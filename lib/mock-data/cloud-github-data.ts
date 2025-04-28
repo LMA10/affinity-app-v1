@@ -1,0 +1,46 @@
+// Mock data for Cloud GitHub Status
+export const mockCloudGithubData = {
+  overallStatus: "operational",
+  uptime: 99.98,
+  totalServices: 12,
+  servicesOperational: 12,
+  activeIncidents: 0,
+  resolvedIncidents: 3,
+  services: [
+    { name: "Git Operations", status: "operational" },
+    { name: "API Requests", status: "operational" },
+    { name: "Webhooks", status: "operational" },
+    { name: "Issues", status: "operational" },
+    { name: "Pull Requests", status: "operational" },
+    { name: "Actions", status: "operational" },
+    { name: "Packages", status: "operational" },
+    { name: "Pages", status: "operational" },
+    { name: "Codespaces", status: "operational" },
+    { name: "Copilot", status: "operational" },
+    { name: "Discussions", status: "operational" },
+    { name: "Notifications", status: "operational" },
+  ],
+  incidents: [
+    {
+      date: "2025-04-12",
+      service: "Actions",
+      description: "Increased failure rates for GitHub Actions workflows",
+      duration: "45 minutes",
+      status: "resolved",
+    },
+    {
+      date: "2025-04-10",
+      service: "API Requests",
+      description: "Degraded performance for API requests",
+      duration: "32 minutes",
+      status: "resolved",
+    },
+    {
+      date: "2025-04-07",
+      service: "Git Operations",
+      description: "Delays in git clone, push, and pull operations",
+      duration: "1 hour 15 minutes",
+      status: "resolved",
+    },
+  ],
+}
