@@ -27,7 +27,6 @@ export const useNotificationState = create<NotificationState>((set, get) => ({
     try {
       const channels = await getNotificationChannels()
       set({ channels, isLoading: false })
-      return channels
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to fetch channels"
       set({ error: errorMessage, isLoading: false })

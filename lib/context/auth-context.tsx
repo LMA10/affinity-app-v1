@@ -103,31 +103,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Function to handle logout
   const logout = () => {
-    // First clear the authentication state
-    usersState.logout()
-    setIsAuthenticated(false)
-    setUser(null)
+    // Clear valtio session state
+    if (sessionState.clearSession) sessionState.clearSession();
 
-    // --- Clear cookies for server-side auth ---
+    // Clear user state
+    usersState.logout();
+    setIsAuthenticated(false);
+    setUser(null);
+
+    // Clear all cookies (try both path=/ and path-specific)
     if (typeof window !== "undefined") {
-      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-      document.cookie = "accToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-      document.cookie = "refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-      document.cookie = "expiration=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-      // Debug: log cookies after clearing
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=");
+      });
+      const keysToRemove = ["dateRange", "token", "accToken", "expiration", "refreshToken"];
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+      sessionStorage.clear();
     }
-    // --- End clear cookies ---
 
-    // Show toast notification
     toast({
       title: "Logged out successfully",
       description: "You have been logged out of the system",
-    })
+    });
 
-    // Use a small timeout to ensure state is cleared before navigation
     setTimeout(() => {
-      window.location.href = "/login";
-    }, 10)
+      window.location.replace("/login");
+    }, 10);
   }
 
   // Debug: log auth state on mount and when it changes

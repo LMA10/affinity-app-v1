@@ -166,14 +166,12 @@ const updateAlertManagement = async (
             }
           }
         } catch (parseError) {
-          console.error("Error parsing error response:", parseError)
         }
       }
 
       throw new Error(errorMessage)
     }
   } catch (error) {
-    console.error("Error updating alert:", error)
     throw error
   }
 }

@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast"
 import userService from "@/lib/services/userService"
 import { useSnapshot } from "valtio"
 import adminState from "@/lib/state/admin/adminState"
+import { useAuth } from "@/lib/context/auth-context"
 
 export function AppSidebar() {
   const pathname = usePathname()
@@ -33,6 +34,7 @@ export function AppSidebar() {
     cloudStatus: false,
     management: false,
   })
+  const { logout } = useAuth()
 
   // Determine which section should be open based on the current path
   useEffect(() => {
@@ -58,8 +60,7 @@ export function AppSidebar() {
   const subMenuItemStyles = "uppercase tracking-wide text-xs font-medium"
 
   const handleLogout = () => {
-    // Call the logout function from userService
-    userService.logout()
+    logout()
 
     // Show a toast notification
     toast({
@@ -99,6 +100,15 @@ export function AppSidebar() {
     "/management/agents",
     "/management/users",
   ]
+
+  // Get the logged-in user's email from localStorage
+  let userEmail = ""
+  if (typeof window !== "undefined") {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '[]')
+      userEmail = currentUser[1] || ""
+    } catch {}
+  }
 
   return (
     <Sidebar className="border-r border-orange-600/20 bg-[#0a1419]">
@@ -218,6 +228,18 @@ export function AppSidebar() {
                 </SidebarMenuSubItem>
               )}
 
+              {isPageVisible("/management/users") && (
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton
+                    asChild
+                    isActive={pathname === "/management/users"}
+                    className={`py-2 ${subMenuItemStyles}`}
+                  >
+                    <Link href="/management/users">USERS</Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              )}
+
               {isPageVisible("/management/notifications") && (
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton
@@ -235,6 +257,14 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-orange-600/20 p-4">
+        {userEmail && (
+          <>
+            <div className="text-[10px] text-orange-400 mb-1">Signed in as</div>
+            <div className="text-xs text-orange-300 mb-2 truncate" title={userEmail}>
+              {userEmail}
+            </div>
+          </>
+        )}
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton

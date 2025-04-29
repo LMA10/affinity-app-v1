@@ -76,7 +76,7 @@ const useAlertsState = create<AlertsState>((set, get) => ({
         return alert
       })
 
-      set({ alerts: updatedAlerts, loading: false })
+      set({ alerts: updatedAlerts as Alert[], loading: false })
 
       // Update the list view store
       listViewStore.setListData(updatedAlerts)

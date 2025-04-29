@@ -11,12 +11,23 @@ interface BeforeInstallPromptEvent extends Event {
 export function PWAInstallPrompt() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showPrompt, setShowPrompt] = useState(false)
+  const [dismissed, setDismissed] = useState(
+    typeof window !== "undefined" && localStorage.getItem('pwaInstallDismissed') === 'true'
+  )
 
   useEffect(() => {
-    // Only run in browser environment
     if (typeof window === "undefined") return
+    if (localStorage.getItem('pwaInstallDismissed') === 'true') {
+      setDismissed(true)
+      setShowPrompt(false)
+      return
+    }
 
     const handler = (e: Event) => {
+      if (localStorage.getItem('pwaInstallDismissed') === 'true') {
+        setDismissed(true)
+        return
+      }
       e.preventDefault()
       setInstallPrompt(e as BeforeInstallPromptEvent)
       setShowPrompt(true)
@@ -24,7 +35,6 @@ export function PWAInstallPrompt() {
 
     window.addEventListener("beforeinstallprompt", handler)
 
-    // Check if already installed
     const isInstalled = window.matchMedia("(display-mode: standalone)").matches
     if (isInstalled) {
       setShowPrompt(false)
@@ -34,6 +44,15 @@ export function PWAInstallPrompt() {
       window.removeEventListener("beforeinstallprompt", handler)
     }
   }, [])
+
+  // Defensive: close popup if pwaInstallDismissed is set while open
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem('pwaInstallDismissed') === 'true') {
+      setShowPrompt(false);
+      setDismissed(true);
+    }
+  }, [showPrompt]);
 
   const handleInstall = async () => {
     if (!installPrompt) return
@@ -46,10 +65,12 @@ export function PWAInstallPrompt() {
   }
 
   const dismissPrompt = () => {
+    localStorage.setItem('pwaInstallDismissed', 'true')
+    setDismissed(true)
     setShowPrompt(false)
   }
 
-  if (!showPrompt) return null
+  if (dismissed || !showPrompt) return null
 
   return (
     <div className="fixed bottom-4 right-4 bg-white dark:bg-slate-800 p-4 rounded-lg shadow-lg max-w-sm z-50 border border-gray-200 dark:border-gray-700">

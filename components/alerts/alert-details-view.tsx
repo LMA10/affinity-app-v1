@@ -34,7 +34,15 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
   // Alert management state
   const [status, setStatus] = useState<string>(alert.alert_management?.status || "")
-  const [owner, setOwner] = useState<string>(alert.alert_management?.owner || "current_user")
+  // Get the logged-in user's email from localStorage
+  let userEmail = ""
+  if (typeof window !== "undefined") {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '[]')
+      userEmail = currentUser[1] || ""
+    } catch {}
+  }
+  const [owner, setOwner] = useState<string>(alert.alert_management?.owner || userEmail)
   const [resolvedBy, setResolvedBy] = useState<string>(alert.alert_management?.resolved_by || "not_resolved")
   const [isFalsePositive, setIsFalsePositive] = useState<boolean>(alert.alert_management?.is_false_positive || false)
 
@@ -254,7 +262,37 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                       </Select>
                     </div>
 
-                    {/* Owner and Resolved By fields are hidden as requested */}
+                    <div>
+                      <Label htmlFor="owner" className="text-sm text-muted-foreground">
+                        Owner
+                      </Label>
+                      <Select value={owner} onValueChange={setOwner}>
+                        <SelectTrigger id="owner" className="mt-1">
+                          <SelectValue placeholder="Select owner" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={userEmail}>{userEmail}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="resolved-by" className="text-sm text-muted-foreground">
+                        Resolved By
+                      </Label>
+                      <Select
+                        value={resolvedBy}
+                        onValueChange={(value) => setResolvedBy(value)}
+                      >
+                        <SelectTrigger id="resolved-by" className="mt-1">
+                          <SelectValue placeholder="Select resolved by" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="not_resolved">Not Resolved</SelectItem>
+                          <SelectItem value="resolved">Resolved</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
                     <div>
                       <Label htmlFor="false-positive" className="text-sm text-muted-foreground">

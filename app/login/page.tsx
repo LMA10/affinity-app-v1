@@ -116,12 +116,13 @@ export default function LoginPage() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="link" className="px-0 text-xs text-muted-foreground">
+          {/* <Button variant="link" className="px-0 text-xs text-muted-foreground">
             Forgot password?
           </Button>
           <Button variant="link" className="px-0 text-xs text-muted-foreground">
             Contact support
           </Button>
+          */}
         </CardFooter>
       </Card>
     </div>

@@ -1,65 +1,42 @@
 import config from "../config/configDev"
-// import sessionState from "../state/sessionState/sessionState"
-
-// Import the new user interfaces
-import type { UsersResponse, User } from "../types/user"
+import { getCookie } from "../utils/auth"
+import sessionState from "../state/sessionState/sessionState"
+import { isUserAdmin } from "../state/userState/userState"
 
 const urlapi = config.urlAPI
 
-const logout = (): void => {
-  // Clear session state
-  // sessionState.clearSession()
+export interface User {
+  username: string;
+  email: string;
+  email_verified: boolean;
+  status: string;
+  enabled: boolean;
+  created_at: string;
+  last_modified: string;
+  raw?: any;
+}
 
-  // Clear localStorage items
+export interface Group {
+  id: string
+  name: string
+}
+
+const logout = (): void => {
+  // Only remove the keys you want to clear, leave pwaInstallDismissed and others untouched
   localStorage.removeItem("dateRange")
   localStorage.removeItem("token")
   localStorage.removeItem("accToken")
   localStorage.removeItem("expiration")
 
-  // Clear any other application-specific storage
+  // Clear session storage as well
+  sessionStorage.clear()
+
+  // Clear any cookies
   try {
-    // Clear all localStorage items that might contain user data
-    const keysToKeep: string[] = [] // Add any keys you want to keep here
-
-    Object.keys(localStorage).forEach((key) => {
-      if (!keysToKeep.includes(key)) {
-        localStorage.removeItem(key)
-      }
-    })
-
-    // Clear session storage as well
-    sessionStorage.clear()
-
-    // Clear any cookies
     document.cookie.split(";").forEach((c) => {
       document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/")
     })
-
-  } catch (error) {
-  }
-}
-
-interface UserDetails {
-  Username: string
-  email: string | null
-  email_verified: boolean | null
-  UserCreateDate: string
-  UserLastModifiedDate: string
-  Enabled: boolean
-  UserStatus: string
-}
-
-interface Group {
-  id: string
-  name: string
-}
-
-// Helper to get a cookie value
-function getCookie(name: string): string {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || '';
-  return '';
+  } catch (error) {}
 }
 
 // Update the login function to handle the new response structure
@@ -78,32 +55,28 @@ const login = async (email: string, password: string): Promise<{ success: boolea
 
     const responseData = await response.json()
 
-    // Handle the response format
-    if (responseData.statusCode === 200 && responseData.body) {
-      // The body is already an object, no need to parse it
-      const tokenData = responseData.body
-
-      // Check if id_token exists
-      if (tokenData.id_token) {
-        return {
-          success: true,
-          message: {
-            token: tokenData.id_token,
-            accessToken: tokenData.access_token,
-            refreshToken: tokenData.refresh_token,
-            // Use the expires_in value from the response
-            expiration: tokenData.expires_in || 3600,
-          },
-        }
+    if (
+      responseData.statusCode === 200 &&
+      responseData.body &&
+      responseData.body.response &&
+      responseData.body.response.AuthenticationResult
+    ) {
+      const auth = responseData.body.response.AuthenticationResult
+      return {
+        success: true,
+        message: {
+          token: auth.IdToken,
+          accessToken: auth.AccessToken,
+          refreshToken: auth.RefreshToken,
+          expiration: auth.ExpiresIn || 3600,
+        },
       }
     }
 
     // Handle error responses
     let errorMessage = "An error occurred during login"
-
-    // Check if there's an error in the response
-    if (responseData.body && responseData.body.error) {
-      errorMessage = responseData.body.error.message || responseData.body.error
+    if (responseData.body && responseData.body.message) {
+      errorMessage = responseData.body.message
     }
 
     return {
@@ -131,20 +104,16 @@ const createHeaders = (): HeadersInit => {
   }
 }
 
-const createBearerHeaders = (): HeadersInit => {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${getCookie("token") || ''}`,
-  }
-}
-
-const register = async (email: string, password: string, admin: boolean): Promise<any> => {
+const register = async (email: string, password: string): Promise<any> => {
   try {
-    const response = await fetch(`${urlapi}/auth/signup`, {
+    const token = sessionState.token || '';
+    const response = await fetch(`${urlapi}/auth/registration`, {
       method: "POST",
-      headers: createHeaders(),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      } as HeadersInit,
       body: JSON.stringify({
-        username: email, // Using email as username as per requirements
         email,
         password,
       }),
@@ -160,92 +129,56 @@ const register = async (email: string, password: string, admin: boolean): Promis
 
 const confirmRegistration = async (email: string, confirmationCode: string): Promise<any> => {
   try {
-    const response = await fetch(`${urlapi}/auth/confirm-signup`, {
+    const response = await fetch(`${urlapi}/auth/confirm`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, confirmation_code: confirmationCode }),
+      body: JSON.stringify({ 
+        email, 
+        confirmation_code: confirmationCode 
+      }),
     })
-    return response.json()
+    if (!response.ok) {
+      throw new Error("Failed to confirm registration")
+    }
+    const data = await response.json()
+    if (data.statusCode !== 200) {
+      throw new Error(data.body?.message || "Failed to confirm registration")
+    }
+    return data
   } catch (error) {
     throw error
   }
 }
 
-// Update the fetchUsers function to use the new endpoint
-const fetchUsers = async (): Promise<User[]> => {
-  try {
-    const token = getCookie("token") || '';
-    if (!token) {
-      throw new Error("No authorization token found");
-    }
-
-    const response = await fetch(`${urlapi}/auth/users/list`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      } as HeadersInit,
-    });
-
-    const text = await response.text();
-    const responseData = text ? JSON.parse(text) : null;
-
-    if (!responseData) {
-      throw new Error("Empty or invalid JSON response");
-    }
-
-    let parsedBody: any;
-    if (typeof responseData.body === "string") {
-      parsedBody = JSON.parse(responseData.body);
-    } else {
-      parsedBody = responseData.body;
-    }
-
-    // 💥 Nueva validación acá
-    if (parsedBody?.error) {
-      //console.error("Error in body:", parsedBody.error);
-      throw new Error(parsedBody.error.message || "Internal server error");
-    }
-
-    if (!parsedBody?.users || !Array.isArray(parsedBody.users)) {
-      // 💬 En vez de explotar, puede retornar []
-      return [];
-    }
-
-    return parsedBody.users;
-  } catch (error) {
-    //console.error("Error fetching users:", error);
-    throw error;
-  }
-};
-
 // Removed whoami function since it's not working
 
-const fetchUserGroups = async (email: string): Promise<Group[]> => {
+const fetchUserGroups = async (username: string): Promise<string[]> => {
   try {
-    const token = getCookie("token") || '';
-    const response = await fetch(`${urlapi}/auth/users/groups`, {
+    const token = sessionState.token || '';
+    const accessToken = sessionState.accessToken || '';
+    const response = await fetch(`${urlapi}/auth/users/${username}/groups`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: token,
+        AccessToken: accessToken,
       } as HeadersInit,
     })
     if (!response.ok) {
       throw new Error("Failed to fetch user groups")
     }
-    return response.json()
+    const data = await response.json();
+    return data.body && Array.isArray(data.body.groups) ? data.body.groups : [];
   } catch (error) {
-    //console.error("Error fetching user groups:", error)
-    throw error
+    throw error;
   }
 }
 
 const fetchGroups = async (): Promise<Group[]> => {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
     const response = await fetch(`${urlapi}/auth/groups`, {
       method: "GET",
       headers: {
@@ -263,29 +196,25 @@ const fetchGroups = async (): Promise<Group[]> => {
   }
 }
 
-const changePassword = async (oldPassword: string, newPassword: string): Promise<void> => {
+function getCurrentUserAndGroups() {
+  if (typeof window === 'undefined') return { currentUser: null, userGroups: {} };
+  let currentUser = null;
+  let userGroups = {};
   try {
-    const token = getCookie("token") || '';
-    const response = await fetch(`${urlapi}/auth/change-password`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      } as HeadersInit,
-      body: JSON.stringify({ oldPassword, newPassword }),
-    })
-    if (!response.ok) {
-      throw new Error("Failed to change password")
-    }
-  } catch (error) {
-    //console.error("Error changing password:", error)
-    throw error
-  }
+    const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    currentUser = stored?.[0] || null;
+    userGroups = JSON.parse(localStorage.getItem('userGroups') || '{}');
+  } catch {}
+  return { currentUser, userGroups };
 }
 
 const disableUser = async (email: string): Promise<void> => {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
+    const { currentUser, userGroups } = getCurrentUserAndGroups();
+    if (!isUserAdmin(currentUser, userGroups)) {
+      throw new Error("You do not have permission to perform this action.");
+    }
     const response = await fetch(`${urlapi}/auth/disable-user`, {
       method: "POST",
       headers: {
@@ -298,14 +227,17 @@ const disableUser = async (email: string): Promise<void> => {
       throw new Error("Failed to disable user")
     } 
   } catch (error) {
-    //console.error("Error disabling user:", error)
     throw error
   }
 }
 
 const deleteUser = async (email: string): Promise<void> => {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
+    const { currentUser, userGroups } = getCurrentUserAndGroups();
+    if (!isUserAdmin(currentUser, userGroups)) {
+      throw new Error("You do not have permission to perform this action.");
+    }
     const response = await fetch(`${urlapi}/auth/delete-user`, {
       method: "POST",
       headers: {
@@ -318,14 +250,17 @@ const deleteUser = async (email: string): Promise<void> => {
       throw new Error("Failed to delete user")
     }
   } catch (error) {
-    //console.error("Error deleting user:", error)
     throw error
   }
 }
 
 const enableUser = async (email: string): Promise<void> => {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
+    const { currentUser, userGroups } = getCurrentUserAndGroups();
+    if (!isUserAdmin(currentUser, userGroups)) {
+      throw new Error("You do not have permission to perform this action.");
+    }
     const response = await fetch(`${urlapi}/auth/enable-user`, {
       method: "POST",
       headers: {
@@ -338,14 +273,13 @@ const enableUser = async (email: string): Promise<void> => {
       throw new Error("Failed to enable user")
     } 
   } catch (error) {
-    //console.error("Error enabling user:", error)
     throw error
   }
 }
 
 const resetUserPassword = async (email: string): Promise<any> => {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
     const response = await fetch(`${urlapi}/auth/admin/reset-user-password`, {
       method: "POST",
       headers: {
@@ -364,19 +298,206 @@ const resetUserPassword = async (email: string): Promise<any> => {
   }
 }
 
+export async function getUsers(): Promise<User[]> {
+  const token = sessionState.token || '';
+  if (!token) throw new Error("No authorization token found");
+
+  const response = await fetch(`${urlapi}/auth/users/list`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token,
+    } as HeadersInit,
+  });
+
+  const data = await response.json();
+  if (!data.body || !data.body.users) return [];
+  return data.body.users.map((user: any) => {
+    const emailAttr = user.Attributes.find((a: any) => a.Name === "email");
+    const emailVerifiedAttr = user.Attributes.find((a: any) => a.Name === "email_verified");
+    return {
+      username: user.Username,
+      email: emailAttr ? emailAttr.Value : "",
+      email_verified: emailVerifiedAttr ? emailVerifiedAttr.Value === "true" : false,
+      status: user.UserStatus,
+      enabled: user.Enabled,
+      created_at: user.UserCreateDate,
+      last_modified: user.UserLastModifiedDate,
+      raw: user,
+    };
+  });
+}
+
+// Change current user's password (me)
+const changeMyPassword = async (old_password: string, new_password: string): Promise<void> => {
+  try {
+    const accessToken = sessionState.accessToken || '';
+    const token = sessionState.token || '';
+    const response = await fetch(`${urlapi}/auth/users/me/password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        AccessToken: accessToken,
+        Authorization: token,
+      } as HeadersInit,
+      body: JSON.stringify({ old_password, new_password }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to change password");
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Fetch current user info (userId and email)
+export const getCurrentUser = async (): Promise<[string, string]> => {
+  const token = sessionState.token || '';
+  const accessToken = sessionState.accessToken || '';
+  const response = await fetch(`${urlapi}/auth/users/me`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token,
+      AccessToken: accessToken,
+    } as HeadersInit,
+  });
+  const data = await response.json();
+  if (
+    data.statusCode === 200 &&
+    data.body &&
+    data.body.user_data &&
+    data.body.user_data.Username &&
+    Array.isArray(data.body.user_data.UserAttributes)
+  ) {
+    const userId = data.body.user_data.Username;
+    const emailAttr = data.body.user_data.UserAttributes.find((attr: any) => attr.Name === "email");
+    const email = emailAttr ? emailAttr.Value : "";
+    return [userId, email];
+  }
+  throw new Error("Failed to fetch current user info");
+}
+
+// Make user admin
+export const makeAdmin = async (username: string): Promise<any> => {
+  const token = sessionState.token || '';
+  const { currentUser, userGroups } = getCurrentUserAndGroups();
+  if (!isUserAdmin(currentUser, userGroups)) {
+    throw new Error("You do not have permission to perform this action.");
+  }
+  const response = await fetch(`${urlapi}/auth/admin/users/make-admin/${username}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token,
+    } as HeadersInit,
+  });
+  if (!response.ok) {
+    throw new Error("Failed to make user admin");
+  }
+  return response.json();
+};
+
+// Remove user from admin
+export const removeAdmin = async (username: string): Promise<any> => {
+  const token = sessionState.token || '';
+  const { currentUser, userGroups } = getCurrentUserAndGroups();
+  if (!isUserAdmin(currentUser, userGroups)) {
+    throw new Error("You do not have permission to perform this action.");
+  }
+  if (currentUser && currentUser === username) {
+    throw new Error("You cannot remove your own admin permission.");
+  }
+  const response = await fetch(`${urlapi}/auth/admin/users/remove-admin/${username}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token,
+    } as HeadersInit,
+  });
+  if (!response.ok) {
+    throw new Error("Failed to remove user from admin");
+  }
+  return response.json();
+};
+
+export const enableUserByUsername = async (username: string): Promise<any> => {
+  const token = sessionState.token || '';
+  const { currentUser, userGroups } = getCurrentUserAndGroups();
+  if (!isUserAdmin(currentUser, userGroups)) {
+    throw new Error("You do not have permission to perform this action.");
+  }
+  const response = await fetch(`${urlapi}/auth/admin/users/enable/${username}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token,
+    } as HeadersInit,
+  });
+  if (!response.ok) {
+    throw new Error("Failed to enable user");
+  }
+  return response.json();
+};
+
+export const disableUserByUsername = async (username: string): Promise<any> => {
+  const token = sessionState.token || '';
+  const { currentUser, userGroups } = getCurrentUserAndGroups();
+  if (!isUserAdmin(currentUser, userGroups)) {
+    throw new Error("You do not have permission to perform this action.");
+  }
+  const response = await fetch(`${urlapi}/auth/admin/users/disable/${username}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token,
+    } as HeadersInit,
+  });
+  if (!response.ok) {
+    throw new Error("Failed to disable user");
+  }
+  return response.json();
+};
+
+export const deleteUserByUsername = async (username: string): Promise<any> => {
+  const token = sessionState.token || '';
+  const { currentUser, userGroups } = getCurrentUserAndGroups();
+  if (!isUserAdmin(currentUser, userGroups)) {
+    throw new Error("You do not have permission to perform this action.");
+  }
+  const response = await fetch(`${urlapi}/auth/admin/users/${username}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token,
+    } as HeadersInit,
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete user");
+  }
+  return response.json();
+};
+
 const userService = {
   login,
   register,
   confirmRegistration,
-  fetchUsers,
   fetchUserGroups,
   fetchGroups,
-  changePassword,
   disableUser,
   deleteUser,
   enableUser,
   resetUserPassword,
   logout,
+  getUsers,
+  changeMyPassword,
+  getCurrentUser,
+  makeAdmin,
+  removeAdmin,
+  enableUserByUsername,
+  disableUserByUsername,
+  deleteUserByUsername,
 }
 
 export default userService

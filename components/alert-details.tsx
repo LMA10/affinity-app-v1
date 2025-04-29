@@ -11,6 +11,16 @@ import { X, Shield, ArrowRight, ExternalLink, FileText, MessageSquare, CheckCirc
 export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => void }) {
   const [status, setStatus] = useState(alert.status)
 
+  // Get the logged-in user's email from localStorage
+  let userEmail = ""
+  if (typeof window !== "undefined") {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '[]')
+      userEmail = currentUser[1] || ""
+    } catch {}
+  }
+  const [owner, setOwner] = useState(alert.owner || userEmail)
+
   if (!alert) return null
 
   const getSeverityColor = (severity: string) => {
@@ -100,6 +110,21 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
           <div>
             <span className="text-muted-foreground">ID:</span>
             <span className="ml-2 font-mono text-xs">{alert.id}</span>
+          </div>
+        </div>
+
+        {/* Alert Management Section */}
+        <div className="mt-4">
+          <div className="font-semibold text-orange-500 mb-2">Alert Management</div>
+          <div className="mb-2">
+            <label className="block text-xs text-muted-foreground mb-1">Owner</label>
+            <select
+              className="w-full bg-[#0a1419] border border-orange-600/20 rounded-md p-2 text-sm text-orange-500"
+              value={owner}
+              onChange={e => setOwner(e.target.value)}
+            >
+              <option value={userEmail}>{userEmail}</option>
+            </select>
           </div>
         </div>
 

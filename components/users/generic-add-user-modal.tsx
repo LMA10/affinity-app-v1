@@ -14,16 +14,15 @@ interface GenericAddUserModalProps {
 
 export function GenericAddUserModal({ isOpen, onClose, onSuccess }: GenericAddUserModalProps) {
   const [email, setEmail] = useState("")
-  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [confirmationCode, setConfirmationCode] = useState("")
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [deliveryDetails, setDeliveryDetails] = useState<{ destination: string; medium: string } | null>(null)
 
   const handleSubmit = async (stepId: string, goToNextStep: () => void, complete: () => void) => {
     if (stepId === "details") {
       // Validate form
-      if (!email || !username || !password || !confirmPassword) {
+      if (!email || !password || !confirmPassword) {
         throw new Error("All fields are required")
       }
 
@@ -40,7 +39,15 @@ export function GenericAddUserModal({ isOpen, onClose, onSuccess }: GenericAddUs
       }
 
       // Register user
-      await userState.register(email, password, isAdmin)
+      const response = await userState.register(email, password)
+      if (response?.body?.response?.CodeDeliveryDetails) {
+        setDeliveryDetails({
+          destination: response.body.response.CodeDeliveryDetails.Destination,
+          medium: response.body.response.CodeDeliveryDetails.DeliveryMedium,
+        })
+      } else {
+        setDeliveryDetails(null)
+      }
       goToNextStep()
     } else if (stepId === "confirmation") {
       // Validate confirmation code
@@ -63,16 +70,6 @@ export function GenericAddUserModal({ isOpen, onClose, onSuccess }: GenericAddUs
       title: "User Details",
       content: (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
-            />
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -105,19 +102,6 @@ export function GenericAddUserModal({ isOpen, onClose, onSuccess }: GenericAddUs
               placeholder="Confirm password"
             />
           </div>
-
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="isAdmin"
-              checked={isAdmin}
-              onChange={(e) => setIsAdmin(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
-            />
-            <Label htmlFor="isAdmin" className="text-sm">
-              Grant administrator privileges
-            </Label>
-          </div>
         </div>
       ),
     },
@@ -133,9 +117,11 @@ export function GenericAddUserModal({ isOpen, onClose, onSuccess }: GenericAddUs
             onChange={(e) => setConfirmationCode(e.target.value)}
             placeholder="Enter confirmation code sent to email"
           />
-          <p className="text-xs text-muted-foreground">
-            A confirmation code has been sent to {email}. Please check your email and enter the code above.
-          </p>
+          {deliveryDetails && (
+            <p className="text-xs text-muted-foreground">
+              A confirmation code has been sent to {deliveryDetails.destination} via {deliveryDetails.medium}. Please check your email and enter the code above.
+            </p>
+          )}
         </div>
       ),
     },
