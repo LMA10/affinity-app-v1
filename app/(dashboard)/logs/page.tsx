@@ -96,43 +96,61 @@ export default function LogsPage() {
     }
   }, [headers])
 
+  // Utility to normalize field names (case-insensitive, remove spaces, etc.)
+  function normalizeFieldName(name: string) {
+    return name.replace(/\s+/g, '').toLowerCase();
+  }
+
+  // Utility to flatten nested objects (e.g., { useridentity: { type: "AWSService" } } => { "useridentity.type": "AWSService" })
+  function flattenObject(obj: any, prefix = ""): Record<string, any> {
+    return Object.keys(obj).reduce((acc, k) => {
+      const pre = prefix.length ? prefix + "." : ""
+      if (typeof obj[k] === "object" && obj[k] !== null && !Array.isArray(obj[k])) {
+        Object.assign(acc, flattenObject(obj[k], pre + k))
+      } else {
+        acc[pre + k] = obj[k]
+      }
+      return acc
+    }, {} as Record<string, any>)
+  }
+
   // Filter logs based on search query, status filter, and active filters
   const filterLogs = useCallback(() => {
-
     const filtered = logs.filter((log) => {
+      const flatLog = flattenObject(log)
       // Check if log matches the search query
       const matchesSearch =
         debouncedSearch === "" ||
-        Object.entries(log).some(([key, value]) => {
+        Object.entries(flatLog).some(([key, value]) => {
           if (value === null) return false
           const stringValue = String(value).toLowerCase()
           const searchLower = debouncedSearch.toLowerCase()
-          const matches = stringValue.includes(searchLower)
-          if (matches) 
-          return matches
+          return stringValue.includes(searchLower)
         })
 
       // Check if log matches the status filter
       const matchesStatus =
         statusFilter === "all" ||
-        (statusFilter === "error" && ["500", "503", "504"].includes(String(log.albstatuscode))) ||
-        (statusFilter === "warning" && ["400", "401", "403", "404"].includes(String(log.albstatuscode))) ||
-        (statusFilter === "info" && ["200", "201", "204"].includes(String(log.albstatuscode)))
+        (statusFilter === "error" && ["500", "503", "504"].includes(String(flatLog.albstatuscode))) ||
+        (statusFilter === "warning" && ["400", "401", "403", "404"].includes(String(flatLog.albstatuscode))) ||
+        (statusFilter === "info" && ["200", "201", "204"].includes(String(flatLog.albstatuscode)))
 
       // Check if log matches all active filters
       const matchesActiveFilters =
         activeFilters.length === 0 ||
         activeFilters.every((filter) => {
-          if (log[filter.field] === null) return false
-          const logValue = String(log[filter.field]).toLowerCase()
+          // Normalize both filter field and log keys
+          const normalizedFilterField = normalizeFieldName(filter.field)
+          const logKey = Object.keys(flatLog).find(
+            (k) => normalizeFieldName(k) === normalizedFilterField
+          )
+          if (!logKey || flatLog[logKey] === null) return false
+          const logValue = String(flatLog[logKey]).toLowerCase()
           const filterValue = filter.value.toLowerCase()
-          const matches = logValue === filterValue
-          if (!matches)
-          return matches
+          return logValue === filterValue
         })
 
-      const result = matchesSearch && matchesStatus && matchesActiveFilters
-      return result
+      return matchesSearch && matchesStatus && matchesActiveFilters
     })
 
     setFilteredLogs(filtered)
@@ -190,19 +208,17 @@ export default function LogsPage() {
     }
   }
 
-  // Handle clicking on a value in the expanded view
+  // When clicking a value, use the normalized field name from the log object
   const handleValueClick = (field: string, value: string) => {
-    
-
+    // Find the actual log key that matches the normalized field
+    const normalizedField = normalizeFieldName(field)
+    const logKey = headers.find((h) => normalizeFieldName(h) === normalizedField) || field
     // Add the field-value pair to active filters if it's not already there
-    const filterExists = activeFilters.some((filter) => filter.field === field && filter.value === value)
-
+    const filterExists = activeFilters.some((filter) => filter.field === logKey && filter.value === value)
     if (!filterExists) {
-      const newFilters = [...activeFilters, { field, value }]
+      const newFilters = [...activeFilters, { field: logKey, value }]
       setActiveFilters(newFilters)
     }
-
-    // Reset to first page when adding a filter
     setCurrentPage(1)
   }
 

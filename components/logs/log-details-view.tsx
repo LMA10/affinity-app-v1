@@ -50,7 +50,7 @@ export function LogDetailsView({ log, headers, onClose, onValueClick }: LogDetai
   }
 
   const copyFullLog = () => {
-    navigator.clipboard.writeText(JSON.stringify(log, null, prettifyJson ? 2 : null))
+    navigator.clipboard.writeText(JSON.stringify(log, null, prettifyJson ? 2 : undefined))
     toast({
       title: "Copied to clipboard",
       description: "The full log has been copied to your clipboard",
@@ -59,7 +59,7 @@ export function LogDetailsView({ log, headers, onClose, onValueClick }: LogDetai
   }
 
   const exportLogToJson = () => {
-    const jsonContent = JSON.stringify(log, null, prettifyJson ? 2 : null)
+    const jsonContent = JSON.stringify(log, null, prettifyJson ? 2 : undefined)
     const blob = new Blob([jsonContent], { type: "application/json" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
@@ -224,7 +224,7 @@ export function LogDetailsView({ log, headers, onClose, onValueClick }: LogDetai
           <div className="relative">
             <ScrollArea className="h-[400px] bg-[#0f1d24] p-4 rounded-md border border-orange-600/10">
               <pre className="font-mono text-sm whitespace-pre-wrap">
-                {JSON.stringify(log, null, prettifyJson ? 2 : null)}
+                {JSON.stringify(log, null, prettifyJson ? 2 : undefined)}
               </pre>
             </ScrollArea>
           </div>

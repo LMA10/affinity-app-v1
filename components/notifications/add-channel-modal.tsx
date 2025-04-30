@@ -34,14 +34,10 @@ export function AddChannelModal({ isOpen, onClose, onSuccess }: AddChannelModalP
     switch (notificationType) {
       case "slack":
         return "Slack Channel"
-      case "email":
-        return "Email Address"
       case "discord":
         return "Discord Channel"
       case "telegram":
         return "Telegram Chat ID"
-      case "whatsapp":
-        return "WhatsApp Group"
       default:
         return "Channel"
     }
@@ -51,14 +47,10 @@ export function AddChannelModal({ isOpen, onClose, onSuccess }: AddChannelModalP
     switch (notificationType) {
       case "slack":
         return "#security-alerts"
-      case "email":
-        return "security-team@company.com"
       case "discord":
         return "#security-alerts"
       case "telegram":
         return "Security Team"
-      case "whatsapp":
-        return "Security Team Group"
       default:
         return "Enter channel"
     }
@@ -147,10 +139,8 @@ export function AddChannelModal({ isOpen, onClose, onSuccess }: AddChannelModalP
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="slack">Slack</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
                     <SelectItem value="discord">Discord</SelectItem>
                     <SelectItem value="telegram">Telegram</SelectItem>
-                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
                     <SelectItem value="webhook">Webhook</SelectItem>
                   </SelectContent>
                 </Select>

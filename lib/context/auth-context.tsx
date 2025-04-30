@@ -132,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     setTimeout(() => {
-      window.location.replace("/login");
+      window.location.replace("/");
     }, 10);
   }
 

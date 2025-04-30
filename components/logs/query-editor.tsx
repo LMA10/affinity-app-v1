@@ -387,21 +387,25 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
                     ) : (
                       <>
                         <span>{tab.name}</span>
-                        <button
-                          onClick={(e) => startEditingTab(tab.id, e)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        <span
+                          onClick={(e) => { e.stopPropagation(); startEditingTab(tab.id, e); }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                          role="button"
+                          tabIndex={0}
                         >
                           <Pencil className={`h-3 w-3 ${isDarkTheme ? "text-orange-500" : "text-orange-600"}`} />
-                        </button>
+                        </span>
                       </>
                     )}
 
-                    <button
-                      onClick={(e) => closeTab(tab.id, e)}
-                      className={`ml-2 rounded-full p-0.5 ${isDarkTheme ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
+                    <span
+                      onClick={(e) => { e.stopPropagation(); closeTab(tab.id, e); }}
+                      className={`ml-2 rounded-full p-0.5 ${isDarkTheme ? "hover:bg-gray-700" : "hover:bg-gray-200"} cursor-pointer`}
+                      role="button"
+                      tabIndex={0}
                     >
                       <X className="h-3 w-3" />
-                    </button>
+                    </span>
                   </div>
                 </TabsTrigger>
               ))}

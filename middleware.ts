@@ -4,11 +4,23 @@ import type { NextRequest } from "next/server"
 // List of public routes that don't require authentication
 const publicRoutes = ["/login", "/unauthorized"]
 
+// List of restricted routes (use regex-like matching for subpaths)
+const restrictedRoutes = [
+  "/wiki", // restricts /wiki and all subpaths
+  "/legal", // restricts /legal and all subpaths
+  // Add any other routes that should be restricted
+]
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  // Debug log to check what path is being checked
+  console.log("MIDDLEWARE PATHNAME:", pathname)
 
   // Check if the path is a public route
   const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route))
+
+  // Check if the path is a restricted route (matches /wiki or any subpath)
+  const isRestrictedRoute = restrictedRoutes.some((route) => pathname === route || pathname.startsWith(route + "/"))
 
   // Check if the path is for static files
   const isStaticFile =
@@ -34,6 +46,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // If trying to access a restricted route, redirect to unauthorized
+  if (isRestrictedRoute) {
+    return NextResponse.redirect(new URL("/unauthorized", request.url))
+  }
+
   // If the route is not public and not a static file, and the token is invalid, redirect to login
   if (!isPublicRoute && !isStaticFile && !isTokenValid) {
     return NextResponse.redirect(new URL("/login", request.url))
@@ -54,3 +71,5 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 }
+
+// NOTE: After changing this file, restart your dev server to ensure changes take effect.

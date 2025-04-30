@@ -69,7 +69,7 @@ export function AppSidebar() {
     })
 
     // Redirect to login page
-    router.push("/login")
+    router.push("/")
   }
 
   // Check if a page should be visible
@@ -107,7 +107,7 @@ export function AppSidebar() {
     try {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '[]')
       userEmail = currentUser[1] || ""
-    } catch {}
+    } catch { }
   }
 
   return (
@@ -206,9 +206,8 @@ export function AppSidebar() {
                 <Cog className={menuIconStyles} />
                 <span>MANAGEMENT</span>
                 <ChevronDown
-                  className={`ml-auto h-4 w-4 shrink-0 text-orange-500 transition-transform duration-200 ${
-                    openSections.management ? "rotate-180" : ""
-                  }`}
+                  className={`ml-auto h-4 w-4 shrink-0 text-orange-500 transition-transform duration-200 ${openSections.management ? "rotate-180" : ""
+                    }`}
                 />
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -228,18 +227,6 @@ export function AppSidebar() {
                 </SidebarMenuSubItem>
               )}
 
-              {isPageVisible("/management/users") && (
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton
-                    asChild
-                    isActive={pathname === "/management/users"}
-                    className={`py-2 ${subMenuItemStyles}`}
-                  >
-                    <Link href="/management/users">USERS</Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              )}
-
               {isPageVisible("/management/notifications") && (
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton
@@ -248,6 +235,18 @@ export function AppSidebar() {
                     className={`py-2 ${subMenuItemStyles}`}
                   >
                     <Link href="/management/notifications">NOTIFICATIONS</Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              )}
+
+              {isPageVisible("/management/users") && (
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton
+                    asChild
+                    isActive={pathname === "/management/users"}
+                    className={`py-2 ${subMenuItemStyles}`}
+                  >
+                    <Link href="/management/users">USERS</Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
               )}

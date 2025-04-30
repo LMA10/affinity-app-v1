@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       // Redirect to login page instead of unauthorized
-      router.push("/login")
+      router.push("/")
     }
   }, [isAuthenticated, isLoading, router])
 

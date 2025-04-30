@@ -36,7 +36,7 @@ export default function NotFound() {
           </p>
 
           <Button asChild className="bg-orange-600 hover:bg-orange-700 mt-4">
-            <Link href="/dashboard">Return to Dashboard</Link>
+            <Link href="/alerts-view">Return to Main Page</Link>
           </Button>
         </div>
       </div>

@@ -28,9 +28,10 @@ interface QueryResultsProps {
     dataScanned?: string
   }
   onRetry?: () => void
+  onValueClick?: (field: string, value: string) => void
 }
 
-export function QueryResults({ queryStatus, queryError, queryMetrics, onRetry }: QueryResultsProps) {
+export function QueryResults({ queryStatus, queryError, queryMetrics, onRetry, onValueClick }: QueryResultsProps) {
   const [activeTab, setActiveTab] = useState("results")
   const { logs, headers, totalRows, loading, error, errorDetails, lastQuery } = useLogsState()
   const [expandedRow, setExpandedRow] = useState<number | null>(null)
@@ -185,15 +186,23 @@ export function QueryResults({ queryStatus, queryError, queryMetrics, onRetry }:
                       {visibleHeaders.map((column) => (
                         <TableCell key={column} className="font-mono text-xs">
                           {column in row ? (
-                            column.toLowerCase().includes("statuscode") ? (
-                              <Badge variant="outline" className={getStatusBadgeColor(String(row[column]))}>
-                                {row[column] !== null ? String(row[column]) : "-"}
-                              </Badge>
-                            ) : row[column] !== null ? (
-                              String(row[column])
-                            ) : (
-                              "-"
-                            )
+                            <span
+                              className="cursor-pointer"
+                              onClick={() => onValueClick?.(column, String(row[column]))}
+                              tabIndex={0}
+                              role="button"
+                              style={{ display: "inline-block" }}
+                            >
+                              {column.toLowerCase().includes("statuscode") ? (
+                                <Badge variant="outline" className={getStatusBadgeColor(String(row[column]))}>
+                                  {row[column] !== null ? String(row[column]) : "-"}
+                                </Badge>
+                              ) : row[column] !== null ? (
+                                String(row[column])
+                              ) : (
+                                "-"
+                              )}
+                            </span>
                           ) : (
                             "undefined"
                           )}
