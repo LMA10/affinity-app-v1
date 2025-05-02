@@ -1,5 +1,8 @@
 "use client";
-function Layout({ children }: { children: React.ReactNode }) {
+import { withAuth } from "@/lib/hoc/withAuth"
+
+const AdministrationLayoutComponent = function AdministrationLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
-export default Layout; 
+
+export default withAuth(AdministrationLayoutComponent, { adminOnly: true }); 

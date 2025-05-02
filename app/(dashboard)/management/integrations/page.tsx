@@ -9,11 +9,17 @@ import { CheckCircle, Plus, RefreshCw, Settings, Trash2, AlertCircle } from "luc
 import { useIntegrations } from "@/lib/hooks/use-integrations"
 import type { Integration } from "@/lib/types/integration"
 import { IntegrationDetailsModal } from "@/components/integrations/integration-details-modal"
+import { Modal } from "@/components/ui/modal"
+import { useIntegrationsStore } from "@/lib/state/integrations/integrationsState"
+import { toast } from "@/hooks/use-toast"
 
 export default function IntegrationsPage() {
   const { integrations, isLoading, error, fetchIntegrations } = useIntegrations()
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null)
+  const deleteIntegration = useIntegrationsStore((s) => s.deleteIntegration)
 
   const handleRefresh = () => {
     fetchIntegrations()
@@ -27,6 +33,31 @@ export default function IntegrationsPage() {
   const closeIntegrationDetails = () => {
     setIsModalOpen(false)
     setSelectedIntegration(null)
+  }
+
+  const handleOpenDeleteModal = (integration: Integration) => {
+    setIntegrationToDelete(integration)
+    setDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!integrationToDelete) return
+    try {
+      await deleteIntegration(integrationToDelete.integration_id)
+      toast({
+        title: "Integration deleted",
+        description: `${integrationToDelete.log_name || integrationToDelete.integration_id} was deleted successfully.`,
+      })
+      setDeleteModalOpen(false)
+      setIntegrationToDelete(null)
+      fetchIntegrations()
+    } catch (err) {
+      toast({
+        title: "Delete failed",
+        description: err instanceof Error ? err.message : "Failed to delete integration.",
+        variant: "destructive",
+      })
+    }
   }
 
   // Map log_type to a more user-friendly name and description
@@ -177,7 +208,7 @@ export default function IntegrationsPage() {
                         <Button variant="outline" size="sm" className="px-2" onClick={handleRefresh}>
                           <RefreshCw className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" className="px-2 text-red-500 hover:text-red-600">
+                        <Button variant="outline" size="sm" className="px-2 text-red-500 hover:text-red-600" onClick={() => handleOpenDeleteModal(integration)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -195,6 +226,20 @@ export default function IntegrationsPage() {
         isOpen={isModalOpen}
         onClose={closeIntegrationDetails}
       />
+
+      <Modal
+        isOpen={deleteModalOpen}
+        onClose={() => { setDeleteModalOpen(false); setIntegrationToDelete(null); }}
+        title="Confirm Delete Integration"
+      >
+        <div className="space-y-4">
+          <p>Are you sure you want to delete integration <span className="font-bold">{integrationToDelete?.log_name || integrationToDelete?.integration_id}</span>? This action cannot be undone.</p>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => { setDeleteModalOpen(false); setIntegrationToDelete(null); }}>Cancel</Button>
+            <Button className="bg-red-600 hover:bg-red-700" onClick={handleConfirmDelete}>Delete</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

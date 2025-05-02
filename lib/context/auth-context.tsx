@@ -57,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
     localStorage.removeItem('currentUser')
     localStorage.removeItem('userGroups')
+    localStorage.removeItem('expiration')
     sessionStorage.clear()
     window.location.replace("/login")
   }

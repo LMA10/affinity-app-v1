@@ -11,8 +11,9 @@ import { useAuth } from "@/lib/context/auth-context"
 import { Loading } from "@/components/loading"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { withAuth } from "@/lib/hoc/withAuth"
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+const DashboardLayoutComponent = function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -48,3 +49,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </ThemeProvider>
   );
 }
+
+export default withAuth(DashboardLayoutComponent)

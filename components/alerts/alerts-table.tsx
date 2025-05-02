@@ -12,11 +12,16 @@ interface AlertsTableProps {
 }
 
 export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
-  const { setSelectedAlert, setIsOpen } = useAlertDetails()
+  const { setSelectedAlert, setIsOpen, selectedAlert, isOpen } = useAlertDetails()
 
   const handleViewDetails = (alert: any) => {
-    setSelectedAlert(alert)
-    setIsOpen(true)
+    if (isOpen && selectedAlert && selectedAlert.alert_id === alert.alert_id) {
+      setIsOpen(false)
+      setSelectedAlert(null)
+    } else {
+      setSelectedAlert(alert)
+      setIsOpen(true)
+    }
   }
 
   const getSeverityBadgeColor = (severity: string) => {
@@ -66,7 +71,11 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
             </TableRow>
           ) : (
             alerts.map((alert) => (
-              <TableRow key={alert.alert_id} className="border-b border-orange-600/10">
+              <TableRow
+                key={alert.alert_id}
+                className="border-b border-orange-600/10 cursor-pointer hover:bg-orange-600/10 transition"
+                onClick={() => handleViewDetails(alert)}
+              >
                 <TableCell className="font-mono text-xs">
                   {alert.event?.time
                     ? new Date(alert.event.time).toISOString().replace("T", "\n").substring(0, 19)
@@ -83,7 +92,7 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
                 <TableCell className="font-medium">{alert.metadata?.rule_name || "-"}</TableCell>
                 <TableCell>{alert.client}</TableCell>
                 <TableCell>{alert.alert_management?.status || "-"}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right" onClick={e => e.stopPropagation()}>
                   <Button variant="ghost" size="sm" onClick={() => handleViewDetails(alert)}>
                     Details
                   </Button>

@@ -91,3 +91,18 @@ export const updateIntegration = async (integration: Integration): Promise<Integ
     throw error
   }
 }
+
+export const deleteIntegration = async (integrationId: string): Promise<void> => {
+  try {
+    const response = await fetch(`${urlapi}/integrations/${integrationId}`, {
+      method: "DELETE",
+      headers: createHeaders(),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to delete integration: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+  } catch (error) {
+    throw error;
+  }
+};

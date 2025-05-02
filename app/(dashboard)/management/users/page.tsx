@@ -342,7 +342,7 @@ export default function UsersPage() {
                   className="pl-10"
                 />
               </div>
-
+              {/*
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full sm:w-[180px]">
@@ -352,12 +352,11 @@ export default function UsersPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem onClick={() => setRoleFilter("all")}>All Roles</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter("admin")}>Admin</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter("analyst")}>Analyst</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter("user")}>User</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter("readonly")}>Read Only</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setRoleFilter("administrators")}>administrators</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setRoleFilter("users")}>User</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+                */}
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

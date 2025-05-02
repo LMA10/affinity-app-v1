@@ -1,5 +1,8 @@
 "use client";
-function Layout({ children }: { children: React.ReactNode }) {
+import { withAuth } from "@/lib/hoc/withAuth"
+
+const CloudLayoutComponent = function CloudLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
-export default Layout; 
+
+export default withAuth(CloudLayoutComponent, { adminOnly: true }); 

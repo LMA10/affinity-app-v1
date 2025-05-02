@@ -4,6 +4,7 @@ import {
   fetchIntegrations,
   toggleIntegrationStatus,
   updateIntegration as updateIntegrationService,
+  deleteIntegration as deleteIntegrationService,
 } from "../../services/integrationService"
 
 interface IntegrationsState {
@@ -13,6 +14,7 @@ interface IntegrationsState {
   fetchIntegrations: () => Promise<void>
   toggleIntegrationStatus: (integrationId: string, enabled: boolean) => Promise<void>
   updateIntegration: (integration: Integration) => Promise<Integration>
+  deleteIntegration: (integrationId: string) => Promise<void>
 }
 
 export const useIntegrationsStore = create<IntegrationsState>((set) => ({
@@ -64,6 +66,20 @@ export const useIntegrationsStore = create<IntegrationsState>((set) => ({
         isLoading: false,
       })
       throw error // Re-throw to handle in the component
+    }
+  },
+
+  deleteIntegration: async (integrationId: string) => {
+    set({ isLoading: true, error: null })
+    try {
+      await deleteIntegrationService(integrationId)
+      set((state) => ({
+        integrations: state.integrations.filter((i) => i.integration_id !== integrationId),
+        isLoading: false,
+      }))
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : "Failed to delete integration", isLoading: false })
+      throw error
     }
   },
 }))

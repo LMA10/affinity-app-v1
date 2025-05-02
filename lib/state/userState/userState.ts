@@ -208,6 +208,7 @@ export const usersState = proxy<UsersState>({
 
     // Remove currentUser from localStorage
     localStorage.removeItem('currentUser')
+    localStorage.removeItem('expiration')
 
     // Reset state
     usersState.success = false
