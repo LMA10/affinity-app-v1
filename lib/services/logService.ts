@@ -1,4 +1,5 @@
 import config from "@/lib/config/configDev"
+import sessionState from "@/lib/state/sessionState/sessionState";
 
 const urlapi = config.urlAPI
 
@@ -32,17 +33,9 @@ export interface DatabasesResponse {
   }
 }
 
-// Helper to get a cookie value
-function getCookie(name: string): string {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || '';
-  return '';
-}
-
 export async function searchLogs(query: string): Promise<LogsResponse> {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
     if (!token) {
       throw new Error("No authorization token found")
     }
@@ -79,7 +72,7 @@ export async function searchLogsNextPage(
   headers: string[],
 ): Promise<LogsResponse> {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
     if (!token) {
       throw new Error("No authorization token found")
     }
@@ -123,7 +116,7 @@ export async function searchLogsNextPage(
 
 export async function getDatabases(): Promise<DatabasesResponse> {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
     if (!token) {
       throw new Error("No authorization token found")
     }

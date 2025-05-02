@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
@@ -11,21 +10,21 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Eye, EyeOff, Lock, Mail } from "lucide-react"
 import { useAuth } from "@/lib/context/auth-context"
+import { toast } from "@/hooks/use-toast"
 
-export default function LoginPage() {
+function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { isAuthenticated, login, isLoading: authLoading } = useAuth()
+  const { login, isAuthenticated, isLoading: authIsLoading } = useAuth()
 
-  // Check if already logged in
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/alerts-view")
+    if (!authIsLoading && isAuthenticated) {
+      router.replace("/alerts-view")
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, authIsLoading, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,30 +32,31 @@ export default function LoginPage() {
 
     if (!email || !password) {
       setIsLoading(false)
+      toast({
+        title: "Missing credentials",
+        description: "Please enter both email and password.",
+        variant: "destructive",
+      })
       return
     }
 
     const success = await login(email, password)
 
     if (success) {
+      toast({
+        title: "Login successful",
+        description: "Welcome back! Redirecting...",
+      })
       router.push("/alerts-view")
+    } else {
+      toast({
+        title: "Login failed",
+        description: "Invalid email or password.",
+        variant: "destructive",
+      })
     }
 
     setIsLoading(false)
-  }
-
-  // Show loading state while checking authentication
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a1419]">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
-      </div>
-    )
-  }
-
-  // Don't render login page if already authenticated
-  if (isAuthenticated) {
-    return null
   }
 
   return (
@@ -94,6 +94,7 @@ export default function LoginPage() {
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
+                  placeholder="Enter your password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -103,28 +104,29 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
+                  className="absolute right-3 top-3"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700" disabled={isLoading}>
-              {isLoading ? "Authenticating..." : "Login"}
+            <Button
+              type="submit"
+              className="w-full bg-orange-500 hover:bg-orange-600"
+              disabled={isLoading}
+            >
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          {/* <Button variant="link" className="px-0 text-xs text-muted-foreground">
-            Forgot password?
-          </Button>
-          <Button variant="link" className="px-0 text-xs text-muted-foreground">
-            Contact support
-          </Button>
-          */}
-        </CardFooter>
       </Card>
     </div>
   )
 }
+
+export default LoginPage

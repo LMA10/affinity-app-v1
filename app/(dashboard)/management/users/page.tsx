@@ -243,8 +243,16 @@ export default function UsersPage() {
       setDeleteUserModalOpen(false)
       setUserToDelete(null)
       await userState.getUsers()
+      toast({
+        title: "User deleted successfully!",
+        description: "The user has been removed from the system.",
+      })
     } catch (err) {
       // Optionally show a toast or error
+      toast({
+        title: "Error deleting user",
+        description: "An error occurred while deleting the user. Please try again later.",
+      })
     }
   }
 
@@ -501,6 +509,10 @@ export default function UsersPage() {
         onSuccess={() => {
           setIsAddUserModalOpen(false)
           userState.getUsers() // Refresh the user list when a new user is added
+          toast({
+            title: "User added successfully!",
+            description: "The user has been added to the system.",
+          })
         }}
       />
       <Modal

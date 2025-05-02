@@ -1,4 +1,5 @@
 import { NEXT_PUBLIC_API_URL } from "@/lib/config/configDev"
+import sessionState from "@/lib/state/sessionState/sessionState";
 
 export interface NotificationChannel {
   notification_id?: string
@@ -26,17 +27,9 @@ interface AddNotificationResponse {
   }
 }
 
-// Helper to get a cookie value
-function getCookie(name: string): string {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || '';
-  return '';
-}
-
 export async function addNotificationChannel(channelData: NotificationChannel): Promise<NotificationChannel> {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
     if (!token) {
       throw new Error("No authorization token found")
     }
@@ -73,7 +66,7 @@ export async function addNotificationChannel(channelData: NotificationChannel): 
 
 export async function getNotificationChannels(): Promise<NotificationChannel[]> {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
     if (!token) {
       throw new Error("No authorization token found")
     }
@@ -106,7 +99,7 @@ export async function updateNotificationChannel(
   channelData: NotificationChannel,
 ): Promise<NotificationChannel> {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
     if (!token) {
       throw new Error("No authorization token found")
     }
@@ -144,7 +137,7 @@ export async function updateNotificationChannel(
 
 export async function deleteNotificationChannel(id: string): Promise<void> {
   try {
-    const token = getCookie("token") || '';
+    const token = sessionState.token || '';
     if (!token) {
       throw new Error("No authorization token found")
     }
