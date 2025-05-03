@@ -226,53 +226,24 @@ export default function NotificationsPage() {
                     <span>Error loading channels: {error}</span>
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Channel Name</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Target</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {!channels || channels.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                            No notification channels found. Click "Add Channel" to create one.
-                          </TableCell>
-                        </TableRow>
+                  <>
+                    {/* Mobile: Card/List layout */}
+                    <div className="block md:hidden space-y-4">
+                      {(!channels || channels.length === 0) ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          No notification channels found. Click "Add Channel" to create one.
+                        </div>
                       ) : (
                         channels.map((channel) => {
-                          if (!channel) return null // Skip undefined channels
-
+                          if (!channel) return null
                           const ChannelIcon = getChannelIcon(channel.notification_type || "")
                           return (
-                            <TableRow key={channel.notification_id}>
-                              <TableCell>
-                                <div className="flex items-center">
-                                  <ChannelIcon className="h-4 w-4 mr-2 text-orange-500" />
-                                  <span className="font-medium">{channel.name || "Unnamed Channel"}</span>
+                            <div key={channel.notification_id} className="rounded-lg border border-orange-600/20 bg-[#0f1d24] p-4 flex flex-col gap-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <ChannelIcon className="h-4 w-4 text-orange-500" />
+                                  <span className="font-medium text-base">{channel.name || "Unnamed Channel"}</span>
                                 </div>
-                              </TableCell>
-                              <TableCell className="capitalize">{channel.notification_type || "Unknown"}</TableCell>
-                              <TableCell className="font-mono text-xs">{channel.channel || "N/A"}</TableCell>
-                              <TableCell>
-                                <Badge
-                                  variant="outline"
-                                  className={
-                                    channel.enabled
-                                      ? "bg-green-500/10 text-green-500 border-green-500/20"
-                                      : "bg-red-500/10 text-red-500 border-red-500/20"
-                                  }
-                                >
-                                  {channel.enabled ? "Active" : "Inactive"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>{channel.client || "N/A"}</TableCell>
-                              <TableCell className="text-right">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon">
@@ -287,22 +258,101 @@ export default function NotificationsPage() {
                                       Edit Channel
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      className="text-red-500"
-                                      onClick={() => handleDeleteChannel(channel)}
-                                    >
+                                    <DropdownMenuItem className="text-red-500" onClick={() => handleDeleteChannel(channel)}>
                                       <Trash2 className="h-4 w-4 mr-2" />
                                       Delete Channel
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
-                              </TableCell>
-                            </TableRow>
+                              </div>
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                                <span><span className="text-muted-foreground">Type:</span> <span className="capitalize">{channel.notification_type || "Unknown"}</span></span>
+                                <span><span className="text-muted-foreground">Target:</span> <span className="font-mono text-xs">{channel.channel || "N/A"}</span></span>
+                                <span><span className="text-muted-foreground">Status:</span> <Badge variant="outline" className={channel.enabled ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"}>{channel.enabled ? "Active" : "Inactive"}</Badge></span>
+                                <span><span className="text-muted-foreground">Client:</span> {channel.client || "N/A"}</span>
+                              </div>
+                            </div>
                           )
                         })
                       )}
-                    </TableBody>
-                  </Table>
+                    </div>
+                    {/* Desktop: Table layout */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Channel Name</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Target</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Client</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {!channels || channels.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                No notification channels found. Click "Add Channel" to create one.
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            channels.map((channel) => {
+                              if (!channel) return null // Skip undefined channels
+                              const ChannelIcon = getChannelIcon(channel.notification_type || "")
+                              return (
+                                <TableRow key={channel.notification_id}>
+                                  <TableCell>
+                                    <div className="flex items-center">
+                                      <ChannelIcon className="h-4 w-4 mr-2 text-orange-500" />
+                                      <span className="font-medium">{channel.name || "Unnamed Channel"}</span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="capitalize">{channel.notification_type || "Unknown"}</TableCell>
+                                  <TableCell className="font-mono text-xs">{channel.channel || "N/A"}</TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      variant="outline"
+                                      className={
+                                        channel.enabled
+                                          ? "bg-green-500/10 text-green-500 border-green-500/20"
+                                          : "bg-red-500/10 text-red-500 border-red-500/20"
+                                      }
+                                    >
+                                      {channel.enabled ? "Active" : "Inactive"}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>{channel.client || "N/A"}</TableCell>
+                                  <TableCell className="text-right">
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                          <MoreHorizontal className="h-4 w-4" />
+                                          <span className="sr-only">Open menu</span>
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                        <DropdownMenuItem onClick={() => handleEditChannel(channel)}>
+                                          <Edit className="h-4 w-4 mr-2" />
+                                          Edit Channel
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="text-red-500" onClick={() => handleDeleteChannel(channel)}>
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Delete Channel
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </TableCell>
+                                </TableRow>
+                              )
+                            })
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>

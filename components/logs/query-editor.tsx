@@ -350,14 +350,14 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
       <div
         className={`flex items-center justify-between border-b ${isDarkTheme ? "border-orange-600/20 bg-[#0f1d24]" : "border-gray-200 bg-gray-50"}`}
       >
-        <div className="flex-1 overflow-x-auto">
+        <div className="flex-1 min-w-0 overflow-x-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`h-10 p-0 w-full flex items-center ${isDarkTheme ? "bg-transparent" : "bg-gray-50"}`}>
+            <TabsList className={`h-10 p-0 w-full flex items-center overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-orange-600/30 scrollbar-track-transparent min-w-0 max-h-12 ${isDarkTheme ? "bg-transparent" : "bg-gray-50"}`} style={{ WebkitOverflowScrolling: 'touch' }}>
               {tabs.map((tab) => (
                 <TabsTrigger
                   key={tab.id}
                   value={tab.id}
-                  className={`relative h-10 px-4 rounded-none border-r ${
+                  className={`relative h-10 px-4 rounded-none border-r min-w-[120px] max-w-[180px] truncate text-sm md:text-base whitespace-nowrap ${
                     isDarkTheme
                       ? `border-orange-600/20 data-[state=active]:bg-[#0a1419] data-[state=active]:text-orange-500 text-gray-300`
                       : `border-gray-200 data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm text-gray-700`
@@ -368,7 +368,6 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
                     {tab.status === "running" && <Play className="h-3 w-3 text-blue-500 animate-pulse" />}
                     {tab.status === "error" && <AlertCircle className="h-3 w-3 text-red-500" />}
                     {tab.status === "success" && <CheckCircle className="h-3 w-3 text-green-500" />}
-
                     {editingTabId === tab.id ? (
                       <input
                         ref={editInputRef}
@@ -397,7 +396,6 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
                         </span>
                       </>
                     )}
-
                     <span
                       onClick={(e) => { e.stopPropagation(); closeTab(tab.id, e); }}
                       className={`ml-2 rounded-full p-0.5 ${isDarkTheme ? "hover:bg-gray-700" : "hover:bg-gray-200"} cursor-pointer`}
@@ -431,11 +429,11 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
 
       <div className="flex-1 flex flex-col">
         <div
-          className={`p-2 border-b flex justify-between items-center ${
+          className={`p-2 border-b flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-0 ${
             isDarkTheme ? "bg-[#0f1d24] border-orange-600/20" : "bg-gray-50 border-gray-200"
           }`}
         >
-          <div className="flex items-center">
+          <div className="flex items-center mb-2 md:mb-0">
             <span className={`text-sm font-medium mr-2 ${isDarkTheme ? "text-gray-200" : "text-gray-700"}`}>
               SQL Query
             </span>
@@ -443,11 +441,11 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
               <AlignLeft className={`h-4 w-4 ${isDarkTheme ? "text-orange-500" : "text-orange-600"}`} />
             </Button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
             <Button
               variant="outline"
               size="sm"
-              className={isDarkTheme ? "border-orange-600/20 text-orange-500" : "border-orange-200 text-orange-600"}
+              className={`w-full md:w-auto ${isDarkTheme ? "border-orange-600/20 text-orange-500" : "border-orange-200 text-orange-600"}`}
               onClick={() => setIsQueryBuilderOpen(true)}
             >
               <Wand2 className="mr-2 h-4 w-4" />
@@ -456,7 +454,7 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
             <Button
               variant="default"
               size="sm"
-              className="bg-orange-600 hover:bg-orange-700 text-white"
+              className="w-full md:w-auto bg-orange-600 hover:bg-orange-700 text-white"
               onClick={runQuery}
               disabled={loading || activeTabData.status === "running"}
             >
@@ -472,19 +470,21 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
                 </>
               )}
             </Button>
-            <Button variant="outline" size="sm" onClick={clearActiveTab}>
+            <Button variant="outline" size="sm" className="w-full md:w-auto" onClick={clearActiveTab}>
               <X className="mr-2 h-4 w-4" />
               Clear
             </Button>
           </div>
         </div>
 
-        <SqlEditor
-          value={activeTabData.sql}
-          onChange={(value) => updateSql(activeTab, value)}
-          status={activeTabData.status}
-          error={activeTabData.error || error}
-        />
+        <div className="flex-1 w-full overflow-x-auto p-2 md:p-4">
+          <SqlEditor
+            value={activeTabData.sql}
+            onChange={(value) => updateSql(activeTab, value)}
+            status={activeTabData.status}
+            error={activeTabData.error || error}
+          />
+        </div>
       </div>
 
       <SQLQueryBuilder

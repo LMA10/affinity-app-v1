@@ -156,65 +156,130 @@ export function QueryResults({ queryStatus, queryError, queryMetrics, onRetry, o
           </div>
 
           <TabsContent value="results" className="p-0 m-0 flex-1 overflow-auto">
-            <div className="overflow-auto max-h-[calc(50vh-200px)]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40px]"></TableHead>
-                    {visibleHeaders.map((column) => (
-                      <TableHead key={column}>{column}</TableHead>
+            {/* Mobile: Card/List layout */}
+            <div className="block md:hidden space-y-4 p-2">
+              {logs.map((row, rowIndex) => (
+                <div key={rowIndex} className="rounded-xl border border-orange-600/20 bg-[#0f1d24] p-4 flex flex-col gap-3 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-orange-400 text-lg">Log #{rowIndex + 1}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setExpandedRow(expandedRow === rowIndex ? null : rowIndex)}
+                    >
+                      {expandedRow === rowIndex ? (
+                        <ChevronDown className="h-5 w-5 text-orange-500" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                  {/* Show up to 5 fields as summary */}
+                  <div className="flex flex-col gap-1 text-sm">
+                    {visibleHeaders.slice(0, 5).map((column) => (
+                      <div key={column} className="flex gap-2 items-center">
+                        <span className="text-muted-foreground font-medium">{column}:</span>
+                        <span className="font-mono text-xs break-all max-w-full">
+                          {column.toLowerCase().includes("statuscode") ? (
+                            <Badge variant="outline" className={getStatusBadgeColor(String(row[column]))}>
+                              {row[column] !== null ? String(row[column]) : "-"}
+                            </Badge>
+                          ) : row[column] !== null ? (
+                            String(row[column])
+                          ) : (
+                            "-"
+                          )}
+                        </span>
+                      </div>
                     ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {logs.map((row, rowIndex) => (
-                    <TableRow key={rowIndex} className={expandedRow === rowIndex ? "bg-[#0a1419]" : ""}>
-                      <TableCell className="p-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => setExpandedRow(expandedRow === rowIndex ? null : rowIndex)}
-                        >
-                          {expandedRow === rowIndex ? (
-                            <ChevronDown className="h-4 w-4 text-orange-500" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </Button>
-                      </TableCell>
+                  </div>
+                  {/* Expanded details */}
+                  {expandedRow === rowIndex && (
+                    <div className="mt-3 pt-3 border-t border-orange-600/10 text-xs flex flex-col gap-1">
                       {visibleHeaders.map((column) => (
-                        <TableCell key={column} className="font-mono text-xs">
-                          {column in row ? (
-                            <span
-                              className="cursor-pointer"
-                              onClick={() => onValueClick?.(column, String(row[column]))}
-                              tabIndex={0}
-                              role="button"
-                              style={{ display: "inline-block" }}
-                            >
-                              {column.toLowerCase().includes("statuscode") ? (
-                                <Badge variant="outline" className={getStatusBadgeColor(String(row[column]))}>
-                                  {row[column] !== null ? String(row[column]) : "-"}
-                                </Badge>
-                              ) : row[column] !== null ? (
-                                String(row[column])
-                              ) : (
-                                "-"
-                              )}
-                            </span>
-                          ) : (
-                            "undefined"
-                          )}
-                        </TableCell>
+                        <div key={column} className="flex gap-2 items-center">
+                          <span className="text-muted-foreground font-medium">{column}:</span>
+                          <span className="font-mono break-all max-w-full">
+                            {column.toLowerCase().includes("statuscode") ? (
+                              <Badge variant="outline" className={getStatusBadgeColor(String(row[column]))}>
+                                {row[column] !== null ? String(row[column]) : "-"}
+                              </Badge>
+                            ) : row[column] !== null ? (
+                              String(row[column])
+                            ) : (
+                              "-"
+                            )}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {/* Desktop: Table layout */}
+            <div className="hidden md:block overflow-x-auto">
+              <div className="overflow-auto max-h-[calc(50vh-200px)]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[40px]"></TableHead>
+                      {visibleHeaders.map((column) => (
+                        <TableHead key={column}>{column}</TableHead>
                       ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="p-2 border-t border-orange-600/20 text-xs text-muted-foreground">
-              {totalRows} rows returned
+                  </TableHeader>
+                  <TableBody>
+                    {logs.map((row, rowIndex) => (
+                      <TableRow key={rowIndex} className={expandedRow === rowIndex ? "bg-[#0a1419]" : ""}>
+                        <TableCell className="p-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => setExpandedRow(expandedRow === rowIndex ? null : rowIndex)}
+                          >
+                            {expandedRow === rowIndex ? (
+                              <ChevronDown className="h-4 w-4 text-orange-500" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </TableCell>
+                        {visibleHeaders.map((column) => (
+                          <TableCell key={column} className="font-mono text-xs">
+                            {column in row ? (
+                              <span
+                                className="cursor-pointer"
+                                onClick={() => onValueClick?.(column, String(row[column]))}
+                                tabIndex={0}
+                                role="button"
+                                style={{ display: "inline-block" }}
+                              >
+                                {column.toLowerCase().includes("statuscode") ? (
+                                  <Badge variant="outline" className={getStatusBadgeColor(String(row[column]))}>
+                                    {row[column] !== null ? String(row[column]) : "-"}
+                                  </Badge>
+                                ) : row[column] !== null ? (
+                                  String(row[column])
+                                ) : (
+                                  "-"
+                                )}
+                              </span>
+                            ) : (
+                              "undefined"
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="p-2 border-t border-orange-600/20 text-xs text-muted-foreground">
+                {totalRows} rows returned
+              </div>
             </div>
           </TabsContent>
 

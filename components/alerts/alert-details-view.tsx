@@ -194,10 +194,10 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   }
 
   return (
-    <div className="bg-[#0a1419] h-full p-4">
-      <div className="relative mb-4">
-        <div className="flex items-center gap-2 pr-10">
-          <h3 className="text-orange-500 font-medium">Alert Details</h3>
+    <div className="bg-[#0a1419] h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto">
+      <div className="relative mb-4 w-full">
+        <div className="flex items-center gap-2 pr-10 w-full">
+          <h3 className="text-orange-500 font-medium text-lg md:text-xl">Alert Details</h3>
           <Badge
             variant="outline"
             className={
@@ -214,36 +214,36 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
             </Badge>
           )}
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-0 right-0 h-6 w-6">
-          <X className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-0 right-0 h-10 w-10 md:h-6 md:w-6">
+          <X className="h-6 w-6 md:h-4 md:w-4" />
         </Button>
-        <div className="flex gap-2 mt-4">
-          <Button variant="outline" size="sm" onClick={copyFullAlert} className="h-7 px-2 w-full sm:w-auto">
-            <Copy className="h-3.5 w-3.5 mr-1" />
+        <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
+          <Button variant="outline" size="sm" onClick={copyFullAlert} className="h-10 px-2 w-full sm:w-auto">
+            <Copy className="h-4 w-4 mr-1" />
             Copy
           </Button>
-          <Button variant="outline" size="sm" onClick={exportAlertToJson} className="h-7 px-2 w-full sm:w-auto">
-            <FileDown className="h-3.5 w-3.5 mr-1" />
+          <Button variant="outline" size="sm" onClick={exportAlertToJson} className="h-10 px-2 w-full sm:w-auto">
+            <FileDown className="h-4 w-4 mr-1" />
             Export
           </Button>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-        <TabsList className="bg-[#0f1d24]">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4 w-full">
+        <TabsList className="bg-[#0f1d24] flex flex-wrap w-full">
           <TabsTrigger value="formatted">Formatted View</TabsTrigger>
           <TabsTrigger value="raw">Raw JSON</TabsTrigger>
         </TabsList>
 
         <TabsContent value="formatted">
-          <ScrollArea className="h-[calc(100vh-120px)] pr-4">
-            <div className="grid grid-cols-1 gap-4">
+          <ScrollArea className="h-[60vh] md:h-[calc(100vh-120px)] pr-1 md:pr-4 w-full">
+            <div className="grid grid-cols-1 gap-4 w-full">
               {/* Alert Management */}
               <Card className="bg-[#0f1d24] border border-orange-600/20">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Alert Management</CardTitle>
+                  <CardTitle className="text-lg text-base md:text-xl">Alert Management</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 p-3 md:p-6">
                   <div className="grid grid-cols-1 gap-4">
                     <div>
                       <Label htmlFor="status" className="text-sm text-muted-foreground">
@@ -341,9 +341,9 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               {/* Alert Overview */}
               <Card className="bg-[#0f1d24] border border-orange-600/20">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Alert Overview</CardTitle>
+                  <CardTitle className="text-lg text-base md:text-xl">Alert Overview</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 p-3 md:p-6">
                   <div className="grid grid-cols-1 gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground">Alert Name</p>
@@ -377,9 +377,9 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               {alert.metadata && (
                 <Card className="bg-[#0f1d24] border border-orange-600/20">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Rule Metadata</CardTitle>
+                    <CardTitle className="text-lg text-base md:text-xl">Rule Metadata</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2">
+                  <CardContent className="space-y-2 p-3 md:p-6">
                     <div className="grid grid-cols-1 gap-2">
                       <div>
                         <p className="text-sm text-muted-foreground">Rule Name</p>
@@ -406,9 +406,9 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               {alert.event && (
                 <Card className="bg-[#0f1d24] border border-orange-600/20">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Event Information</CardTitle>
+                    <CardTitle className="text-lg text-base md:text-xl">Event Information</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2">
+                  <CardContent className="space-y-2 p-3 md:p-6">
                     <div>
                       <p className="text-sm text-muted-foreground">Iteration</p>
                       <p>{alert.event.iteration}</p>
@@ -456,9 +456,9 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               {alert.security_detection && (
                 <Card className="bg-[#0f1d24] border border-orange-600/20">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Security Detection</CardTitle>
+                    <CardTitle className="text-lg text-base md:text-xl">Security Detection</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2">
+                  <CardContent className="space-y-2 p-3 md:p-6">
                     <div>
                       <p className="text-sm text-muted-foreground">Severity</p>
                       <Badge variant="outline" className={getSeverityBadgeColor(alert.security_detection.severity)}>
@@ -494,7 +494,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               {alert.mitre_techniques && alert.mitre_techniques.length > 0 && (
                 <Card className="bg-[#0f1d24] border border-orange-600/20">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">MITRE ATT&CK Techniques</CardTitle>
+                    <CardTitle className="text-lg text-base md:text-xl">MITRE ATT&CK Techniques</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
@@ -512,19 +512,19 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
         </TabsContent>
 
         <TabsContent value="raw">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4 w-full">
             <div className="flex items-center space-x-2">
               <Switch id="prettify-json" checked={prettifyJson} onCheckedChange={setPrettifyJson} />
               <Label htmlFor="prettify-json">Prettify JSON</Label>
             </div>
-            <Button variant="outline" size="sm" className="h-7 px-2" onClick={copyFullAlert}>
-              <Copy className="h-3.5 w-3.5 mr-1" />
+            <Button variant="outline" size="sm" className="h-10 px-2" onClick={copyFullAlert}>
+              <Copy className="h-4 w-4 mr-1" />
               Copy
             </Button>
           </div>
-          <div className="relative">
-            <ScrollArea className="h-[calc(100vh-180px)] bg-[#0f1d24] p-4 rounded-md border border-orange-600/10">
-              <pre className="font-mono text-sm whitespace-pre-wrap">
+          <div className="relative w-full">
+            <ScrollArea className="h-[40vh] md:h-[calc(100vh-180px)] bg-[#0f1d24] p-2 md:p-4 rounded-md border border-orange-600/10 w-full">
+              <pre className="font-mono text-xs md:text-sm whitespace-pre-wrap break-all w-full">
                 {JSON.stringify(alert, undefined, prettifyJson ? 2 : undefined)}
               </pre>
             </ScrollArea>

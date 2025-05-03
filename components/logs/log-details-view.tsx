@@ -112,59 +112,58 @@ export function LogDetailsView({ log, headers, onClose, onValueClick }: LogDetai
   }
 
   return (
-    <div className="bg-[#0a1419] border border-orange-600/20 rounded-md p-4 mt-2 mb-2 relative">
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-[#0a1419] border border-orange-600/20 rounded-md p-3 md:p-4 mt-2 mb-2 relative w-full max-w-full">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2 md:gap-0">
         <div className="flex items-center gap-2">
-          <h3 className="text-orange-500 font-medium">Log Details</h3>
+          <h3 className="text-orange-500 font-medium text-lg md:text-xl">Log Details</h3>
           <Badge variant="outline" className={log.albstatuscode ? getStatusBadgeColor(String(log.albstatuscode)) : ""}>
-            {log.albstatuscode || "Unknown"} {log.requestverb || ""}{" "}
-            {log.requesturl ? new URL(log.requesturl).pathname : ""}
+            {log.albstatuscode || "Unknown"} {log.requestverb || ""} {log.requesturl ? new URL(log.requesturl).pathname : ""}
           </Badge>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={copyFullLog} className="h-7 px-2">
-            <Copy className="h-3.5 w-3.5 mr-1" />
+        <div className="flex items-center gap-2 mt-2 md:mt-0">
+          <Button variant="outline" size="sm" onClick={copyFullLog} className="h-8 px-2">
+            <Copy className="h-4 w-4 mr-1" />
             Copy JSON
           </Button>
-          <Button variant="outline" size="sm" onClick={exportLogToJson} className="h-7 px-2">
-            <FileDown className="h-3.5 w-3.5 mr-1" />
+          <Button variant="outline" size="sm" onClick={exportLogToJson} className="h-8 px-2">
+            <FileDown className="h-4 w-4 mr-1" />
             Export
           </Button>
-          <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6">
-            <X className="h-4 w-4" />
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+            <X className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-        <TabsList className="bg-[#0f1d24]">
+        <TabsList className="bg-[#0f1d24] w-full">
           <TabsTrigger value="formatted">Formatted View</TabsTrigger>
           <TabsTrigger value="raw">Raw JSON</TabsTrigger>
         </TabsList>
 
         <TabsContent value="formatted">
-          <ScrollArea className="h-[400px] pr-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+          <ScrollArea className="h-[300px] md:h-[400px] pr-2 md:pr-4 w-full">
+            <div className="block md:grid md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 w-full">
               {filteredHeaders.map((header) => (
-                <div key={header} className="group relative">
-                  <div className="text-orange-500/80 text-sm font-medium mb-1">{header}</div>
-                  <div className="flex items-start gap-2 bg-[#0f1d24] p-2 rounded-md border border-orange-600/10 group-hover:border-orange-600/30 transition-colors">
-                    <div className="flex-1 break-all">
+                <div key={header} className="group relative w-full">
+                  <div className="text-orange-500/80 text-sm font-medium mb-1 break-words">{header}</div>
+                  <div className="flex items-start gap-2 bg-[#0f1d24] p-2 rounded-md border border-orange-600/10 group-hover:border-orange-600/30 transition-colors w-full">
+                    <div className="flex-1 break-all text-xs md:text-sm">
                       {log[header] !== null ? (
                         typeof log[header] === "object" ? (
-                          <pre className="font-mono text-sm whitespace-pre-wrap">
+                          <pre className="font-mono text-xs md:text-sm whitespace-pre-wrap">
                             {JSON.stringify(log[header], null, 2)}
                           </pre>
                         ) : header === "timestamp" || header === "requestcreationtime" ? (
                           showTimestamps ? (
-                            <div className="font-mono text-sm break-words">
+                            <div className="font-mono text-xs md:text-sm break-words">
                               <div>{log[header]}</div>
                               <div className="text-xs text-muted-foreground">{formatTimestamp(log[header])}</div>
                             </div>
                           ) : (
                             <button
                               onClick={() => handleValueClick(header, String(log[header]))}
-                              className="font-mono text-sm break-words hover:bg-orange-500/20 px-1 rounded cursor-pointer transition-colors text-left w-full"
+                              className="font-mono text-xs md:text-sm break-words hover:bg-orange-500/20 px-1 rounded cursor-pointer transition-colors text-left w-full"
                             >
                               {log[header]}
                             </button>
@@ -180,7 +179,7 @@ export function LogDetailsView({ log, headers, onClose, onValueClick }: LogDetai
                         ) : (
                           <button
                             onClick={() => handleValueClick(header, String(log[header]))}
-                            className="font-mono text-sm break-words hover:bg-orange-500/20 px-1 rounded cursor-pointer transition-colors text-left w-full"
+                            className="font-mono text-xs md:text-sm break-words hover:bg-orange-500/20 px-1 rounded cursor-pointer transition-colors text-left w-full"
                           >
                             {String(log[header])}
                           </button>
@@ -192,10 +191,10 @@ export function LogDetailsView({ log, headers, onClose, onValueClick }: LogDetai
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={`h-5 w-5 ${copiedField === header ? "text-green-500" : "opacity-0 group-hover:opacity-100"} transition-opacity`}
+                      className={`h-6 w-6 ${copiedField === header ? "text-green-500" : "opacity-0 group-hover:opacity-100"} transition-opacity`}
                       onClick={() => copyToClipboard(header, log[header] !== null ? String(log[header]) : "-")}
                     >
-                      {copiedField === header ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                      {copiedField === header ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     </Button>
                   </div>
                 </div>
@@ -216,14 +215,14 @@ export function LogDetailsView({ log, headers, onClose, onValueClick }: LogDetai
               <Switch id="prettify-json" checked={prettifyJson} onCheckedChange={setPrettifyJson} />
               <Label htmlFor="prettify-json">Prettify JSON</Label>
             </div>
-            <Button variant="outline" size="sm" className="h-7 px-2" onClick={copyFullLog}>
-              <Copy className="h-3.5 w-3.5 mr-1" />
+            <Button variant="outline" size="sm" className="h-8 px-2" onClick={copyFullLog}>
+              <Copy className="h-4 w-4 mr-1" />
               Copy
             </Button>
           </div>
           <div className="relative">
-            <ScrollArea className="h-[400px] bg-[#0f1d24] p-4 rounded-md border border-orange-600/10">
-              <pre className="font-mono text-sm whitespace-pre-wrap">
+            <ScrollArea className="h-[300px] md:h-[400px] bg-[#0f1d24] p-4 rounded-md border border-orange-600/10 w-full">
+              <pre className="font-mono text-xs md:text-sm whitespace-pre-wrap">
                 {JSON.stringify(log, null, prettifyJson ? 2 : undefined)}
               </pre>
             </ScrollArea>

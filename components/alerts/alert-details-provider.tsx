@@ -28,11 +28,19 @@ export function AlertDetailsProvider({ children }: { children: React.ReactNode }
   return (
     <AlertDetailsContext.Provider value={{ selectedAlert, setSelectedAlert, isOpen, setIsOpen }}>
       <div className="flex h-full w-full relative">
-        <div className={`flex-1 transition-all duration-300 ${isOpen ? "mr-[400px]" : ""}`}>{children}</div>
+        <div className={`flex-1 transition-all duration-300 ${isOpen ? 'md:mr-[400px]' : ''}`}>{children}</div>
+        {/* Mobile: Fullscreen modal, Desktop: Sidebar */}
         {isOpen && selectedAlert && (
-          <div className="fixed top-0 right-0 h-full max-w-full w-full sm:w-[400px] bg-[#0f1d24] border-l border-orange-600/20 flex flex-col overflow-y-auto overflow-x-hidden">
-            <AlertDetailsView alert={selectedAlert} onClose={() => setIsOpen(false)} />
-          </div>
+          <>
+            {/* Overlay for mobile modal */}
+            <div className="fixed inset-0 bg-black/60 z-40 block md:hidden" onClick={() => setIsOpen(false)} />
+            {/* Details panel: mobile = modal, desktop = sidebar */}
+            <div
+              className="fixed z-50 top-0 right-0 h-full w-full md:w-[400px] bg-[#0f1d24] border-l border-orange-600/20 flex flex-col overflow-y-auto overflow-x-hidden transition-all duration-300 block md:block"
+            >
+              <AlertDetailsView alert={selectedAlert} onClose={() => setIsOpen(false)} />
+            </div>
+          </>
         )}
       </div>
     </AlertDetailsContext.Provider>
