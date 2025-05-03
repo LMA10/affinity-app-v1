@@ -5,6 +5,7 @@ import { CreateModal, type Step } from "@/components/ui/create-modal"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import userState from "@/lib/state/userState/userState"
+import { Eye, EyeOff } from "lucide-react"
 
 interface GenericAddUserModalProps {
   isOpen: boolean
@@ -18,6 +19,8 @@ export function GenericAddUserModal({ isOpen, onClose, onSuccess }: GenericAddUs
   const [confirmPassword, setConfirmPassword] = useState("")
   const [confirmationCode, setConfirmationCode] = useState("")
   const [deliveryDetails, setDeliveryDetails] = useState<{ destination: string; medium: string } | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleSubmit = async (stepId: string, goToNextStep: () => void, complete: () => void) => {
     if (stepId === "details") {
@@ -83,24 +86,44 @@ export function GenericAddUserModal({ isOpen, onClose, onSuccess }: GenericAddUs
 
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm password"
-            />
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm password"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500"
+                onClick={() => setShowConfirmPassword((v) => !v)}
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
           </div>
         </div>
       ),

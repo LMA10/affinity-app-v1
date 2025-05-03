@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Eye, EyeOff, Lock, Mail } from "lucide-react"
 import { useAuth } from "@/lib/context/auth-context"
 import { toast } from "@/hooks/use-toast"
+import { Loading } from "@/components/loading"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 function LoginPage() {
   const [email, setEmail] = useState("")
@@ -60,15 +62,17 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a1419] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
+      <div className="absolute top-6 right-6 z-10">
+        <ThemeToggle />
+      </div>
       <div className="absolute top-8 left-8">
         <Image src="/soli-logo.png" alt="AFFINITY Logo" width={180} height={60} priority />
       </div>
-
-      <Card className="w-full max-w-md border-orange-600/20 bg-[#0f1d24]/80 backdrop-blur-sm">
+      <Card className="w-full max-w-md border bg-white dark:bg-[#0f1d24] border-gray-200 dark:border-orange-600/20 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl text-orange-500">Login to AFFINITY</CardTitle>
-          <CardDescription>Enter your credentials to access your security dashboard</CardDescription>
+          <CardTitle className="text-2xl text-orange-500">AFFINITY</CardTitle>
+          <CardDescription className="text-muted-foreground">Enter your credentials to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -82,7 +86,7 @@ function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-background border border-gray-200 dark:border-orange-600/20 text-foreground placeholder:text-muted-foreground"
                   required
                   autoComplete="username"
                 />
@@ -98,7 +102,7 @@ function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-background border border-gray-200 dark:border-orange-600/20 text-foreground placeholder:text-muted-foreground"
                   required
                   autoComplete="current-password"
                 />
@@ -117,10 +121,10 @@ function LoginPage() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
               disabled={isLoading}
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? <Loading className="mr-2" /> : "Login"}
             </Button>
           </form>
         </CardContent>

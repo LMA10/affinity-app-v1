@@ -22,7 +22,6 @@ import {
   Plus,
   Smartphone,
   Trash2,
-  Loader2,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -46,6 +45,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Loading } from "@/components/loading"
 
 // Mock data for notification rules
 const notificationRules = [
@@ -217,7 +217,7 @@ export default function NotificationsPage() {
               <CardContent className="p-0">
                 {isLoading ? (
                   <div className="flex justify-center items-center p-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+                    <Loading />
                     <span className="ml-2 text-muted-foreground">Loading channels...</span>
                   </div>
                 ) : error ? (

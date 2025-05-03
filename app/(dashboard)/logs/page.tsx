@@ -460,7 +460,23 @@ export default function LogsPage() {
           </div>
         )}
 
-        {hasRunQuery ? (
+        {viewMode === "table" && !hasRunQuery ? (
+          <div className="rounded-md border bg-[#0f1d24] p-12 flex flex-col items-center justify-center text-center">
+            <Database className="h-16 w-16 text-orange-500/30 mb-6" />
+            <h3 className="text-xl font-medium mb-3">No logs to display</h3>
+            <p className="text-muted-foreground max-w-md mb-6">
+              Use the Query Editor to search and analyze your security logs. Write a SQL query to get started.
+            </p>
+            <Button
+              variant="default"
+              className="bg-orange-600 hover:bg-orange-700"
+              onClick={() => setViewMode("query")}
+            >
+              <Code className="h-4 w-4 mr-2" />
+              Open Query Editor
+            </Button>
+          </div>
+        ) : hasRunQuery ? (
           <div className="rounded-md border bg-[#0f1d24] relative">
             {(loading || logsLoading) && <Loading className="absolute right-4 top-4" />}
 
@@ -612,23 +628,7 @@ export default function LogsPage() {
               </div>
             )}
           </div>
-        ) : (
-          <div className="rounded-md border bg-[#0f1d24] p-12 flex flex-col items-center justify-center text-center">
-            <Database className="h-16 w-16 text-orange-500/30 mb-6" />
-            <h3 className="text-xl font-medium mb-3">No logs to display</h3>
-            <p className="text-muted-foreground max-w-md mb-6">
-              Use the Query Editor to search and analyze your security logs. Write a SQL query to get started.
-            </p>
-            <Button
-              variant="default"
-              className="bg-orange-600 hover:bg-orange-700"
-              onClick={() => setViewMode("query")}
-            >
-              <Code className="h-4 w-4 mr-2" />
-              Open Query Editor
-            </Button>
-          </div>
-        )}
+        ) : null}
       </div>
     </div>
   )
