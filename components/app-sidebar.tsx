@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { AlertTriangle, BarChart3, BookOpen, Cloud, Cog, FileText, LogOut, ChevronDown, Settings } from "lucide-react"
+import { AlertTriangle, BarChart3, BookOpen, Cloud, Cog, FileText, LogOut, ChevronDown, Settings, Search } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -163,6 +163,20 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           )}
+
+          {/* INCIDENT RESPONSE Section */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === "/threat-hunting"}
+              className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
+            >
+              <Link href="/threat-hunting" className="text-orange-500 flex items-center w-full">
+                <Search className={menuIconStyles} />
+                <span>THREAT HUNTING</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
 
           {/* WIKI Section */}
           {/* {isPageVisible("/wiki") && (
