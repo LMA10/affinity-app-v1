@@ -7,10 +7,6 @@ import { Input } from "@/components/ui/input";
 import { useRef, useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, Download, FileText, ShieldCheck, ClipboardList, UploadCloud, History, X, Share2, Clock } from 'lucide-react';
 import { Tabs } from '@/components/ui/tabs';
-import { useWorkbench, WorkbenchProvider } from "../workbench-context";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer"
-import { LogsPanel } from "@/components/logs/LogsPanel"
-import useLogsState from "@/lib/state/logs/logsState";
 
 const IOC_COLORS: Record<string, string> = {
     ipv4: "bg-blue-700",
@@ -108,7 +104,7 @@ function isPrivateIPv4(ip: string): boolean {
 }
 
 // Replace MasonryGrid and card view with a flat, scrollable table/list per IOC type
-function IOCTypeTable({ iocType, values, meta, collapsed, toggleCollapse, searchTerm, handleSearchChange, openInVT, openInAbuseIPDB, copyToClipboard, enriched, iocViewMode, setIocViewMode, checked, handleCheck }: any) {
+function IOCTypeTable({ iocType, values, meta, collapsed, toggleCollapse, searchTerm, handleSearchChange, openInVT, openInAbuseIPDB, copyToClipboard, enriched, iocViewMode, setIocViewMode }: any) {
     const Icon = meta.icon;
     let filteredValues = values;
     // Count occurrences for sorting and badge
@@ -187,7 +183,7 @@ function IOCTypeTable({ iocType, values, meta, collapsed, toggleCollapse, search
                         <table className="min-w-full text-sm">
                             <tbody>
                                 {filteredValues.map((val: string, idx: number) => (
-                                    <tr key={`${iocType}:${val}:${idx}`} className="border-b border-orange-900/10 hover:bg-orange-900/10 transition">
+                                    <tr key={idx} className="border-b border-orange-900/10 hover:bg-orange-900/10 transition">
                                         <td className="px-4 py-2 font-mono text-orange-100 whitespace-nowrap">
                                             {val}
                                             {iocViewMode[iocType] === 'count' && countMap[val] > 1 && (
@@ -210,9 +206,6 @@ function IOCTypeTable({ iocType, values, meta, collapsed, toggleCollapse, search
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="px-2 py-2 whitespace-nowrap">
-                                            <input type="checkbox" checked={checked[`${iocType}:${val}`] || false} onChange={e => handleCheck(iocType, val, e.target.checked)} />
-                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -224,15 +217,7 @@ function IOCTypeTable({ iocType, values, meta, collapsed, toggleCollapse, search
     );
 }
 
-function useWorkbenchSafe() {
-  try {
-    return useWorkbench();
-  } catch {
-    return null;
-  }
-}
-
-function ThreatHuntingPageInner() {
+export default function IncidentResponsePage() {
     const {
         rawText,
         setRawText,
@@ -302,13 +287,6 @@ function ThreatHuntingPageInner() {
     const [ipv4Sort, setIpv4Sort] = useState<'original' | 'count'>('original');
     const [ipv4ViewMode, setIpv4ViewMode] = useState<'all' | 'unique' | 'count'>('all');
     const [iocViewMode, setIocViewMode] = useState<Record<string, 'all' | 'unique' | 'count'>>({});
-    const workbench = useWorkbenchSafe();
-    const { selectedIocs, setSelectedIocs, setQueryString } = workbench || { selectedIocs: [], setSelectedIocs: () => {}, setQueryString: () => {} };
-    const [checked, setChecked] = useState<Record<string, boolean>>({});
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [logsQuery, setLogsQuery] = useState("");
-    const { headers } = useLogsState();
-    const [searchAllColumns, setSearchAllColumns] = useState(false);
 
     useEffect(() => {
         document.body.className = darkMode ? "bg-[#10181d] text-white" : "bg-white text-black";
@@ -467,91 +445,6 @@ function ThreatHuntingPageInner() {
         setTimeout(() => setShowShareTooltip(false), 2000);
     }
 
-    // Utility: Generate SQL WHERE clause from selected IOCs
-    function generateSqlQuery(iocs: { type: string; value: string }[], searchAll: boolean) {
-        if (!iocs.length) return "";
-        const columns = headers && headers.length > 0 ? headers : [
-            "eventversion", "useridentity.type", "useridentity.principalid", "useridentity.arn", "useridentity.accountid",
-            "eventtime", "eventsource", "eventname", "awsregion", "sourceIPAddress", "userAgent", "errorCode", "errorMessage",
-            "requestParameters", "responseElements", "additionalEventData", "requestID", "eventID", "resources", "eventType",
-            "apiVersion", "readOnly", "recipientAccountId", "serviceEventDetails", "sharedEventID", "vpcEndpointId"
-        ];
-        const fieldMap: Record<string, string[]> = {
-            ipv4: ["sourceIPAddress"],
-            ipv6: ["sourceIPAddress"],
-            domain: ["domain", "fqdn", "url"],
-            fqdn: ["fqdn", "domain", "url"],
-            url: ["url", "domain", "fqdn"],
-            email: ["userIdentity.arn", "userIdentity.principalid"],
-            md5: ["file_hash", "md5"],
-            sha1: ["file_hash", "sha1"],
-            sha256: ["file_hash", "sha256"],
-        };
-        const clauses: string[] = [];
-        for (const { type, value } of iocs) {
-            if (searchAll) {
-                columns.forEach(col => {
-                    clauses.push(`CAST(\"${col}\" AS TEXT) LIKE '%${value}%'`);
-                });
-            } else {
-                const fields = fieldMap[type] || columns;
-                if (["ipv4", "ipv6", "md5", "sha1", "sha256", "email"].includes(type)) {
-                    fields.forEach(field => {
-                        clauses.push(`\"${field}\" = '${value}'`);
-                    });
-                } else {
-                    fields.forEach(field => {
-                        clauses.push(`CAST(\"${field}\" AS TEXT) LIKE '%${value}%'`);
-                    });
-                }
-            }
-        }
-        return `SELECT * FROM \"cloudtrail\" WHERE ${clauses.join(" OR ")} LIMIT 100`;
-    }
-
-    // Handle checkbox change
-    function handleCheck(iocType: string, value: string, checkedVal: boolean) {
-        setChecked(prev => ({ ...prev, [`${iocType}:${value}`]: checkedVal }));
-    }
-
-    // Handle Query in Logs
-    function handleQueryInLogs() {
-        // Gather selected IOCs
-        const selected: { type: string; value: string }[] = [];
-        Object.entries(iocResults).forEach(([type, values]) => {
-            values.forEach(value => {
-                if (checked[`${type}:${value}`]) {
-                    selected.push({ type, value });
-                }
-            });
-        });
-
-        if (selected.length === 0) {
-            // Show a toast notification
-            const toast = document.createElement('div');
-            toast.textContent = 'Please select at least one IOC to query';
-            toast.style.position = 'fixed';
-            toast.style.bottom = '32px';
-            toast.style.right = '32px';
-            toast.style.background = '#ff9800';
-            toast.style.color = 'white';
-            toast.style.padding = '12px 24px';
-            toast.style.borderRadius = '8px';
-            toast.style.fontWeight = 'bold';
-            toast.style.zIndex = '9999';
-            toast.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-            document.body.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 1800);
-            return;
-        }
-
-        setSelectedIocs(selected);
-        const query = generateSqlQuery(selected, searchAllColumns);
-        setQueryString(query);
-        setLogsQuery(query);
-        setIsDrawerOpen(true);
-    }
-
     return (
         <div className="min-h-screen flex flex-col items-center bg-[#181c20] p-0">
             <div className="w-full max-w-5xl mt-10">
@@ -582,7 +475,7 @@ function ThreatHuntingPageInner() {
                                 placeholder="Paste or type your log data here..."
                             />
                             <Button onClick={async () => { await handleGrep(); setStep(2); }} className="w-full max-w-xs mx-auto block bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base py-2 rounded-md">
-                                Analyze
+                                Grep
                             </Button>
                         </>
                     )}
@@ -636,14 +529,9 @@ function ThreatHuntingPageInner() {
                         {/* Actions */}
                         <div className="flex gap-2 mb-4">
                             <Button onClick={() => copyAllIocs(iocResults)} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Copy all IOCs to clipboard">Copy All</Button>
-                            <label className="flex items-center gap-2 bg-orange-900/10 px-3 py-2 rounded-full cursor-pointer select-none">
-                                <input type="checkbox" checked={searchAllColumns} onChange={e => setSearchAllColumns(e.target.checked)} className="accent-orange-500" />
-                                <span className="text-orange-200 text-sm font-semibold">Search all columns</span>
-                            </label>
                             <Button onClick={() => { handleReset(); setStep(1); }} className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-105">Reset</Button>
                             <Button onClick={() => exportIOCs('csv')} className="bg-orange-700 hover:bg-orange-800 text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export CSV</Button>
                             <Button onClick={() => exportIOCs('json')} className="bg-orange-700 hover:bg-orange-800 text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export JSON</Button>
-                            <Button onClick={handleQueryInLogs} className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Query selected IOCs in Logs">Query in Logs</Button>
                         </div>
                         {/* IOC Results */}
                         <div className="space-y-4">
@@ -666,8 +554,6 @@ function ThreatHuntingPageInner() {
                                         enriched={enriched}
                                         iocViewMode={iocViewMode}
                                         setIocViewMode={setIocViewMode}
-                                        checked={checked}
-                                        handleCheck={handleCheck}
                                     />
                                 );
                             })}
@@ -701,31 +587,6 @@ function ThreatHuntingPageInner() {
                     </div>
                 </div>
             )}
-            <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-                <DrawerContent className="max-w-4xl w-full right-0 fixed top-0 h-full z-50 bg-[#10181d] border-l border-orange-700/30 shadow-2xl">
-                    <DrawerHeader>
-                        <DrawerTitle>Security Logs</DrawerTitle>
-                        <DrawerClose asChild>
-                            <button onClick={() => setIsDrawerOpen(false)} className="absolute right-4 top-4 text-orange-400 hover:text-orange-600 text-2xl">×</button>
-                        </DrawerClose>
-                    </DrawerHeader>
-                    <div className="p-0 overflow-y-auto h-[calc(100vh-60px)]">
-                        <LogsPanel queryString={logsQuery} onClose={() => setIsDrawerOpen(false)} />
-                    </div>
-                </DrawerContent>
-            </Drawer>
         </div>
     );
-}
-
-export default function ThreatHuntingPageWrapper(props: any) {
-  const workbench = useWorkbenchSafe();
-  if (workbench) {
-    return <ThreatHuntingPageInner {...props} />;
-  }
-  return (
-    <WorkbenchProvider>
-      <ThreatHuntingPageInner {...props} />
-    </WorkbenchProvider>
-  );
 }

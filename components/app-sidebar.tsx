@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { AlertTriangle, BarChart3, BookOpen, Cloud, Cog, FileText, LogOut, ChevronDown, Settings, Search } from "lucide-react"
+import { AlertTriangle, BarChart3, BookOpen, Cloud, Cog, FileText, LogOut, ChevronDown, Settings, Search, Code } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,

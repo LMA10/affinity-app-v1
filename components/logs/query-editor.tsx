@@ -27,6 +27,7 @@ export interface QueryTab {
 
 interface QueryEditorProps {
   onRunQuery?: (query: string) => void
+  value?: string
 }
 
 const LOCAL_STORAGE_KEY = "affinity-query-tabs"
@@ -52,12 +53,12 @@ const safeLocalStorage = {
   },
 }
 
-export function QueryEditor({ onRunQuery }: QueryEditorProps) {
+export function QueryEditor({ onRunQuery, value }: QueryEditorProps) {
   const [tabs, setTabs] = useState<QueryTab[]>([
     {
       id: "query-1",
       name: "Query 1",
-      sql: 'SELECT * FROM "cloudtrail" LIMIT 10;',
+      sql: value ?? 'SELECT * FROM "cloudtrail" LIMIT 10;',
       status: "idle",
       error: null,
     },
