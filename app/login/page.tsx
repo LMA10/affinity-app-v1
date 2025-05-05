@@ -13,6 +13,10 @@ import { useAuth } from "@/lib/context/auth-context"
 import { toast } from "@/hooks/use-toast"
 import { Loading } from "@/components/loading"
 import { ThemeToggle } from "@/components/theme-toggle"
+import usersState from "@/lib/state/userState/userState"
+import { useSnapshot } from "valtio"
+import { Modal } from "@/components/ui/modal"
+import { Button as UIButton } from "@/components/ui/button"
 
 function LoginPage() {
   const [email, setEmail] = useState("")
@@ -21,6 +25,11 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { login, isAuthenticated, isLoading: authIsLoading } = useAuth()
+  const { error: loginError } = useSnapshot(usersState)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [confirmationCode, setConfirmationCode] = useState("")
+  const [confirmLoading, setConfirmLoading] = useState(false)
+  const [confirmError, setConfirmError] = useState("")
 
   useEffect(() => {
     if (!authIsLoading && isAuthenticated) {
@@ -43,6 +52,7 @@ function LoginPage() {
     }
 
     const success = await login(email, password)
+    const statusCode = usersState.loginMessage?.statusCode
 
     if (success) {
       toast({
@@ -50,15 +60,39 @@ function LoginPage() {
         description: "Welcome back! Redirecting...",
       })
       router.push("/alerts-view")
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password.",
-        variant: "destructive",
-      })
+      setIsLoading(false)
+      return
     }
-
+    if (statusCode === 202) {
+      setShowConfirmModal(true)
+      setIsLoading(false)
+      return
+    }
+    toast({
+      title: "Login failed",
+      description: loginError,
+      variant: "destructive",
+    })
     setIsLoading(false)
+  }
+
+  const handleConfirm = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setConfirmLoading(true)
+    setConfirmError("")
+    try {
+      await usersState.confirmRegistration(email, confirmationCode)
+      toast({
+        title: "User confirmed!",
+        description: "You can now access your account.",
+      })
+      setShowConfirmModal(false)
+      router.push("/alerts-view")
+    } catch (err) {
+      setConfirmError(err instanceof Error ? err.message : "Failed to confirm user")
+    } finally {
+      setConfirmLoading(false)
+    }
   }
 
   return (
@@ -129,6 +163,26 @@ function LoginPage() {
           </form>
         </CardContent>
       </Card>
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title="Confirm Your Account"
+      >
+        <form onSubmit={handleConfirm} className="space-y-4">
+          <Label htmlFor="confirmationCode">Confirmation Code</Label>
+          <Input
+            id="confirmationCode"
+            value={confirmationCode}
+            onChange={e => setConfirmationCode(e.target.value)}
+            placeholder="Enter confirmation code sent to email"
+            autoFocus
+          />
+          {confirmError && <div className="text-red-500 text-sm">{confirmError}</div>}
+          <UIButton type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white" disabled={confirmLoading}>
+            {confirmLoading ? "Confirming..." : "Confirm"}
+          </UIButton>
+        </form>
+      </Modal>
     </div>
   )
 }

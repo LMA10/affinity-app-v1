@@ -194,7 +194,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   }
 
   return (
-    <div className="bg-[#0a1419] h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto">
+    <div className="bg-card h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto">
       <div className="relative mb-4 w-full">
         <div className="flex items-center gap-2 pr-10 w-full">
           <h3 className="text-orange-500 font-medium text-lg md:text-xl">Alert Details</h3>
@@ -230,7 +230,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4 w-full">
-        <TabsList className="bg-[#0f1d24] flex flex-wrap w-full">
+        <TabsList className="bg-card flex flex-wrap w-full">
           <TabsTrigger value="formatted">Formatted View</TabsTrigger>
           <TabsTrigger value="raw">Raw JSON</TabsTrigger>
         </TabsList>
@@ -239,7 +239,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
           <ScrollArea className="h-[60vh] md:h-[calc(100vh-120px)] pr-1 md:pr-4 w-full">
             <div className="grid grid-cols-1 gap-4 w-full">
               {/* Alert Management */}
-              <Card className="bg-[#0f1d24] border border-orange-600/20">
+              <Card className="bg-card border border-orange-600/20">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg text-base md:text-xl">Alert Management</CardTitle>
                 </CardHeader>
@@ -339,7 +339,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               </Card>
 
               {/* Alert Overview */}
-              <Card className="bg-[#0f1d24] border border-orange-600/20">
+              <Card className="bg-card border border-orange-600/20">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg text-base md:text-xl">Alert Overview</CardTitle>
                 </CardHeader>
@@ -375,7 +375,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* Metadata */}
               {alert.metadata && (
-                <Card className="bg-[#0f1d24] border border-orange-600/20">
+                <Card className="bg-card border border-orange-600/20">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">Rule Metadata</CardTitle>
                   </CardHeader>
@@ -404,7 +404,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* Event Information */}
               {alert.event && (
-                <Card className="bg-[#0f1d24] border border-orange-600/20">
+                <Card className="bg-card border border-orange-600/20">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">Event Information</CardTitle>
                   </CardHeader>
@@ -415,7 +415,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Query</p>
-                      <pre className="font-mono text-xs bg-[#0a1014] p-2 rounded-md overflow-x-auto">
+                      <pre className="font-mono text-xs bg-muted p-2 rounded-md overflow-x-auto">
                         {alert.event.query}
                       </pre>
                       <Button
@@ -454,7 +454,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* Security Detection */}
               {alert.security_detection && (
-                <Card className="bg-[#0f1d24] border border-orange-600/20">
+                <Card className="bg-card border border-orange-600/20">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">Security Detection</CardTitle>
                   </CardHeader>
@@ -474,7 +474,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         <p className="text-sm text-muted-foreground">Important Data</p>
                         <div className="grid grid-cols-1 gap-2">
                           {Object.entries(alert.security_detection.important_data).map(([key, value]) => (
-                            <div key={key} className="bg-[#0a1014] p-2 rounded-md">
+                            <div key={key} className="bg-muted p-2 rounded-md">
                               <p className="text-xs text-muted-foreground">{key}</p>
                               <p className="text-sm">{typeof value === 'string' ? value : JSON.stringify(value) || "-"}</p>
                             </div>
@@ -492,7 +492,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* MITRE Techniques */}
               {alert.mitre_techniques && alert.mitre_techniques.length > 0 && (
-                <Card className="bg-[#0f1d24] border border-orange-600/20">
+                <Card className="bg-card border border-orange-600/20">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">MITRE ATT&CK Techniques</CardTitle>
                   </CardHeader>
@@ -523,7 +523,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
             </Button>
           </div>
           <div className="relative w-full">
-            <ScrollArea className="h-[40vh] md:h-[calc(100vh-180px)] bg-[#0f1d24] p-2 md:p-4 rounded-md border border-orange-600/10 w-full">
+            <ScrollArea className="h-[40vh] md:h-[calc(100vh-180px)] bg-card p-2 md:p-4 rounded-md border border-orange-600/10 w-full">
               <pre className="font-mono text-xs md:text-sm whitespace-pre-wrap break-all w-full">
                 {JSON.stringify(alert, undefined, prettifyJson ? 2 : undefined)}
               </pre>

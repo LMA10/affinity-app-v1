@@ -27,6 +27,7 @@ import {
   Users,
   Eye,
   EyeOff,
+  Loader2,
 } from "lucide-react"
 import { GenericAddUserModal } from "@/components/users/generic-add-user-modal"
 import userState, { isUserAdmin } from "@/lib/state/userState/userState"
@@ -53,6 +54,7 @@ export default function UsersPage() {
   const [currentUser, setCurrentUser] = useState<string | null>(null)
   const [deleteUserModalOpen, setDeleteUserModalOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<any>(null)
+  const [fullPageLoading, setFullPageLoading] = useState(true)
 
   // Get users from state
   const { users, loading, error } = useSnapshot(userState)
@@ -254,6 +256,26 @@ export default function UsersPage() {
         description: "An error occurred while deleting the user. Please try again later.",
       })
     }
+  }
+
+  useEffect(() => {
+    // Wait for users, userGroups, and currentUser to be loaded
+    if (
+      !loading &&
+      users.length > 0 &&
+      Object.keys(userGroups).length === users.length &&
+      currentUser !== null
+    ) {
+      setFullPageLoading(false)
+    }
+  }, [loading, users, userGroups, currentUser])
+
+  if (fullPageLoading) {
+    return (
+      <div className="flex flex-1 h-full w-full items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      </div>
+    )
   }
 
   return (
