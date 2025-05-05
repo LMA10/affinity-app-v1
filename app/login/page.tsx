@@ -22,6 +22,9 @@ import { useTheme } from "next-themes"
 import Link from "next/link"
 
 function LoginPage() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -34,9 +37,27 @@ function LoginPage() {
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [confirmError, setConfirmError] = useState("")
   const { theme } = useTheme();
-  const bgColor = theme === "dark" ? "#0E1A1F" : "#E8E8E8";
-  const cardColor = theme === "dark" ? "#142A33" : "#fff";
+  const isDark = theme === "dark";
+  const bgColor = isDark ? "#0E1A1F" : "#E8E8E8";
+  const containerBg = isDark ? "#142A33" : "#CAD0D2";
   const borderColor = "#EA661B";
+  const headingColor = isDark ? "#EA661B" : "#142A33";
+  const subtitleColor = "#506C77";
+  const logoColor = isDark ? "#EA661B" : "#142A33";
+  const inputBg = isDark ? "#000" : "#B2BCC0";
+  const inputText = isDark ? "#fff" : "#142A33";
+  const buttonBg = "#EA661B";
+  const buttonText = "#fff";
+  const linkColor = isDark ? "#fff" : "#142A33";
+  const helveticaBlack = 'Helvetica Black, Helvetica, Arial, sans-serif';
+  const helveticaLight = 'Helvetica Light, Helvetica, Arial, sans-serif';
+  const baseFontSize = 23;
+  const containerPaddingY = 25;
+  const containerPaddingX = 64;
+  const marginY = 20;
+  const subtitleInputSpacing = 16;
+  const inputButtonSpacing = 11;
+  const buttonLinksSpacing = 16;
 
   useEffect(() => {
     if (!authIsLoading && isAuthenticated) {
@@ -103,77 +124,98 @@ function LoginPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center"
-      style={{ background: "#0E1A1F", fontFamily: 'Helvetica, Arial, sans-serif' }}
-    >
-      <div className="absolute top-6 right-6 z-10">
-        <ThemeToggle />
-      </div>
-      <div
-        className="w-full max-w-md flex flex-col items-stretch"
-        style={{
-          background: "#142A33",
-          border: "1px solid #EA661B",
-          borderRadius: 12,
-          padding: '2.5rem 2rem 2rem 2rem',
-          boxSizing: 'border-box',
-        }}
-      >
-        <div className="flex justify-center mb-8">
-          <ThemedLogo width={173} height={58} style={{ color: "#EA661B" }} />
-        </div>
-        <h1 className="text-[23px] font-bold mb-1 text-left" style={{ color: "#EA661B" }}>Affinity</h1>
-        <div className="mb-8 text-left text-sm" style={{ color: "#506C77" }}>
-          / enter your credentials to access your account
-        </div>
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <input
-            id="email"
-            type="email"
-            placeholder="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="w-full px-4 py-2 bg-black text-white rounded-none outline-none focus:ring-0 focus:outline-none"
-            required
-            autoComplete="username"
-            style={{ border: 'none' }}
-          />
-          <div className="relative">
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-black text-white rounded-none outline-none focus:ring-0 focus:outline-none"
-              required
-              autoComplete="current-password"
-              style={{ border: 'none' }}
-            />
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-              onClick={() => setShowPassword(!showPassword)}
-              tabIndex={-1}
-            >
-              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-            </button>
+    <div>
+      {!mounted ? (
+        <div />
+      ) : (
+        <div
+          className="min-h-screen flex items-center justify-center"
+          style={{ background: bgColor, fontFamily: helveticaLight, fontSize: baseFontSize, marginTop: marginY, marginBottom: marginY }}
+        >
+          <div className="absolute top-6 right-6 z-10">
+            <ThemeToggle />
           </div>
-          <button
-            type="submit"
-            className="w-full py-2 mt-2 bg-[#EA661B] text-white text-center font-semibold rounded-none"
-            disabled={isLoading}
-            style={{ fontSize: 16 }}
+          <div
+            className="flex flex-col items-stretch"
+            style={{
+              background: containerBg,
+              border: `1px solid ${borderColor}`,
+              borderRadius: 10,
+              padding: `${containerPaddingY}px ${containerPaddingX}px 2rem ${containerPaddingX}px`,
+              boxSizing: 'border-box',
+              minHeight: `calc(100vh - ${marginY * 2}px)`,
+              width: '100%',
+              maxWidth: 480,
+              margin: '0 auto',
+              justifyContent: 'flex-start',
+            }}
           >
-            {isLoading ? <Loading className="mr-2" /> : "Login"}
-          </button>
-        </form>
-        <div className="flex justify-between mt-4 text-sm">
-          <Link href="#" className="text-gray-200 no-underline hover:underline">Forgot password?</Link>
-          <Link href="#" className="text-gray-200 no-underline hover:underline">Contact support</Link>
+            <div style={{ height: 45 - containerPaddingY }} />
+            <div className="flex justify-center" style={{ marginBottom: 25 }}>
+              <ThemedLogo width={173} height={58} style={{ color: logoColor }} />
+            </div>
+            <h1 className="mb-1 text-left" style={{ color: headingColor, fontFamily: helveticaBlack, fontWeight: 600, fontSize: baseFontSize }}>Affinity</h1>
+            <div className="text-left" style={{ color: subtitleColor, fontFamily: helveticaLight, fontWeight: 300, fontSize: baseFontSize * 0.7, marginBottom: subtitleInputSpacing, lineHeight: '18px' }}>
+              / enter your credentials to access your security dashboard
+            </div>
+            <form onSubmit={handleLogin} className="flex flex-col" style={{ gap: inputButtonSpacing }}>
+              <input
+                id="email"
+                type="email"
+                placeholder="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="w-full px-4 py-2 rounded-none outline-none focus:ring-0 focus:outline-none"
+                required
+                autoComplete="username"
+                style={{ border: 'none', background: inputBg, color: inputText, fontFamily: helveticaLight, fontWeight: 300, fontSize: baseFontSize * 0.8, marginBottom: inputButtonSpacing }}
+              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full px-4 py-2 rounded-none outline-none focus:ring-0 focus:outline-none"
+                  required
+                  autoComplete="current-password"
+                  style={{ border: 'none', background: inputBg, color: inputText, fontFamily: helveticaLight, fontWeight: 300, fontSize: baseFontSize * 0.8 }}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+              <button
+                type="submit"
+                className="w-full py-2 mt-2 text-center"
+                disabled={isLoading}
+                style={{
+                  background: buttonBg,
+                  color: buttonText,
+                  fontFamily: helveticaBlack,
+                  fontWeight: 400,
+                  fontSize: baseFontSize * 0.8,
+                  borderRadius: 10,
+                  marginTop: inputButtonSpacing,
+                  marginBottom: buttonLinksSpacing,
+                }}
+              >
+                {isLoading ? <Loading className="mr-2" /> : "Entrar"}
+              </button>
+            </form>
+            <div className="flex justify-between text-sm" style={{ color: linkColor, fontFamily: helveticaLight, fontWeight: 300 }}>
+              <Link href="#" className="no-underline hover:underline">Forgot password?</Link>
+              <Link href="#" className="no-underline hover:underline">Contact support</Link>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

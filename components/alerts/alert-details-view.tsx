@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import useAlertsState from "@/lib/state/alerts/alertsState"
 import sessionState from "@/lib/state/sessionState/sessionState"
 import type { AlertManagementUpdate } from "@/lib/services/alertService"
+import { useTheme } from "next-themes"
 
 interface AlertDetailsViewProps {
   alert: any
@@ -31,6 +32,9 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   const { toast } = useToast()
   const router = useRouter()
   const updateAlertManagement = useAlertsState((state) => state.updateAlertManagement)
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const panelBg = isDark ? "#0E1A1F" : "#fff";
 
   // Alert management state
   const [status, setStatus] = useState<string>(alert.alert_management?.status || "")
@@ -194,7 +198,10 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   }
 
   return (
-    <div className="bg-white h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto border border-[#CAD0D2] shadow-sm">
+    <div
+      className="h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto shadow-sm"
+      style={{ background: panelBg }}
+    >
       <div className="relative mb-4 w-full">
         <div className="flex items-center gap-2 pr-10 w-full">
           <h3 className="text-orange-500 font-medium text-lg md:text-xl">Alert Details</h3>
