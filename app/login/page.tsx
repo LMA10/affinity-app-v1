@@ -17,6 +17,9 @@ import usersState from "@/lib/state/userState/userState"
 import { useSnapshot } from "valtio"
 import { Modal } from "@/components/ui/modal"
 import { Button as UIButton } from "@/components/ui/button"
+import { ThemedLogo } from "@/components/ThemedLogo"
+import { useTheme } from "next-themes"
+import Link from "next/link"
 
 function LoginPage() {
   const [email, setEmail] = useState("")
@@ -30,6 +33,10 @@ function LoginPage() {
   const [confirmationCode, setConfirmationCode] = useState("")
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [confirmError, setConfirmError] = useState("")
+  const { theme } = useTheme();
+  const bgColor = theme === "dark" ? "#0E1A1F" : "#E8E8E8";
+  const cardColor = theme === "dark" ? "#142A33" : "#fff";
+  const borderColor = "#EA661B";
 
   useEffect(() => {
     if (!authIsLoading && isAuthenticated) {
@@ -96,93 +103,77 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{ background: "#0E1A1F", fontFamily: 'Helvetica, Arial, sans-serif' }}
+    >
       <div className="absolute top-6 right-6 z-10">
         <ThemeToggle />
       </div>
-      <div className="absolute top-8 left-8">
-        <Image src="/soli-logo.png" alt="AFFINITY Logo" width={180} height={60} priority />
-      </div>
-      <Card className="w-full max-w-md border bg-white dark:bg-[#0f1d24] border-gray-200 dark:border-orange-600/20 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl text-orange-500">AFFINITY</CardTitle>
-          <CardDescription className="text-muted-foreground">Enter your credentials to login to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  placeholder="name@company.com"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-background border border-gray-200 dark:border-orange-600/20 text-foreground placeholder:text-muted-foreground"
-                  required
-                  autoComplete="username"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  placeholder="Enter your password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-background border border-gray-200 dark:border-orange-600/20 text-foreground placeholder:text-muted-foreground"
-                  required
-                  autoComplete="current-password"
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-3"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </button>
-              </div>
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? <Loading className="mr-2" /> : "Login"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-      <Modal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        title="Confirm Your Account"
+      <div
+        className="w-full max-w-md flex flex-col items-stretch"
+        style={{
+          background: "#142A33",
+          border: "1px solid #EA661B",
+          borderRadius: 12,
+          padding: '2.5rem 2rem 2rem 2rem',
+          boxSizing: 'border-box',
+        }}
       >
-        <form onSubmit={handleConfirm} className="space-y-4">
-          <Label htmlFor="confirmationCode">Confirmation Code</Label>
-          <Input
-            id="confirmationCode"
-            value={confirmationCode}
-            onChange={e => setConfirmationCode(e.target.value)}
-            placeholder="Enter confirmation code sent to email"
-            autoFocus
+        <div className="flex justify-center mb-8">
+          <ThemedLogo width={173} height={58} style={{ color: "#EA661B" }} />
+        </div>
+        <h1 className="text-[23px] font-bold mb-1 text-left" style={{ color: "#EA661B" }}>Affinity</h1>
+        <div className="mb-8 text-left text-sm" style={{ color: "#506C77" }}>
+          / enter your credentials to access your account
+        </div>
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          <input
+            id="email"
+            type="email"
+            placeholder="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="w-full px-4 py-2 bg-black text-white rounded-none outline-none focus:ring-0 focus:outline-none"
+            required
+            autoComplete="username"
+            style={{ border: 'none' }}
           />
-          {confirmError && <div className="text-red-500 text-sm">{confirmError}</div>}
-          <UIButton type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white" disabled={confirmLoading}>
-            {confirmLoading ? "Confirming..." : "Confirm"}
-          </UIButton>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="w-full px-4 py-2 bg-black text-white rounded-none outline-none focus:ring-0 focus:outline-none"
+              required
+              autoComplete="current-password"
+              style={{ border: 'none' }}
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+          <button
+            type="submit"
+            className="w-full py-2 mt-2 bg-[#EA661B] text-white text-center font-semibold rounded-none"
+            disabled={isLoading}
+            style={{ fontSize: 16 }}
+          >
+            {isLoading ? <Loading className="mr-2" /> : "Login"}
+          </button>
         </form>
-      </Modal>
+        <div className="flex justify-between mt-4 text-sm">
+          <Link href="#" className="text-gray-200 no-underline hover:underline">Forgot password?</Link>
+          <Link href="#" className="text-gray-200 no-underline hover:underline">Contact support</Link>
+        </div>
+      </div>
     </div>
   )
 }

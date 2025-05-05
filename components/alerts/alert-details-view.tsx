@@ -194,7 +194,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   }
 
   return (
-    <div className="bg-card h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto">
+    <div className="bg-white h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto border border-[#CAD0D2] shadow-sm">
       <div className="relative mb-4 w-full">
         <div className="flex items-center gap-2 pr-10 w-full">
           <h3 className="text-orange-500 font-medium text-lg md:text-xl">Alert Details</h3>
