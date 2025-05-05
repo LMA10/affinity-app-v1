@@ -117,7 +117,7 @@ export function AppSidebar() {
       </div>
       <SidebarHeader className="border-b border-orange-600/20">
         <div className="flex items-center p-4">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/alerts-view" className="flex items-center gap-2">
             <img
               src="https://i-p.rmcdn.net/65ddfccea1d4fc00527217ce/4650992/image-97f8a95d-10b0-4809-a322-2432385dc369.png?w=1707&e=webp&nll=true&cX=813&cY=282&cW=1154&cH=491"
               alt="Affinity Logo"

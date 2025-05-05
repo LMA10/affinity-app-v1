@@ -10,7 +10,7 @@ interface LoadingProps extends React.HTMLAttributes<HTMLDivElement> {}
 export function Loading({ className, ...props }: LoadingProps) {
   return (
     <div className={cn("flex items-center justify-center", className)} {...props}>
-      <Loader2 className="h-5 w-5 animate-spin text-orange-500" />
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
     </div>
   )
 }

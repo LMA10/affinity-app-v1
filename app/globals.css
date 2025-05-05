@@ -5,12 +5,12 @@
 @layer base {
   :root {
     /* Light theme (default) */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --background: 202 13% 82%; /* #CAD0D2 */
+    --foreground: 202 20% 39%; /* #506C77 */
+    --card: 0 0% 91%; /* #E8E8E8 */
+    --card-foreground: 202 20% 39%; /* #506C77 */
+    --popover: 0 0% 91%; /* #E8E8E8 */
+    --popover-foreground: 202 20% 39%; /* #506C77 */
     --primary: 24 96% 53%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96.1%;
@@ -21,17 +21,17 @@
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 202 13% 82%; /* #CAD0D2 */
+    --input: 202 13% 82%; /* #CAD0D2 */
+    --ring: 202 20% 39%; /* #506C77 */
     --radius: 0.5rem;
-    --sidebar-background: 215 25% 27%;
-    --sidebar-foreground: 210 40% 98%;
+    --sidebar-background: 202 13% 82%; /* #CAD0D2 */
+    --sidebar-foreground: 202 20% 39%; /* #506C77 */
     --sidebar-primary: 24 96% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 20%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 215 25% 27%;
+    --sidebar-accent: 202 20% 39%; /* #506C77 */
+    --sidebar-accent-foreground: 202 13% 82%; /* #CAD0D2 */
+    --sidebar-border: 202 13% 82%; /* #CAD0D2 */
     --sidebar-ring: 24 96% 53%;
   }
 
@@ -72,6 +72,9 @@
   }
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+  }
+  body, html {
+    font-family: Helvetica, Arial, sans-serif;
   }
 }
 

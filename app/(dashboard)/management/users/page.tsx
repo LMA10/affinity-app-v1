@@ -27,6 +27,7 @@ import {
   Users,
   Eye,
   EyeOff,
+  Loader2,
 } from "lucide-react"
 import { GenericAddUserModal } from "@/components/users/generic-add-user-modal"
 import userState, { isUserAdmin } from "@/lib/state/userState/userState"
@@ -53,6 +54,7 @@ export default function UsersPage() {
   const [currentUser, setCurrentUser] = useState<string | null>(null)
   const [deleteUserModalOpen, setDeleteUserModalOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<any>(null)
+  const [fullPageLoading, setFullPageLoading] = useState(true)
 
   // Get users from state
   const { users, loading, error } = useSnapshot(userState)
@@ -243,9 +245,37 @@ export default function UsersPage() {
       setDeleteUserModalOpen(false)
       setUserToDelete(null)
       await userState.getUsers()
+      toast({
+        title: "User deleted successfully!",
+        description: "The user has been removed from the system.",
+      })
     } catch (err) {
       // Optionally show a toast or error
+      toast({
+        title: "Error deleting user",
+        description: "An error occurred while deleting the user. Please try again later.",
+      })
     }
+  }
+
+  useEffect(() => {
+    // Wait for users, userGroups, and currentUser to be loaded
+    if (
+      !loading &&
+      users.length > 0 &&
+      Object.keys(userGroups).length === users.length &&
+      currentUser !== null
+    ) {
+      setFullPageLoading(false)
+    }
+  }, [loading, users, userGroups, currentUser])
+
+  if (fullPageLoading) {
+    return (
+      <div className="flex flex-1 h-full w-full items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      </div>
+    )
   }
 
   return (
@@ -334,7 +364,7 @@ export default function UsersPage() {
                   className="pl-10"
                 />
               </div>
-
+              {/*
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full sm:w-[180px]">
@@ -344,12 +374,11 @@ export default function UsersPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem onClick={() => setRoleFilter("all")}>All Roles</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter("admin")}>Admin</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter("analyst")}>Analyst</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter("user")}>User</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter("readonly")}>Read Only</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setRoleFilter("administrators")}>administrators</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setRoleFilter("users")}>User</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+                */}
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -376,65 +405,20 @@ export default function UsersPage() {
             ) : error ? (
               <div className="text-red-500 p-4 text-center">Error loading users: {error}</div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {/* <TableHead>Username</TableHead> */}
-                    <TableHead>Username</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last Modified</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead>Is Admin</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Mobile: Card/List layout */}
+                <div className="block md:hidden space-y-4">
                   {filteredUsers.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No users found
-                      </TableCell>
-                    </TableRow>
+                    <div className="text-center py-8 text-muted-foreground">No users found</div>
                   ) : (
                     filteredUsers.map((user) => (
-                      <TableRow key={user.username}>
-                        {/* <TableCell className="font-medium">{user.username}</TableCell> */}
-                        <TableCell>{user.email}</TableCell>
-
-                        <TableCell>
-                          <div className="flex items-center">
-                            {user.enabled && user.status === "CONFIRMED" ? (
-                              <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-                            ) : !user.enabled ? (
-                              <Lock className="h-4 w-4 text-red-500 mr-1" />
-                            ) : user.status === "RESET_REQUIRED" || user.status === "FORCE_CHANGE_PASSWORD" ? (
-                              <UserPlus className="h-4 w-4 text-yellow-500 mr-1" />
-                            ) : (
-                              <Users className="h-4 w-4 text-gray-500 mr-1" />
-                            )}
-                            <span
-                              className={
-                                user.enabled && user.status === "CONFIRMED"
-                                  ? "text-green-500"
-                                  : !user.enabled
-                                    ? "text-red-500"
-                                    : user.status === "RESET_REQUIRED" || user.status === "FORCE_CHANGE_PASSWORD"
-                                      ? "text-yellow-500"
-                                      : "text-gray-500"
-                              }
-                            >
-                              {user.status}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{formatDate(user.last_modified)}</TableCell>
-                        <TableCell>{formatDate(user.created_at)}</TableCell>
-                        <TableCell>{userGroups[user.username]?.includes("administrators") ? "True" : "False"}</TableCell>
-                        <TableCell className="text-right">
+                      <div key={user.username} className="rounded-xl border border-orange-600/20 bg-[#0f1d24] p-4 flex flex-col gap-3 shadow-sm relative">
+                        {/* Action menu top-right */}
+                        <div className="absolute top-4 right-4 z-10">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
+                                <MoreHorizontal className="h-5 w-5" />
                                 <span className="sr-only">Open menu</span>
                               </Button>
                             </DropdownMenuTrigger>
@@ -442,10 +426,6 @@ export default function UsersPage() {
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               {isAdmin ? (
                                 <>
-                                  {/* <DropdownMenuItem>
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Edit User
-                                  </DropdownMenuItem> */}
                                   <DropdownMenuItem
                                     onClick={() => handleToggleAdmin(user.username)}
                                     disabled={userGroups[user.username]?.includes("administrators") && isSelf(user.username)}
@@ -485,12 +465,156 @@ export default function UsersPage() {
                               )}
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
+                        </div>
+                        {/* Main info */}
+                        <div className="flex flex-col gap-1 pr-12">
+                          <span className="font-semibold text-base text-orange-400 break-all">{user.email}</span>
+                          <span className="text-xs text-muted-foreground break-all">{user.username}</span>
+                        </div>
+                        {/* Status/Admin row */}
+                        <div className="flex items-center gap-3 mt-2">
+                          {/* Status */}
+                          <span className="flex items-center gap-1 text-sm font-medium">
+                            {user.enabled && user.status === "CONFIRMED" ? (
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                            ) : !user.enabled ? (
+                              <Lock className="h-4 w-4 text-red-500" />
+                            ) : user.status === "RESET_REQUIRED" || user.status === "FORCE_CHANGE_PASSWORD" ? (
+                              <UserPlus className="h-4 w-4 text-yellow-500" />
+                            ) : (
+                              <Users className="h-4 w-4 text-gray-500" />
+                            )}
+                            <span className={user.enabled && user.status === "CONFIRMED" ? "text-green-500" : !user.enabled ? "text-red-500" : user.status === "RESET_REQUIRED" || user.status === "FORCE_CHANGE_PASSWORD" ? "text-yellow-500" : "text-gray-500"}>{user.status}</span>
+                          </span>
+                          {/* Admin */}
+                          <span className="flex items-center gap-1 text-sm font-medium">
+                            <Shield className={userGroups[user.username]?.includes("administrators") ? "h-4 w-4 text-orange-500" : "h-4 w-4 text-muted-foreground"} />
+                            <span className={userGroups[user.username]?.includes("administrators") ? "text-orange-500" : "text-muted-foreground"}>{userGroups[user.username]?.includes("administrators") ? "Admin" : "User"}</span>
+                          </span>
+                        </div>
+                        {/* Divider */}
+                        <div className="border-t border-orange-600/10 my-2" />
+                        {/* Dates/info */}
+                        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                          <span><span className="font-medium text-foreground">Last Modified:</span> {formatDate(user.last_modified)}</span>
+                          <span><span className="font-medium text-foreground">Created At:</span> {formatDate(user.created_at)}</span>
+                        </div>
+                      </div>
                     ))
                   )}
-                </TableBody>
-              </Table>
+                </div>
+                {/* Desktop: Table layout */}
+                <div className="hidden md:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Username</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Last Modified</TableHead>
+                        <TableHead>Created At</TableHead>
+                        <TableHead>Is Admin</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                            No users found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredUsers.map((user) => (
+                          <TableRow key={user.username}>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                {user.enabled && user.status === "CONFIRMED" ? (
+                                  <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
+                                ) : !user.enabled ? (
+                                  <Lock className="h-4 w-4 text-red-500 mr-1" />
+                                ) : user.status === "RESET_REQUIRED" || user.status === "FORCE_CHANGE_PASSWORD" ? (
+                                  <UserPlus className="h-4 w-4 text-yellow-500 mr-1" />
+                                ) : (
+                                  <Users className="h-4 w-4 text-gray-500 mr-1" />
+                                )}
+                                <span
+                                  className={
+                                    user.enabled && user.status === "CONFIRMED"
+                                      ? "text-green-500"
+                                      : !user.enabled
+                                        ? "text-red-500"
+                                        : user.status === "RESET_REQUIRED" || user.status === "FORCE_CHANGE_PASSWORD"
+                                          ? "text-yellow-500"
+                                          : "text-gray-500"
+                                  }
+                                >
+                                  {user.status}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>{formatDate(user.last_modified)}</TableCell>
+                            <TableCell>{formatDate(user.created_at)}</TableCell>
+                            <TableCell>{userGroups[user.username]?.includes("administrators") ? "True" : "False"}</TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Open menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  {isAdmin ? (
+                                    <>
+                                      <DropdownMenuItem
+                                        onClick={() => handleToggleAdmin(user.username)}
+                                        disabled={userGroups[user.username]?.includes("administrators") && isSelf(user.username)}
+                                      >
+                                        <Shield className="h-4 w-4 mr-2" />
+                                        {userGroups[user.username]?.includes("administrators")
+                                          ? (isSelf(user.username) ? "Remove Admin (Not allowed for self)" : "Remove Admin")
+                                          : "Make Admin"}
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => handleOpenChangePassword(user.email)}>
+                                        <Lock className="h-4 w-4 mr-2" />
+                                        Change Password
+                                      </DropdownMenuItem>
+                                      {user.enabled ? (
+                                        <DropdownMenuItem onClick={() => handleToggleUserEnabled(user)}>
+                                          <Lock className="h-4 w-4 mr-2" />
+                                          Disable User
+                                        </DropdownMenuItem>
+                                      ) : (
+                                        <DropdownMenuItem onClick={() => handleToggleUserEnabled(user)}>
+                                          <CheckCircle className="h-4 w-4 mr-2" />
+                                          Enable User
+                                        </DropdownMenuItem>
+                                      )}
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem className="text-red-500" onClick={() => handleOpenDeleteUser(user)}>
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Delete User
+                                      </DropdownMenuItem>
+                                    </>
+                                  ) : (
+                                    <DropdownMenuItem onClick={() => handleOpenChangePassword(user.email)}>
+                                      <Lock className="h-4 w-4 mr-2" />
+                                      Change Password
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -501,6 +625,10 @@ export default function UsersPage() {
         onSuccess={() => {
           setIsAddUserModalOpen(false)
           userState.getUsers() // Refresh the user list when a new user is added
+          toast({
+            title: "User added successfully!",
+            description: "The user has been added to the system.",
+          })
         }}
       />
       <Modal

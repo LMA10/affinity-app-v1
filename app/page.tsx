@@ -1,36 +1,35 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { redirect } from "next/navigation"
+import { useEffect } from "react"
+import { useRouter, usePathname } from "next/navigation"
 import { useAuth } from "@/lib/context/auth-context"
 import { Loading } from "@/components/loading"
 
 export default function Home() {
   const { isAuthenticated, isLoading } = useAuth()
-  const [isClient, setIsClient] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  useEffect(() => {
-    if (isClient && !isLoading) {
+    // Only redirect if on the root path
+    if (pathname === "/" && !isLoading) {
       if (isAuthenticated) {
-        redirect("/alerts-view")
+        router.replace("/alerts-view")
       } else {
-        redirect("/login")
+        router.replace("/login")
       }
     }
-  }, [isAuthenticated, isLoading, isClient])
+  }, [isAuthenticated, isLoading, pathname, router])
 
-  if (!isClient) {
-    return null
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0a1419]">
+        <Loading />
+      </div>
+    )
   }
 
-  // Show loading state while checking authentication
-  return (
-    <div className="flex h-screen items-center justify-center bg-[#0a1419]">
-      <Loading />
-    </div>
-  )
+  return null
 }
+
+

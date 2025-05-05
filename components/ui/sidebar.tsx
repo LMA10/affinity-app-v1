@@ -4,6 +4,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { type VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
+import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -166,20 +167,34 @@ const Sidebar = React.forwardRef<
   }
 
   if (isMobile) {
+    // Split children into main and footer
+    let main = children
+    let footer = null
+    if (Array.isArray(children)) {
+      main = children.filter(child => child?.type?.displayName !== 'SidebarFooter')
+      footer = children.find(child => child?.type?.displayName === 'SidebarFooter')
+    }
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
           data-sidebar="sidebar"
           data-mobile="true"
-          className="w-[--sidebar-width] bg-[#0a1419] p-0 text-sidebar-foreground border-r border-orange-600/20 [&>button]:text-orange-500"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
-          }
+          className="w-[--sidebar-width] bg-sidebar text-sidebar-foreground p-0 [&>button]:text-orange-500 flex flex-col h-full"
+          style={{
+            "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+          } as React.CSSProperties}
           side={side}
         >
-          <div className="flex h-full w-full flex-col">{children}</div>
+          <SheetHeader className="">
+            <div className="sr-only">
+              <SheetTitle>Main Menu</SheetTitle>
+              <SheetDescription>Navigation links and user actions</SheetDescription>
+            </div>
+          </SheetHeader>
+          <div className="flex-1 min-h-0 overflow-y-auto w-full flex flex-col">{main}</div>
+          {footer && (
+            <div className="sticky bottom-0 w-full bg-sidebar z-10 border-t border-sidebar-border">{footer}</div>
+          )}
         </SheetContent>
       </Sheet>
     )

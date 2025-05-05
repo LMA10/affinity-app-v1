@@ -143,6 +143,7 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                 <span className="text-muted-foreground">Client:</span>
                 {isEditing ? (
                   <Input
+                    disabled={true}
                     value={editedIntegration.client || ""}
                     onChange={(e) => handleInputChange("client", e.target.value)}
                     className="h-7 text-sm"
@@ -154,6 +155,7 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                 <span className="text-muted-foreground">Auth Profile:</span>
                 {isEditing ? (
                   <Input
+                    disabled={true}
                     value={editedIntegration.auth_profile || ""}
                     onChange={(e) => handleInputChange("auth_profile", e.target.value)}
                     className="h-7 text-sm"
@@ -199,6 +201,7 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                 {isEditing ? (
                   <div className="flex items-center">
                     <input
+                      disabled={true}
                       type="checkbox"
                       checked={!!editedIntegration.keys_retrieved}
                       onChange={(e) => handleInputChange("keys_retrieved", e.target.checked)}
@@ -301,6 +304,7 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                 {isEditing ? (
                   <div className="flex items-center">
                     <input
+                      disabled={true}
                       type="checkbox"
                       checked={!!editedIntegration.new_integration}
                       onChange={(e) => handleInputChange("new_integration", e.target.checked)}

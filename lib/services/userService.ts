@@ -97,11 +97,15 @@ const login = async (email: string, password: string): Promise<{ success: boolea
   }
 }
 
-const createHeaders = (): HeadersInit => {
-  return {
+const createHeaders = (withAccessToken = false): HeadersInit => {
+  const headers: HeadersInit = {
     "Content-Type": "application/json",
-    Authorization: getCookie("token") || '',
+    Authorization: sessionState.token || '',
+  };
+  if (withAccessToken && sessionState.accessToken) {
+    (headers as any).AccessToken = sessionState.accessToken;
   }
+  return headers;
 }
 
 const register = async (email: string, password: string): Promise<any> => {

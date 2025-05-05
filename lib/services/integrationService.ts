@@ -1,6 +1,7 @@
 import type { Integration, IntegrationsResponse } from "../types/integration"
 import { getSessionState } from "../state/sessionState/sessionState"
 import config from "@/lib/config/configDev"
+import sessionState from "@/lib/state/sessionState/sessionState"
 
 const urlapi = config.urlAPI
 
@@ -12,13 +13,12 @@ function getCookie(name: string): string {
   return '';
 }
 
-export const createHeaders = (token?: string) => {
-  const authToken = token || getCookie("token") || '';
+export const createHeaders = () => {
   return {
     "Content-Type": "application/json",
-    Authorization: `${authToken}`,
+    Authorization: sessionState.token || '',
   } as HeadersInit;
-}
+};
 
 export const fetchIntegrations = async (): Promise<Integration[]> => {
   try {
@@ -91,3 +91,18 @@ export const updateIntegration = async (integration: Integration): Promise<Integ
     throw error
   }
 }
+
+export const deleteIntegration = async (integrationId: string): Promise<void> => {
+  try {
+    const response = await fetch(`${urlapi}/integrations/${integrationId}`, {
+      method: "DELETE",
+      headers: createHeaders(),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to delete integration: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+  } catch (error) {
+    throw error;
+  }
+};
