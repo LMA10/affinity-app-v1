@@ -23,6 +23,7 @@ import userService from "@/lib/services/userService"
 import { useSnapshot } from "valtio"
 import adminState from "@/lib/state/admin/adminState"
 import { useAuth } from "@/lib/context/auth-context"
+import { ThemedLogo } from "@/components/ThemedLogo"
 
 export function AppSidebar() {
   const pathname = usePathname()
@@ -55,9 +56,9 @@ export function AppSidebar() {
   }
 
   // Common styles for menu items
-  const menuItemStyles = "uppercase tracking-wide text-sm font-medium"
-  const menuIconStyles = "h-5 w-5 mr-3 shrink-0"
-  const subMenuItemStyles = "uppercase tracking-wide text-xs font-medium"
+  const menuItemStyles = "uppercase tracking-wide text-sm font-medium font-['Helvetica']"
+  const menuIconStyles = "h-5 w-5 ml-4 mr-2 shrink-0"
+  const subMenuItemStyles = "uppercase tracking-wide text-xs font-medium font-['Helvetica']"
 
   const handleLogout = () => {
     logout()
@@ -111,27 +112,21 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar className="border-r border-orange-600/20 bg-[#0a1419]">
-      <div className="absolute right-0 top-4 translate-x-1/2 z-20 bg-sidebar rounded-full p-1 shadow-md border border-sidebar-border hidden group-data-[state=collapsed]:flex">
-        <SidebarTrigger className="h-6 w-6 text-orange-500" />
+    <Sidebar className="dark:!bg-[#142A33] !bg-[#CAD0D2] border-r dark:border-orange-500 border-transparent">
+      <div className="absolute right-0 top-4 translate-x-1/2 z-20 dark:!bg-[#142A33] !bg-[#CAD0D2] rounded-full p-1 shadow-md hidden group-data-[state=collapsed]:flex">
+        <SidebarTrigger className="h-6 w-6 dark:text-orange-500 text-[#142A33]" />
       </div>
-      <SidebarHeader className="border-b border-orange-600/20">
+      <SidebarHeader className="dark:!bg-[#142A33] !bg-[#CAD0D2]">
         <div className="flex items-center p-4">
           <Link href="/alerts-view" className="flex items-center gap-2">
-            <img
-              src="https://i-p.rmcdn.net/65ddfccea1d4fc00527217ce/4650992/image-97f8a95d-10b0-4809-a322-2432385dc369.png?w=1707&e=webp&nll=true&cX=813&cY=282&cW=1154&cH=491"
-              alt="Affinity Logo"
-              width={150}
-              height={50}
-              className="object-contain"
-            />
+            <ThemedLogo width={138} height={46} className="object-contain" />
           </Link>
-          <SidebarTrigger className="ml-auto text-orange-500" />
+          <SidebarTrigger className="ml-auto dark:text-orange-500 text-[#142A33]" />
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="py-4">
-        <SidebarMenu className="space-y-1">
+      <SidebarContent className="py-4 dark:!bg-[#142A33] !bg-[#CAD0D2]">
+        <SidebarMenu className="space-y-0.1">
           {/* LOGS Section */}
           {isPageVisible("/logs") && (
             <SidebarMenuItem>
@@ -140,8 +135,8 @@ export function AppSidebar() {
                 isActive={pathname === "/logs"}
                 className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
               >
-                <Link href="/logs" className="text-orange-500 flex items-center w-full">
-                  <FileText className={menuIconStyles} />
+                <Link href="/logs" className="dark:text-orange-500 text-[#142A33] flex items-center w-full">
+                  <FileText className={`${menuIconStyles} dark:text-orange-500 text-[#142A33]`} />
                   <span>LOGS</span>
                 </Link>
               </SidebarMenuButton>
@@ -156,8 +151,8 @@ export function AppSidebar() {
                 isActive={pathname === "/alerts"}
                 className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
               >
-                <Link href="/alerts-view" className="text-orange-500 flex items-center w-full">
-                  <AlertTriangle className={menuIconStyles} />
+                <Link href="/alerts-view" className="dark:text-orange-500 text-[#142A33] flex items-center w-full">
+                  <AlertTriangle className={`${menuIconStyles} dark:text-orange-500 text-[#142A33]`} />
                   <span>ALERTS</span>
                 </Link>
               </SidebarMenuButton>
@@ -200,27 +195,26 @@ export function AppSidebar() {
           {isSectionVisible(managementPaths) && (
             <SidebarMenuItem>
               <SidebarMenuButton
-                className={`w-full text-orange-500 flex items-center py-2.5 px-4 ${menuItemStyles}`}
+                className={`w-full dark:text-orange-500 text-[#142A33] flex items-center py-2.5 px-4 ${menuItemStyles}`}
                 onClick={() => toggleSection("management")}
               >
-                <Cog className={menuIconStyles} />
+                <Cog className={`${menuIconStyles} dark:text-orange-500 text-[#142A33]`} />
                 <span>MANAGEMENT</span>
                 <ChevronDown
-                  className={`ml-auto h-4 w-4 shrink-0 text-orange-500 transition-transform duration-200 ${openSections.management ? "rotate-180" : ""
-                    }`}
+                  className={`ml-2 h-4 w-4 shrink-0 dark:text-orange-500 text-[#142A33] transition-transform duration-200 ${openSections.management ? "rotate-180" : ""}`}
                 />
               </SidebarMenuButton>
             </SidebarMenuItem>
           )}
 
           {openSections.management && isSectionVisible(managementPaths) && (
-            <SidebarMenuSub className="ml-4 pl-4 border-l border-orange-600/20">
+            <SidebarMenuSub className="ml-4 pl-4">
               {isPageVisible("/management/integrations") && (
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton
                     asChild
                     isActive={pathname === "/management/integrations"}
-                    className={`py-2 ${subMenuItemStyles}`}
+                    className={`py-2 ${subMenuItemStyles} dark:text-orange-500 text-[#142A33]`}
                   >
                     <Link href="/management/integrations">INTEGRATIONS</Link>
                   </SidebarMenuSubButton>
@@ -232,7 +226,7 @@ export function AppSidebar() {
                   <SidebarMenuSubButton
                     asChild
                     isActive={pathname === "/management/notifications"}
-                    className={`py-2 ${subMenuItemStyles}`}
+                    className={`py-2 ${subMenuItemStyles} dark:text-orange-500 text-[#142A33]`}
                   >
                     <Link href="/management/notifications">NOTIFICATIONS</Link>
                   </SidebarMenuSubButton>
@@ -244,7 +238,7 @@ export function AppSidebar() {
                   <SidebarMenuSubButton
                     asChild
                     isActive={pathname === "/management/users"}
-                    className={`py-2 ${subMenuItemStyles}`}
+                    className={`py-2 ${subMenuItemStyles} dark:text-orange-500 text-[#142A33]`}
                   >
                     <Link href="/management/users">USERS</Link>
                   </SidebarMenuSubButton>
@@ -255,26 +249,23 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-orange-600/20 p-4">
+      <SidebarFooter className="dark:!bg-[#142A33] !bg-[#CAD0D2]">
         {userEmail && (
-          <>
-            <div className="text-[10px] text-orange-400 mb-1">Signed in as</div>
-            <div className="text-xs text-orange-300 mb-2 truncate" title={userEmail}>
-              {userEmail}
+          <div className="flex items-center justify-between px-4">
+            <div>
+              <div className="text-[10px] text-[#506C77] mb-1 font-['IBM_Plex_Mono'] font-normal">Signed in as</div>
+              <div className="text-xs dark:text-[#EA661B] text-[#142A33] mb-2 truncate" title={userEmail}>
+                {userEmail}
+              </div>
             </div>
-          </>
-        )}
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
+            <button
               onClick={handleLogout}
-              className={`flex items-center py-2.5 px-4 ${menuItemStyles} text-orange-500 w-full`}
+              className="dark:text-orange-500 text-[#142A33] hover:opacity-80 transition-colors"
             >
-              <LogOut className={menuIconStyles} />
-              <span>LOGOUT</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
+        )}
       </SidebarFooter>
     </Sidebar>
   )
