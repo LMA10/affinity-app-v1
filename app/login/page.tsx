@@ -40,24 +40,28 @@ function LoginPage() {
   const isDark = theme === "dark";
   const bgColor = isDark ? "#0E1A1F" : "#E8E8E8";
   const containerBg = isDark ? "#142A33" : "#CAD0D2";
-  const borderColor = "#EA661B";
+  const borderColor = isDark ? "#EA661B" : "transparent";
   const headingColor = isDark ? "#EA661B" : "#142A33";
   const subtitleColor = "#506C77";
   const logoColor = isDark ? "#EA661B" : "#142A33";
-  const inputBg = isDark ? "#000" : "#B2BCC0";
-  const inputText = isDark ? "#fff" : "#142A33";
+  const inputBg = isDark ? "#0D1315" : "#B2BCC0";
+  const inputText = "#506C77";
   const buttonBg = "#EA661B";
   const buttonText = "#fff";
   const linkColor = isDark ? "#fff" : "#142A33";
-  const helveticaBlack = 'Helvetica Black, Helvetica, Arial, sans-serif';
-  const helveticaLight = 'Helvetica Light, Helvetica, Arial, sans-serif';
-  const baseFontSize = 23;
-  const containerPaddingY = 25;
-  const containerPaddingX = 64;
-  const marginY = 20;
-  const subtitleInputSpacing = 16;
-  const inputButtonSpacing = 11;
-  const buttonLinksSpacing = 16;
+  const helvetica = 'Helvetica, Arial, sans-serif';
+  const baseFontSize = 13;
+  const containerPaddingY = 20;
+  const containerPaddingX = 51;
+  const marginY = 16;
+  const elementSpacing = 9;
+  const verticalGap = 13;
+  const logoWidth = 138;
+  const logoHeight = 46;
+  const inputHeight = 35;
+  const contentMaxWidth = 320;
+  const borderRadius = 6;
+  const iconColor = "#506C77";
 
   useEffect(() => {
     if (!authIsLoading && isAuthenticated) {
@@ -128,91 +132,168 @@ function LoginPage() {
       {!mounted ? (
         <div />
       ) : (
-        <div
-          className="min-h-screen flex items-center justify-center"
-          style={{ background: bgColor, fontFamily: helveticaLight, fontSize: baseFontSize, marginTop: marginY, marginBottom: marginY }}
+    <div
+          className="h-screen flex items-center justify-center"
+          style={{ 
+            background: bgColor, 
+            fontFamily: helvetica, 
+            fontSize: baseFontSize,
+            overflow: 'hidden',
+            padding: '25px 0',
+            position: 'relative'
+          }}
         >
-          <div className="absolute top-6 right-6 z-10">
-            <ThemeToggle />
-          </div>
-          <div
-            className="flex flex-col items-stretch"
+          <div 
+            className="absolute inset-y-0 left-0"
             style={{
-              background: containerBg,
-              border: `1px solid ${borderColor}`,
-              borderRadius: 10,
-              padding: `${containerPaddingY}px ${containerPaddingX}px 2rem ${containerPaddingX}px`,
-              boxSizing: 'border-box',
-              minHeight: `calc(100vh - ${marginY * 2}px)`,
-              width: '100%',
-              maxWidth: 480,
-              margin: '0 auto',
-              justifyContent: 'flex-start',
+              width: 'calc((50% + 300px) * 0.97)',
+              background: isDark ? '#142A33' : '#CAD0D2',
+              border: isDark ? '1px solid #EA661B' : 'none',
+              zIndex: 0,
+              left: '-50px',
+              top: '-50px',
+              height: 'calc(100% + 100px)'
             }}
+          />
+      <div className="absolute top-6 right-6 z-10">
+            <div style={{ 
+              border: isDark ? '1px solid #EA661B' : 'none',
+              borderRadius: '6px',
+              padding: '0px',
+              stroke: isDark ? '#EA661B' : 'none',
+              strokeWidth: '1px'
+            }}>
+        <ThemeToggle />
+      </div>
+          </div>
+          <div className="flex flex-col items-center justify-center flex-grow relative z-10">
+            <div className="fixed top-[25px] left-1/2 -translate-x-1/2" style={{ width: contentMaxWidth, display: 'flex', justifyContent: 'center', zIndex: 20 }}>
+              <ThemedLogo width={logoWidth} height={logoHeight} style={{ color: logoColor, transform: 'scale(0.9)' }} />
+        </div>
+            <div style={{ 
+              width: '100%', 
+              maxWidth: contentMaxWidth,
+              marginTop: -20
+            }}>
+              <h1 className="mb-1" style={{ color: headingColor, fontFamily: helvetica, fontWeight: 700, fontSize: baseFontSize }}>Affinity</h1>
+              <div style={{ 
+                color: subtitleColor, 
+                fontFamily: helvetica, 
+                fontWeight: 400, 
+                fontSize: '12.3px', 
+                marginBottom: verticalGap,
+                lineHeight: '13px'
+              }}>
+                / enter your credentials to access your security dashboard
+        </div>
+              <form onSubmit={handleLogin} className="flex flex-col w-full" style={{ gap: elementSpacing }}>
+          <input
+            id="email"
+            type="email"
+            placeholder="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 rounded-[6px] outline-none focus:ring-0 focus:outline-none placeholder:text-[#506C77]"
+            required
+            autoComplete="username"
+                  style={{ 
+                    border: 'none', 
+                    background: inputBg, 
+                    color: email ? (isDark ? '#EA661B' : '#142A33') : '#506C77',
+                    fontFamily: helvetica, 
+                    fontWeight: 400, 
+                    fontSize: baseFontSize,
+                    height: `${inputHeight}px`,
+                    WebkitTextFillColor: email ? (isDark ? '#EA661B' : '#142A33') : '#506C77',
+                    WebkitBoxShadow: `0 0 0 1000px ${inputBg} inset`,
+                    transition: 'background-color 5000s ease-in-out 0s'
+                  }}
+          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+                    className="w-full px-3 py-2 rounded-[6px] outline-none focus:ring-0 focus:outline-none placeholder:text-[#506C77]"
+              required
+              autoComplete="current-password"
+                    style={{ 
+                      border: 'none', 
+                      background: inputBg, 
+                      color: password ? (isDark ? '#EA661B' : '#142A33') : '#506C77',
+                      fontFamily: helvetica, 
+                      fontWeight: 400, 
+                      fontSize: baseFontSize,
+                      height: `${inputHeight}px`,
+                      WebkitTextFillColor: password ? (isDark ? '#EA661B' : '#142A33') : '#506C77',
+                      WebkitBoxShadow: `0 0 0 1000px ${inputBg} inset`,
+                      transition: 'background-color 5000s ease-in-out 0s'
+                    }}
+            />
+            <button
+              type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+                    style={{ color: iconColor }}
+            >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          <button
+            type="submit"
+                  className="w-full text-center rounded-[6px] relative"
+            disabled={isLoading}
+                  style={{
+                    background: (!email || !password) ? 'transparent' : buttonBg,
+                    color: (!email || !password) ? '#506C77' : buttonText,
+                    border: (!email || !password) ? '1px solid #506C77' : 'none',
+                    fontFamily: helvetica,
+                    fontWeight: 400,
+                    fontSize: baseFontSize,
+                    height: `${inputHeight}px`,
+                    marginBottom: verticalGap
+                  }}
           >
-            <div style={{ height: 45 - containerPaddingY }} />
-            <div className="flex justify-center" style={{ marginBottom: 25 }}>
-              <ThemedLogo width={173} height={58} style={{ color: logoColor }} />
-            </div>
-            <h1 className="mb-1 text-left" style={{ color: headingColor, fontFamily: helveticaBlack, fontWeight: 600, fontSize: baseFontSize }}>Affinity</h1>
-            <div className="text-left" style={{ color: subtitleColor, fontFamily: helveticaLight, fontWeight: 300, fontSize: baseFontSize * 0.7, marginBottom: subtitleInputSpacing, lineHeight: '18px' }}>
-              / enter your credentials to access your security dashboard
-            </div>
-            <form onSubmit={handleLogin} className="flex flex-col" style={{ gap: inputButtonSpacing }}>
-              <input
-                id="email"
-                type="email"
-                placeholder="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full px-4 py-2 rounded-none outline-none focus:ring-0 focus:outline-none"
-                required
-                autoComplete="username"
-                style={{ border: 'none', background: inputBg, color: inputText, fontFamily: helveticaLight, fontWeight: 300, fontSize: baseFontSize * 0.8, marginBottom: inputButtonSpacing }}
-              />
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 rounded-none outline-none focus:ring-0 focus:outline-none"
-                  required
-                  autoComplete="current-password"
-                  style={{ border: 'none', background: inputBg, color: inputText, fontFamily: helveticaLight, fontWeight: 300, fontSize: baseFontSize * 0.8 }}
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
+                  {isLoading ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : "Entrar"}
+          </button>
+        </form>
+              <div className="flex justify-between w-full" style={{ 
+                color: linkColor, 
+                fontFamily: helvetica, 
+                fontWeight: 400,
+                fontSize: '12.3px' 
+              }}>
+                <Link href="#" className="no-underline hover:underline">Forgot password?</Link>
+                <Link href="#" className="no-underline hover:underline">Contact support</Link>
               </div>
-              <button
-                type="submit"
-                className="w-full py-2 mt-2 text-center"
-                disabled={isLoading}
-                style={{
-                  background: buttonBg,
-                  color: buttonText,
-                  fontFamily: helveticaBlack,
-                  fontWeight: 400,
-                  fontSize: baseFontSize * 0.8,
-                  borderRadius: 10,
-                  marginTop: inputButtonSpacing,
-                  marginBottom: buttonLinksSpacing,
-                }}
-              >
-                {isLoading ? <Loading className="mr-2" /> : "Entrar"}
-              </button>
-            </form>
-            <div className="flex justify-between text-sm" style={{ color: linkColor, fontFamily: helveticaLight, fontWeight: 300 }}>
-              <Link href="#" className="no-underline hover:underline">Forgot password?</Link>
-              <Link href="#" className="no-underline hover:underline">Contact support</Link>
             </div>
+            <a 
+              href="https://solidaritylabs.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                position: 'fixed',
+                bottom: '25px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: isDark ? '#EA661B' : '#142A33',
+                fontFamily: helvetica,
+                fontWeight: 400,
+                fontSize: baseFontSize,
+                textDecoration: 'none',
+                textTransform: 'lowercase'
+              }}
+              className="after:content-[''] after:absolute after:w-0 after:h-[1px] after:bottom-0 after:left-0 after:transition-all after:duration-300 hover:after:w-full after:bg-[#142A33] dark:after:bg-[#EA661B]"
+            >
+              solidaritylabs.io/
+            </a>
           </div>
         </div>
       )}

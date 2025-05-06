@@ -169,15 +169,15 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   const getSeverityBadgeColor = (severity: string) => {
     switch (severity) {
       case "critical":
-        return "bg-red-500/20 text-red-500 border-red-500/20"
+        return "bg-red-500 text-white border-red-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
       case "high":
-        return "bg-orange-500/20 text-orange-500 border-orange-500/20"
+        return "bg-orange-500 text-white border-orange-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
       case "medium":
-        return "bg-yellow-500/20 text-yellow-500 border-yellow-500/20"
+        return "bg-yellow-500 text-white border-yellow-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
       case "low":
-        return "bg-green-500/20 text-green-500 border-green-500/20"
+        return "bg-green-500 text-white border-green-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
       default:
-        return "bg-gray-500/20 text-gray-500 border-gray-500/20"
+        return "bg-gray-500 text-white border-gray-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
     }
   }
 
@@ -185,41 +185,49 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-blue-500/20 text-blue-500 border-blue-500/20"
+        return "bg-blue-500 text-white border-blue-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
       case "investigating":
-        return "bg-purple-500/20 text-purple-500 border-purple-500/20"
+        return "bg-[#00AAE5] text-white border-[#00AAE5] font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
       case "resolved":
-        return "bg-green-500/20 text-green-500 border-green-500/20"
+        return "bg-green-500 text-white border-green-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
       case "false_positive":
-        return "bg-gray-500/20 text-gray-500 border-gray-500/20"
+        return "bg-gray-500 text-white border-gray-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
       default:
-        return "bg-gray-500/20 text-gray-500 border-gray-500/20"
+        return "bg-gray-500 text-white border-gray-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
     }
   }
 
   return (
     <div
       className="h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto shadow-sm"
-      style={{ background: panelBg }}
+      style={{ background: '#0D1315', border: 'none' }}
     >
       <div className="relative mb-4 w-full">
-        <div className="flex items-center gap-2 pr-10 w-full">
-          <h3 className="text-orange-500 font-medium text-lg md:text-xl">Alert Details</h3>
-          <Badge
-            variant="outline"
-            className={
-              alert.security_detection?.severity
-                ? getSeverityBadgeColor(alert.security_detection.severity)
-                : "bg-gray-500/20 text-gray-500"
-            }
-          >
-            {alert.security_detection?.severity || "Unknown"} Severity
-          </Badge>
-          {status && (
-            <Badge variant="outline" className={getStatusBadgeColor(status)}>
-              {status}
+        <div className="flex flex-col gap-2 pr-10 w-full">
+          <h3 style={{ 
+            color: theme === 'light' ? '#FF7120' : '#EA661B', 
+            fontWeight: 700, 
+            fontSize: 13,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            lineHeight: '13px'
+          }}>Alert Details</h3>
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className={
+                alert.security_detection?.severity
+                  ? getSeverityBadgeColor(alert.security_detection.severity)
+                  : "bg-gray-500/20 text-gray-500"
+              }
+            >
+              {alert.security_detection?.severity || "Unknown"} Severity
             </Badge>
-          )}
+            {status && (
+              <Badge variant="outline" className={getStatusBadgeColor(status)}>
+                {status}
+              </Badge>
+            )}
+          </div>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-0 right-0 h-10 w-10 md:h-6 md:w-6">
           <X className="h-6 w-6 md:h-4 md:w-4" />
@@ -246,7 +254,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
           <ScrollArea className="h-[60vh] md:h-[calc(100vh-120px)] pr-1 md:pr-4 w-full">
             <div className="grid grid-cols-1 gap-4 w-full">
               {/* Alert Management */}
-              <Card className="bg-card border border-orange-600/20">
+              <Card className="bg-transparent border-0 shadow-none">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg text-base md:text-xl">Alert Management</CardTitle>
                 </CardHeader>
@@ -346,7 +354,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               </Card>
 
               {/* Alert Overview */}
-              <Card className="bg-card border border-orange-600/20">
+              <Card className="bg-transparent border-0 shadow-none">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg text-base md:text-xl">Alert Overview</CardTitle>
                 </CardHeader>
@@ -382,7 +390,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* Metadata */}
               {alert.metadata && (
-                <Card className="bg-card border border-orange-600/20">
+                <Card className="bg-transparent border-0 shadow-none">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">Rule Metadata</CardTitle>
                   </CardHeader>
@@ -411,7 +419,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* Event Information */}
               {alert.event && (
-                <Card className="bg-card border border-orange-600/20">
+                <Card className="bg-transparent border-0 shadow-none">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">Event Information</CardTitle>
                   </CardHeader>
@@ -461,7 +469,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* Security Detection */}
               {alert.security_detection && (
-                <Card className="bg-card border border-orange-600/20">
+                <Card className="bg-transparent border-0 shadow-none">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">Security Detection</CardTitle>
                   </CardHeader>
@@ -499,7 +507,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* MITRE Techniques */}
               {alert.mitre_techniques && alert.mitre_techniques.length > 0 && (
-                <Card className="bg-card border border-orange-600/20">
+                <Card className="bg-transparent border-0 shadow-none">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">MITRE ATT&CK Techniques</CardTitle>
                   </CardHeader>
@@ -530,7 +538,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
             </Button>
           </div>
           <div className="relative w-full">
-            <ScrollArea className="h-[40vh] md:h-[calc(100vh-180px)] bg-card p-2 md:p-4 rounded-md border border-orange-600/10 w-full">
+            <ScrollArea className="h-[40vh] md:h-[calc(100vh-180px)] bg-transparent p-2 md:p-4 rounded-md border-0 w-full">
               <pre className="font-mono text-xs md:text-sm whitespace-pre-wrap break-all w-full">
                 {JSON.stringify(alert, undefined, prettifyJson ? 2 : undefined)}
               </pre>

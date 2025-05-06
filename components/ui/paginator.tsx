@@ -23,33 +23,43 @@ export function Paginator({ currentPage, totalPages, totalRecords, itemsPerPage,
 
   return (
     <div className="flex w-full items-center justify-between p-2">
-      <div className="flex-1 text-sm text-muted-foreground">
+      <div className="flex-1 text-sm font-['IBM_Plex_Mono'] text-[#506C77]">
         {totalRecords} item{totalRecords !== 1 ? "s" : ""} • {itemsPerPage} per page
       </div>
       <div className="flex items-center space-x-2">
         <Button
-          variant="outline"
-          className="h-8 w-8 p-0"
+          variant="ghost"
+          className="h-8 w-8 p-0 text-[#506C77] hover:text-[#506C77] hover:bg-transparent"
           onClick={goToFirst}
           disabled={!hasPrevious || currentPage === 1}
         >
           <span className="sr-only">Go to first page</span>
           <ChevronsLeft className="h-4 w-4" />
         </Button>
-        <Button variant="outline" className="h-8 w-8 p-0" onClick={goToPrevious} disabled={!hasPrevious}>
+        <Button 
+          variant="ghost" 
+          className="h-8 w-8 p-0 text-[#506C77] hover:text-[#506C77] hover:bg-transparent" 
+          onClick={goToPrevious} 
+          disabled={!hasPrevious}
+        >
           <span className="sr-only">Go to previous page</span>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="px-2 text-sm">
+        <span className="px-2 text-sm font-['IBM_Plex_Mono'] text-[#506C77]">
           Page {currentPage} of {totalPages || 1}
         </span>
-        <Button variant="outline" className="h-8 w-8 p-0" onClick={goToNext} disabled={!hasNext}>
+        <Button 
+          variant="ghost" 
+          className="h-8 w-8 p-0 text-[#506C77] hover:text-[#506C77] hover:bg-transparent" 
+          onClick={goToNext} 
+          disabled={!hasNext}
+        >
           <span className="sr-only">Go to next page</span>
           <ChevronRight className="h-4 w-4" />
         </Button>
         <Button
-          variant="outline"
-          className="h-8 w-8 p-0"
+          variant="ghost"
+          className="h-8 w-8 p-0 text-[#506C77] hover:text-[#506C77] hover:bg-transparent"
           onClick={goToLast}
           disabled={!hasNext || currentPage === totalPages}
         >
