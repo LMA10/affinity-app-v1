@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { X, Shield, ArrowRight, ExternalLink, FileText, MessageSquare, CheckCircle } from "lucide-react"
 
+
 export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => void }) {
   const [status, setStatus] = useState(alert.status)
 
