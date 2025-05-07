@@ -124,7 +124,7 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
 
               <div className="grid grid-cols-[140px_1fr] gap-y-3 text-sm">
                 <span className="text-muted-foreground">Integration ID:</span>
-                <span className="font-mono text-xs break-all">{editedIntegration.integration_id}</span>
+                <span className="font-mono text-xs break-all max-w-xs md:max-w-sm lg:max-w-md">{editedIntegration.integration_id}</span>
 
                 <span className="text-muted-foreground">Log Name:</span>
                 {isEditing ? (
@@ -134,7 +134,7 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                     className="h-7 text-sm"
                   />
                 ) : (
-                  <span>{editedIntegration.log_name || ""}</span>
+                  <span className="break-all max-w-xs md:max-w-sm lg:max-w-md">{editedIntegration.log_name || ""}</span>
                 )}
 
                 <span className="text-muted-foreground">Log Type:</span>

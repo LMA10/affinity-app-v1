@@ -196,8 +196,15 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   return (
     <div className="bg-card h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto">
       <div className="relative mb-4 w-full">
-        <div className="flex items-center gap-2 pr-10 w-full">
-          <h3 className="text-orange-500 font-medium text-lg md:text-xl">Alert Details</h3>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 w-full">
+          <div className="flex items-center gap-2">
+            <h3 className="text-orange-500 font-medium text-lg md:text-xl">Alert Details</h3>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} className="self-start md:self-center ml-auto md:ml-0 h-10 w-10 md:h-8 md:w-8">
+            <X className="h-6 w-6 md:h-4 md:w-4" />
+          </Button>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 mt-2">
           <Badge
             variant="outline"
             className={
@@ -214,9 +221,6 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
             </Badge>
           )}
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-0 right-0 h-10 w-10 md:h-6 md:w-6">
-          <X className="h-6 w-6 md:h-4 md:w-4" />
-        </Button>
         <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
           <Button variant="outline" size="sm" onClick={copyFullAlert} className="h-10 px-2 w-full sm:w-auto">
             <Copy className="h-4 w-4 mr-1" />

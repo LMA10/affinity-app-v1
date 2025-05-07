@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, EyeOff, Lock, Mail } from "lucide-react"
+import { Eye, EyeOff, Lock, Mail, Loader2 } from "lucide-react"
 import { useAuth } from "@/lib/context/auth-context"
 import { toast } from "@/hooks/use-toast"
 import { Loading } from "@/components/loading"
@@ -51,10 +51,10 @@ function LoginPage() {
       return
     }
 
-    const success = await login(email, password)
+    const result = await login(email, password)
     const statusCode = usersState.loginMessage?.statusCode
 
-    if (success) {
+    if (result.success) {
       toast({
         title: "Login successful",
         description: "Welcome back! Redirecting...",
@@ -70,7 +70,7 @@ function LoginPage() {
     }
     toast({
       title: "Login failed",
-      description: loginError,
+      description: result.error,
       variant: "destructive",
     })
     setIsLoading(false)
@@ -158,7 +158,11 @@ function LoginPage() {
               className="w-full bg-orange-500 hover:bg-orange-600 text-white"
               disabled={isLoading}
             >
-              {isLoading ? <Loading className="mr-2" /> : "Login"}
+              {isLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                "Login"
+              )}
             </Button>
           </form>
         </CardContent>

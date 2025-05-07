@@ -9,7 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   user: any | null
-  login: (email: string, password: string) => Promise<boolean>
+  login: (email: string, password: string) => Promise<{ success: boolean, error?: string }>
   logout: () => void
   checkAuth: () => boolean
 }
@@ -32,17 +32,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   // Login function
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean, error?: string }> => {
     setIsLoading(true)
     try {
       await usersState.login(email, password)
       if (usersState.success && usersState.loginMessage?.token) {
         setIsAuthenticated(true)
         setUser({ email })
-        return true
+        return { success: true }
       } else {
         setIsAuthenticated(false)
-        return false
+        return { success: false, error: usersState.error || "Login failed" }
       }
     } finally {
       setIsLoading(false)
