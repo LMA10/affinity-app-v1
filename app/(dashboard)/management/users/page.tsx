@@ -27,6 +27,7 @@ import {
   Users,
   Eye,
   EyeOff,
+  Loader2,
 } from "lucide-react"
 import { GenericAddUserModal } from "@/components/users/generic-add-user-modal"
 import userState, { isUserAdmin } from "@/lib/state/userState/userState"
@@ -53,6 +54,7 @@ export default function UsersPage() {
   const [currentUser, setCurrentUser] = useState<string | null>(null)
   const [deleteUserModalOpen, setDeleteUserModalOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<any>(null)
+  const [fullPageLoading, setFullPageLoading] = useState(true)
 
   // Get users from state
   const { users, loading, error } = useSnapshot(userState)
@@ -165,6 +167,15 @@ export default function UsersPage() {
 
   // Handler for opening the modal (only for current user, for now just allow for any user)
   const handleOpenChangePassword = (userEmail: string) => {
+    // Only allow if user is admin or changing their own password
+    if (!isAdmin && userEmail !== currentUser) {
+      toast({
+        title: "Access Denied",
+        description: "You can only change your own password.",
+        variant: "destructive"
+      });
+      return;
+    }
     setChangePasswordUser(userEmail)
     setIsChangePasswordModalOpen(true)
     setOldPassword("")
@@ -254,6 +265,26 @@ export default function UsersPage() {
         description: "An error occurred while deleting the user. Please try again later.",
       })
     }
+  }
+
+  useEffect(() => {
+    // Wait for users, userGroups, and currentUser to be loaded
+    if (
+      !loading &&
+      users.length > 0 &&
+      Object.keys(userGroups).length === users.length &&
+      currentUser !== null
+    ) {
+      setFullPageLoading(false)
+    }
+  }, [loading, users, userGroups, currentUser])
+
+  if (fullPageLoading) {
+    return (
+      <div className="flex flex-1 h-full w-full items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      </div>
+    )
   }
 
   return (
@@ -392,58 +423,62 @@ export default function UsersPage() {
                     filteredUsers.map((user) => (
                       <div key={user.username} className="rounded-xl border border-orange-600/20 bg-[#0f1d24] p-4 flex flex-col gap-3 shadow-sm relative">
                         {/* Action menu top-right */}
-                        <div className="absolute top-4 right-4 z-10">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-5 w-5" />
-                                <span className="sr-only">Open menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              {isAdmin ? (
-                                <>
-                                  <DropdownMenuItem
-                                    onClick={() => handleToggleAdmin(user.username)}
-                                    disabled={userGroups[user.username]?.includes("administrators") && isSelf(user.username)}
-                                  >
-                                    <Shield className="h-4 w-4 mr-2" />
-                                    {userGroups[user.username]?.includes("administrators")
-                                      ? (isSelf(user.username) ? "Remove Admin (Not allowed for self)" : "Remove Admin")
-                                      : "Make Admin"}
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem onClick={() => handleOpenChangePassword(user.email)}>
-                                    <Lock className="h-4 w-4 mr-2" />
-                                    Change Password
-                                  </DropdownMenuItem>
-                                  {user.enabled ? (
-                                    <DropdownMenuItem onClick={() => handleToggleUserEnabled(user)}>
+                        {(isAdmin || isSelf(user.username)) && (
+                          <div className="absolute top-4 right-4 z-10">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-5 w-5" />
+                                  <span className="sr-only">Open menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                {isAdmin ? (
+                                  <>
+                                    <DropdownMenuItem
+                                      onClick={() => handleToggleAdmin(user.username)}
+                                      disabled={userGroups[user.username]?.includes("administrators") && isSelf(user.username)}
+                                    >
+                                      <Shield className="h-4 w-4 mr-2" />
+                                      {userGroups[user.username]?.includes("administrators")
+                                        ? (isSelf(user.username) ? "Remove Admin (Not allowed for self)" : "Remove Admin")
+                                        : "Make Admin"}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleOpenChangePassword(user.email)}>
                                       <Lock className="h-4 w-4 mr-2" />
-                                      Disable User
+                                      Change Password
                                     </DropdownMenuItem>
-                                  ) : (
-                                    <DropdownMenuItem onClick={() => handleToggleUserEnabled(user)}>
-                                      <CheckCircle className="h-4 w-4 mr-2" />
-                                      Enable User
+                                    {user.enabled ? (
+                                      <DropdownMenuItem onClick={() => handleToggleUserEnabled(user)}>
+                                        <Lock className="h-4 w-4 mr-2" />
+                                        Disable User
+                                      </DropdownMenuItem>
+                                    ) : (
+                                      <DropdownMenuItem onClick={() => handleToggleUserEnabled(user)}>
+                                        <CheckCircle className="h-4 w-4 mr-2" />
+                                        Enable User
+                                      </DropdownMenuItem>
+                                    )}
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-red-500" onClick={() => handleOpenDeleteUser(user)}>
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete User
                                     </DropdownMenuItem>
-                                  )}
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-red-500" onClick={() => handleOpenDeleteUser(user)}>
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Delete User
-                                  </DropdownMenuItem>
-                                </>
-                              ) : (
-                                <DropdownMenuItem onClick={() => handleOpenChangePassword(user.email)}>
-                                  <Lock className="h-4 w-4 mr-2" />
-                                  Change Password
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                                  </>
+                                ) : (
+                                  isSelf(user.username) && (
+                                    <DropdownMenuItem onClick={() => handleOpenChangePassword(user.email)}>
+                                      <Lock className="h-4 w-4 mr-2" />
+                                      Change Password
+                                    </DropdownMenuItem>
+                                  )
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        )}
                         {/* Main info */}
                         <div className="flex flex-col gap-1 pr-12">
                           <span className="font-semibold text-base text-orange-400 break-all">{user.email}</span>
@@ -535,56 +570,60 @@ export default function UsersPage() {
                             <TableCell>{formatDate(user.created_at)}</TableCell>
                             <TableCell>{userGroups[user.username]?.includes("administrators") ? "True" : "False"}</TableCell>
                             <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                    <span className="sr-only">Open menu</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  {isAdmin ? (
-                                    <>
-                                      <DropdownMenuItem
-                                        onClick={() => handleToggleAdmin(user.username)}
-                                        disabled={userGroups[user.username]?.includes("administrators") && isSelf(user.username)}
-                                      >
-                                        <Shield className="h-4 w-4 mr-2" />
-                                        {userGroups[user.username]?.includes("administrators")
-                                          ? (isSelf(user.username) ? "Remove Admin (Not allowed for self)" : "Remove Admin")
-                                          : "Make Admin"}
-                                      </DropdownMenuItem>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem onClick={() => handleOpenChangePassword(user.email)}>
-                                        <Lock className="h-4 w-4 mr-2" />
-                                        Change Password
-                                      </DropdownMenuItem>
-                                      {user.enabled ? (
-                                        <DropdownMenuItem onClick={() => handleToggleUserEnabled(user)}>
+                              {(isAdmin || isSelf(user.username)) && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                      <span className="sr-only">Open menu</span>
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    {isAdmin ? (
+                                      <>
+                                        <DropdownMenuItem
+                                          onClick={() => handleToggleAdmin(user.username)}
+                                          disabled={userGroups[user.username]?.includes("administrators") && isSelf(user.username)}
+                                        >
+                                          <Shield className="h-4 w-4 mr-2" />
+                                          {userGroups[user.username]?.includes("administrators")
+                                            ? (isSelf(user.username) ? "Remove Admin (Not allowed for self)" : "Remove Admin")
+                                            : "Make Admin"}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={() => handleOpenChangePassword(user.email)}>
                                           <Lock className="h-4 w-4 mr-2" />
-                                          Disable User
+                                          Change Password
                                         </DropdownMenuItem>
-                                      ) : (
-                                        <DropdownMenuItem onClick={() => handleToggleUserEnabled(user)}>
-                                          <CheckCircle className="h-4 w-4 mr-2" />
-                                          Enable User
+                                        {user.enabled ? (
+                                          <DropdownMenuItem onClick={() => handleToggleUserEnabled(user)}>
+                                            <Lock className="h-4 w-4 mr-2" />
+                                            Disable User
+                                          </DropdownMenuItem>
+                                        ) : (
+                                          <DropdownMenuItem onClick={() => handleToggleUserEnabled(user)}>
+                                            <CheckCircle className="h-4 w-4 mr-2" />
+                                            Enable User
+                                          </DropdownMenuItem>
+                                        )}
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="text-red-500" onClick={() => handleOpenDeleteUser(user)}>
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Delete User
                                         </DropdownMenuItem>
-                                      )}
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem className="text-red-500" onClick={() => handleOpenDeleteUser(user)}>
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        Delete User
-                                      </DropdownMenuItem>
-                                    </>
-                                  ) : (
-                                    <DropdownMenuItem onClick={() => handleOpenChangePassword(user.email)}>
-                                      <Lock className="h-4 w-4 mr-2" />
-                                      Change Password
-                                    </DropdownMenuItem>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                      </>
+                                    ) : (
+                                      isSelf(user.username) && (
+                                        <DropdownMenuItem onClick={() => handleOpenChangePassword(user.email)}>
+                                          <Lock className="h-4 w-4 mr-2" />
+                                          Change Password
+                                        </DropdownMenuItem>
+                                      )
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))

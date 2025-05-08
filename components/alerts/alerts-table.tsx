@@ -114,7 +114,7 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
             {alerts.map((alert) => (
               <div
                 key={alert.alert_id}
-                className="rounded-lg border border-orange-600/20 bg-[#101c22] p-4 flex flex-col gap-2 shadow-sm"
+                className="rounded-lg border border-orange-600/20 bg-card p-4 flex flex-col gap-2 shadow-sm"
                 onClick={() => handleViewDetails(alert)}
               >
                 <div className="flex items-center justify-between">

@@ -88,6 +88,10 @@ export const usersState = proxy<UsersState>({
         )
         // Fetch and store the current user info after login
         await usersState.fetchAndStoreCurrentUser()
+      } else if (response.message.statusCode === 202) {
+        usersState.loginMessage = response.message
+        usersState.success = false
+        usersState.error = null
       } else {
         usersState.loginMessage = null
         usersState.success = false
