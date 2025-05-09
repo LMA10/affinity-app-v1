@@ -1,0 +1,72 @@
+[
+  {
+    "name": "IPv4",
+    "key": "ipv4",
+    "regex": "\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b",
+    "color": "blue",
+    "icon": "FileText"
+  },
+  {
+    "name": "IPv6",
+    "key": "ipv6",
+    "regex": "([a-fA-F0-9:]+:+)+[a-fA-F0-9]+",
+    "color": "blue",
+    "icon": "FileText"
+  },
+  {
+    "name": "Domain",
+    "key": "domain",
+    "regex": "\\b[a-z0-9.-]+\\.[a-z]{2,}\\b",
+    "color": "green",
+    "icon": "FileText"
+  },
+  {
+    "name": "FQDN",
+    "key": "fqdn",
+    "regex": "\\b[a-z0-9.-]+\\.[a-z]{2,}\\b",
+    "color": "green",
+    "icon": "FileText"
+  },
+  {
+    "name": "URL",
+    "key": "url",
+    "regex": "https?:\\/\\/[^\\s]+",
+    "color": "purple",
+    "icon": "FileText"
+  },
+  {
+    "name": "Email",
+    "key": "email",
+    "regex": "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",
+    "color": "pink",
+    "icon": "FileText"
+  },
+  {
+    "name": "MD5",
+    "key": "md5",
+    "regex": "\\b[a-fA-F0-9]{32}\\b",
+    "color": "yellow",
+    "icon": "FileText"
+  },
+  {
+    "name": "SHA1",
+    "key": "sha1",
+    "regex": "\\b[a-fA-F0-9]{40}\\b",
+    "color": "yellow",
+    "icon": "FileText"
+  },
+  {
+    "name": "SHA256",
+    "key": "sha256",
+    "regex": "\\b[a-fA-F0-9]{64}\\b",
+    "color": "yellow",
+    "icon": "FileText"
+  },
+  {
+    "name": "Unix Path",
+    "key": "unixFilePath",
+    "regex": "\\/(?:[\\w.-]+\\/?)+",
+    "color": "gray",
+    "icon": "FileText"
+  }
+] 

@@ -168,12 +168,12 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={pathname === "/threat-hunting"}
+              isActive={pathname === "/incident-response"}
               className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
             >
-              <Link href="/threat-hunting" className="text-orange-500 flex items-center w-full">
+              <Link href="/incident-response" className="text-orange-500 flex items-center w-full">
                 <Search className={menuIconStyles} />
-                <span>THREAT HUNTING</span>
+                <span>INCIDENT RESPONSE</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

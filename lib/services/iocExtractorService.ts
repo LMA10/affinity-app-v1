@@ -1,20 +1,13 @@
-import { IOC_REGEX_PATTERNS } from "../utils/ioc/regexPatterns";
-import { isValidIPv4, isValidIPv6, isValidDomain, isLikelyBase64 } from "../utils/ioc/validators";
+import { isValidIPv4, isValidIPv6, isValidDomain } from "../utils/ioc/validators";
 import { enrichIOC } from "./iocEnrichmentService";
 
-const DOMAIN_WHITELIST = ["gmail.com", "microsoft.com", "google.com"];
-const PRIVATE_IP_RANGES = [
-  /^10\./,
-  /^192\.168\./,
-  /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
-  /^127\./,
-  /^169\.254\./,
-  /^0\./,
-];
-
-function isPrivateIPv4(ip: string): boolean {
-  return PRIVATE_IP_RANGES.some((re) => re.test(ip));
+// Load config from public directory
+export async function loadIOCConfig() {
+  const res = await fetch('/ioc_config.json');
+  return await res.json();
 }
+
+const DOMAIN_WHITELIST = ["gmail.com", "microsoft.com", "google.com"];
 
 function deobfuscateIOC(ioc: string): string {
   return ioc
@@ -37,25 +30,23 @@ export async function extractIOCs(text: string): Promise<{
   iocResults: Record<string, string[]>;
   enriched: Record<string, any>;
 }> {
+  const config = await loadIOCConfig();
   const results: Record<string, string[]> = {};
-  for (const [iocType] of Object.entries(IOC_REGEX_PATTERNS)) {
-    results[iocType] = [];
-  }
-  for (const [iocType, regex] of Object.entries(IOC_REGEX_PATTERNS)) {
-    if (regex instanceof RegExp && regex.global) regex.lastIndex = 0;
+  for (const ioc of config) {
+    results[ioc.key] = [];
+    const regex = new RegExp(ioc.regex, 'g');
     let match;
     while ((match = regex.exec(text)) !== null) {
       let value = deobfuscateIOC(match[0]);
       // Validation and noise reduction
-      if (iocType === "ipv4") {
+      if (ioc.key === "ipv4") {
         if (!isValidIPv4(value)) continue;
       }
-      if (iocType === "ipv6" && !isValidIPv6(value)) continue;
-      if ((iocType === "domain" || iocType === "fqdn")) {
+      if (ioc.key === "ipv6" && !isValidIPv6(value)) continue;
+      if ((ioc.key === "domain" || ioc.key === "fqdn")) {
         if (!isValidDomain(value) || DOMAIN_WHITELIST.includes(value.toLowerCase())) continue;
       }
-      if (iocType === "base64" && !isLikelyBase64(value)) continue;
-      results[iocType].push(value);
+      results[ioc.key].push(value);
     }
   }
   // Only return IOC types with at least one result
