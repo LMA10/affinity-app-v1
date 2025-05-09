@@ -36,6 +36,7 @@ import { useToast } from "@/hooks/use-toast"
 import type { ChangeEvent } from "react"
 import { Paginator } from "@/components/ui/paginator"
 import useLogsState from "@/lib/state/logs/logsState"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function LogsPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -66,6 +67,7 @@ export default function LogsPage() {
     setCurrentPage,
   } = useLogsState()
   const [hasRunQuery, setHasRunQuery] = useState(false)
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
 
   // Fetch databases when the component mounts
   useEffect(() => {
@@ -348,7 +350,25 @@ export default function LogsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <PageHeader title="Security Logs" description="View and analyze security event logs across your infrastructure" />
+      <div className="px-12 py-4">
+        <div className="flex justify-between items-center">
+          <div style={{ 
+            color: theme === 'light' ? '#506C77' : '#506C77', 
+            fontFamily: 'Helvetica, Arial, sans-serif', 
+            fontWeight: 400, 
+            fontSize: '12.3px', 
+            marginBottom: 0,
+            lineHeight: '13px'
+          }}>
+            <span style={{ color: theme === 'light' ? '#FF7120' : '#EA661B', fontWeight: 700, fontSize: 13 }}>Security Logs</span> / view and analyze security event logs across your infrastructure
+          </div>
+          <div style={{ color: '#0C2027' }}>
+            <div style={{ color: '#0C2027' }}>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="p-6 space-y-6">
         <div className="flex flex-col sm:flex-row gap-4">

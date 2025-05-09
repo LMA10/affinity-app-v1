@@ -275,7 +275,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
         {/* End custom tab navigator */}
 
         <TabsContent value="formatted">
-          <ScrollArea className="h-[60vh] md:h-[calc(100vh-120px)] pr-1 md:pr-4 w-full">
+          <ScrollArea className="h-[60vh] md:h-[calc(100vh-120px)] pr-1 md:pr-4 w-full hide-scrollbar">
             <div className="grid grid-cols-1 gap-2 w-full">
               {/* Alert Management */}
               <Card className="bg-[#0C2027] border border-[#506C77]" style={{ borderWidth: 1 }}>
@@ -570,6 +570,10 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
           </div>
         </TabsContent>
       </Tabs>
+      <style>{`
+      .hide-scrollbar::-webkit-scrollbar { display: none; }
+      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
   )
 }

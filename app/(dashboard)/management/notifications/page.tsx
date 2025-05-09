@@ -46,6 +46,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Loading } from "@/components/loading"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 // Mock data for notification rules
 const notificationRules = [
@@ -113,6 +114,7 @@ export default function NotificationsPage() {
   const [isEditChannelModalOpen, setIsEditChannelModalOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedChannel, setSelectedChannel] = useState<NotificationChannel | null>(null)
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
   const { channels, isLoading, error, fetchChannels, deleteChannel } = useNotificationState()
 
   // Fetch channels on component mount
@@ -167,16 +169,25 @@ export default function NotificationsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <PageHeader
-        title="Notification Management"
-        description="Configure notification channels and delivery rules"
-        actions={
-          <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => setIsAddChannelModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Channel
-          </Button>
-        }
-      />
+      <div className="px-12 py-4">
+        <div className="flex justify-between items-center">
+          <div style={{ 
+            color: theme === 'light' ? '#506C77' : '#506C77', 
+            fontFamily: 'Helvetica, Arial, sans-serif', 
+            fontWeight: 400, 
+            fontSize: '12.3px', 
+            marginBottom: 0,
+            lineHeight: '13px'
+          }}>
+            <span style={{ color: theme === 'light' ? '#FF7120' : '#EA661B', fontWeight: 700, fontSize: 13 }}>Notification Management</span> / configure notification channels and delivery rules
+          </div>
+          <div style={{ color: '#0C2027' }}>
+            <div style={{ color: '#0C2027' }}>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="flex-1 p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

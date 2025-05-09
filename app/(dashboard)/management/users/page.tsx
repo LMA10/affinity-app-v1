@@ -35,6 +35,7 @@ import { useSnapshot } from "valtio"
 import { Modal } from "@/components/ui/modal"
 import { useToast } from "@/hooks/use-toast"
 import { UsersTable } from "@/components/users/users-table"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -51,6 +52,7 @@ export default function UsersPage() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showRepeatNewPassword, setShowRepeatNewPassword] = useState(false)
   const [userGroups, setUserGroups] = useState<{ [username: string]: string[] }>({})
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
   const groupsFetchedRef = useRef(false)
   const [currentUser, setCurrentUser] = useState<string | null>(null)
   const [deleteUserModalOpen, setDeleteUserModalOpen] = useState(false)
@@ -281,6 +283,25 @@ export default function UsersPage() {
 
   return (
     <div className="flex flex-col h-full">
+      <div className="px-12 py-4">
+        <div className="flex justify-between items-center">
+          <div style={{ 
+            color: theme === 'light' ? '#506C77' : '#506C77', 
+            fontFamily: 'Helvetica, Arial, sans-serif', 
+            fontWeight: 400, 
+            fontSize: '12.3px', 
+            marginBottom: 0,
+            lineHeight: '13px'
+          }}>
+            <span style={{ color: theme === 'light' ? '#FF7120' : '#EA661B', fontWeight: 700, fontSize: 13 }}>User Management</span> / manage users and access control
+          </div>
+          <div style={{ color: '#0C2027' }}>
+            <div style={{ color: '#0C2027' }}>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </div>
       <PageHeader
         title="User Management"
         description="Manage users and access control"

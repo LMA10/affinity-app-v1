@@ -36,7 +36,7 @@ const CardTitle = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
+      "text-[16px] font-semibold leading-none tracking-tight font-['Helvetica','Arial',sans-serif] text-white",
       className
     )}
     {...props}
@@ -50,7 +50,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-[12px] font-['Helvetica','Arial',sans-serif] text-[#3F6978]", className)}
     {...props}
   />
 ))
@@ -59,9 +59,26 @@ CardDescription.displayName = "CardDescription"
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
+>(({ className, ...props }, ref) => {
+  // Wrap children to style all <p> tags
+  const children = React.Children.map(props.children, child => {
+    if (
+      React.isValidElement(child) &&
+      typeof child.type === 'string' &&
+      child.type === 'p'
+    ) {
+      return React.cloneElement(child as React.ReactElement<any>, {
+        className: cn((child.props as any)?.className, "text-[12px] font-['Helvetica','Arial',sans-serif] text-[#3F6978]")
+      })
+    }
+    return child
+  })
+  return (
+    <div ref={ref} className={cn("p-6 pt-0 font-['IBM_Plex_Mono',monospace] text-white", className)} {...props}>
+      {children}
+    </div>
+  )
+})
 CardContent.displayName = "CardContent"
 
 const CardFooter = React.forwardRef<

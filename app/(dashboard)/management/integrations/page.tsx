@@ -12,6 +12,7 @@ import { IntegrationDetailsModal } from "@/components/integrations/integration-d
 import { Modal } from "@/components/ui/modal"
 import { useIntegrationsStore } from "@/lib/state/integrations/integrationsState"
 import { toast } from "@/hooks/use-toast"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function IntegrationsPage() {
   const { integrations, isLoading, error, fetchIntegrations } = useIntegrations()
@@ -19,6 +20,7 @@ export default function IntegrationsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null)
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
   const deleteIntegration = useIntegrationsStore((s) => s.deleteIntegration)
 
   const handleRefresh = () => {
@@ -99,16 +101,25 @@ export default function IntegrationsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <PageHeader
-        title="Integrations"
-        description="Manage your security integrations"
-        // actions={
-        //   <Button className="bg-orange-600 hover:bg-orange-700">
-        //     <Plus className="mr-2 h-4 w-4" />
-        //     Add Integration
-        //   </Button>
-        // }
-      />
+      <div className="px-12 py-4">
+        <div className="flex justify-between items-center">
+          <div style={{ 
+            color: theme === 'light' ? '#506C77' : '#506C77', 
+            fontFamily: 'Helvetica, Arial, sans-serif', 
+            fontWeight: 400, 
+            fontSize: '12.3px', 
+            marginBottom: 0,
+            lineHeight: '13px'
+          }}>
+            <span style={{ color: theme === 'light' ? '#FF7120' : '#EA661B', fontWeight: 700, fontSize: 13 }}>Integrations</span> / manage your security integrations
+          </div>
+          <div style={{ color: '#0C2027' }}>
+            <div style={{ color: '#0C2027' }}>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="flex-1 p-6 space-y-6">
         <div className="bg-[#0f1d24] px-4 py-2 rounded-md">
