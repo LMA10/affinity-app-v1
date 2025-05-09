@@ -44,7 +44,7 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
       case "critical":
         return "bg-red-500/20 text-red-500 border-red-500/20"
       case "high":
-        return "bg-orange-500/20 text-orange-500 border-orange-500/20"
+        return "bg-orange-500/20 text-orange-500 border-none"
       case "medium":
         return "bg-yellow-500/20 text-yellow-500 border-yellow-500/20"
       case "low":
@@ -76,7 +76,7 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b border-orange-600/20">
+      <div className="flex items-center justify-between p-4 border-b">
         <h2 className="text-lg font-semibold text-orange-500">Alert Details</h2>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-4 w-4" />
@@ -120,7 +120,7 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
           <div className="mb-2">
             <label className="block text-xs text-muted-foreground mb-1">Owner</label>
             <select
-              className="w-full bg-[#0a1419] border border-orange-600/20 rounded-md p-2 text-sm text-orange-500"
+              className="w-full bg-[#0a1419] border rounded-md p-2 text-sm text-orange-500"
               value={owner}
               onChange={e => setOwner(e.target.value)}
             >
@@ -132,20 +132,20 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
         <Separator />
 
         <Tabs defaultValue="enrichment" className="w-full">
-          <TabsList className="w-full bg-[#0a1419]">
-            <TabsTrigger value="enrichment" className="flex-1">
+          <TabsList className="w-full bg-[#0a1419] flex rounded-md gap-0 p-0 border border-[#506C77]">
+            <TabsTrigger value="enrichment" className="flex-1 bg-[#0C2027] border-0 rounded-none font-[400] font-['Helvetica','Arial',sans-serif] text-white data-[state=active]:bg-[#506C77] data-[state=active]:text-white data-[state=active]:font-[400] h-10 px-4 py-2 transition-colors border-r border-[#506C77] last:border-r-0">
               Enrichment
             </TabsTrigger>
-            <TabsTrigger value="response" className="flex-1">
+            <TabsTrigger value="response" className="flex-1 bg-[#0C2027] border-0 rounded-none font-[400] font-['Helvetica','Arial',sans-serif] text-white data-[state=active]:bg-[#506C77] data-[state=active]:text-white data-[state=active]:font-[400] h-10 px-4 py-2 transition-colors border-r border-[#506C77] last:border-r-0">
               Response
             </TabsTrigger>
-            <TabsTrigger value="timeline" className="flex-1">
+            <TabsTrigger value="timeline" className="flex-1 bg-[#0C2027] border-0 rounded-none font-[400] font-['Helvetica','Arial',sans-serif] text-white data-[state=active]:bg-[#506C77] data-[state=active]:text-white data-[state=active]:font-[400] h-10 px-4 py-2 transition-colors">
               Timeline
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="enrichment" className="space-y-4 mt-4">
-            <Card className="bg-[#0a1419] border-orange-600/20">
+            <Card className="bg-[#0a1419]">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Threat Intelligence</CardTitle>
               </CardHeader>
@@ -169,13 +169,13 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
               </CardContent>
             </Card>
 
-            <Card className="bg-[#0a1419] border-orange-600/20">
+            <Card className="bg-[#0a1419]">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Related Entities</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <div className="rounded-md bg-[#0a1419] p-2 border border-orange-600/10">
+                  <div className="rounded-md bg-[#0a1419] p-2 border">
                     <div className="flex justify-between items-center">
                       <div className="font-medium">IP Address</div>
                       <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
@@ -186,7 +186,7 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
                     <div className="text-xs text-muted-foreground mt-1">Located in: Russia</div>
                   </div>
 
-                  <div className="rounded-md bg-[#0a1419] p-2 border border-orange-600/10">
+                  <div className="rounded-md bg-[#0a1419] p-2 border">
                     <div className="flex justify-between items-center">
                       <div className="font-medium">Host</div>
                       <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
@@ -202,7 +202,7 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
           </TabsContent>
 
           <TabsContent value="response" className="space-y-4 mt-4">
-            <Card className="bg-[#0a1419] border-orange-600/20">
+            <Card className="bg-[#0a1419]">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Recommended Actions</CardTitle>
               </CardHeader>
@@ -233,7 +233,7 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
               </CardContent>
             </Card>
 
-            <Card className="bg-[#0a1419] border-orange-600/20">
+            <Card className="bg-[#0a1419]">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Create Incident</CardTitle>
               </CardHeader>
@@ -245,13 +245,13 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
               </CardContent>
             </Card>
 
-            <Card className="bg-[#0a1419] border-orange-600/20">
+            <Card className="bg-[#0a1419]">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Add Comment</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <textarea
-                  className="w-full h-20 bg-[#0a1419] border border-orange-600/20 rounded-md p-2 text-sm"
+                  className="w-full h-20 bg-[#0a1419] border rounded-md p-2 text-sm"
                   placeholder="Add your analysis or notes here..."
                 />
                 <Button variant="outline" className="w-full">
@@ -262,14 +262,14 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
             </Card>
 
             {/* New Quick Actions section */}
-            <Card className="bg-[#0a1419] border-orange-600/20">
+            <Card className="bg-[#0a1419]">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button
                   variant="outline"
-                  className="w-full border-orange-600/20 hover:bg-orange-600/10"
+                  className="w-full hover:bg-orange-600/10"
                   onClick={handleMarkAsFalsePositive}
                   disabled={status === "false_positive"}
                 >
@@ -281,13 +281,13 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
           </TabsContent>
 
           <TabsContent value="timeline" className="space-y-4 mt-4">
-            <Card className="bg-[#0a1419] border-orange-600/20">
+            <Card className="bg-[#0a1419]">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Event Timeline</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="relative pl-6 pb-4 border-l border-orange-600/20">
+                  <div className="relative pl-6 pb-4 border-l">
                     <div className="absolute left-[-4px] top-0 h-2 w-2 rounded-full bg-orange-500" />
                     <div className="text-xs text-muted-foreground">2025-04-14 08:15:22</div>
                     <div className="text-sm font-medium">Alert Created</div>
@@ -296,14 +296,14 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
                     </div>
                   </div>
 
-                  <div className="relative pl-6 pb-4 border-l border-orange-600/20">
+                  <div className="relative pl-6 pb-4 border-l">
                     <div className="absolute left-[-4px] top-0 h-2 w-2 rounded-full bg-orange-500" />
                     <div className="text-xs text-muted-foreground">2025-04-14 08:16:05</div>
                     <div className="text-sm font-medium">Status Changed</div>
                     <div className="text-xs text-muted-foreground mt-1">Status changed from New to Open</div>
                   </div>
 
-                  <div className="relative pl-6 pb-4 border-l border-orange-600/20">
+                  <div className="relative pl-6 pb-4 border-l">
                     <div className="absolute left-[-4px] top-0 h-2 w-2 rounded-full bg-orange-500" />
                     <div className="text-xs text-muted-foreground">2025-04-14 08:18:30</div>
                     <div className="text-sm font-medium">Enrichment Completed</div>
@@ -325,7 +325,7 @@ export function AlertDetails({ alert, onClose }: { alert: any; onClose: () => vo
         </Tabs>
       </div>
 
-      <div className="p-4 border-t border-orange-600/20">
+      <div className="p-4 border-t">
         <div className="flex space-x-2">
           <Button variant="outline" className="flex-1" onClick={onClose}>
             Close

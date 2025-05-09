@@ -113,20 +113,19 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="dark:!bg-[#142A33] !bg-[#CAD0D2] border-r dark:border-orange-500 border-transparent">
-      <div className="absolute right-0 top-4 translate-x-1/2 z-20 dark:!bg-[#142A33] !bg-[#CAD0D2] rounded-full p-1 shadow-md hidden group-data-[state=collapsed]:flex">
-        <SidebarTrigger className="h-6 w-6 dark:text-orange-500 text-[#142A33]" />
+      <div className="absolute right-0 top-8 translate-x-1/2 z-20 dark:!bg-[#142A33] !bg-[#CAD0D2] rounded-md p-0.5 shadow-md flex border border-orange-500">
+        <SidebarTrigger className="h-7 w-6 dark:text-orange-500 text-[#142A33] flex items-center justify-center font-['IBM_Plex_Mono'] text-lg -translate-y-0.5" />
       </div>
       <SidebarHeader className="dark:!bg-[#142A33] !bg-[#CAD0D2]">
-        <div className="flex items-center p-4">
+        <div className="flex items-center p-4 translate-x-[30px]">
           <Link href="/alerts-view" className="flex items-center gap-2">
             <ThemedLogo width={138} height={46} className="object-contain" />
           </Link>
-          <SidebarTrigger className="ml-auto dark:text-orange-500 text-[#142A33]" />
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="py-4 dark:!bg-[#142A33] !bg-[#CAD0D2]">
-        <SidebarMenu className="space-y-0.1">
+      <SidebarContent className="py-0 dark:!bg-[#142A33] !bg-[#CAD0D2] overflow-x-hidden">
+        <SidebarMenu className="space-y-0 translate-x-[30px] overflow-x-hidden">
           {/* LOGS Section */}
           {isPageVisible("/logs") && (
             <SidebarMenuItem>
@@ -136,7 +135,7 @@ export function AppSidebar() {
                 className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
               >
                 <Link href="/logs" className="dark:text-orange-500 text-[#142A33] flex items-center w-full">
-                  <FileText className={`${menuIconStyles} dark:text-orange-500 text-[#142A33]`} />
+                  <FileText className={`h-5 w-5 ml-4 mr-1 shrink-0 dark:text-orange-500 text-[#142A33]`} />
                   <span>LOGS</span>
                 </Link>
               </SidebarMenuButton>
@@ -152,7 +151,7 @@ export function AppSidebar() {
                 className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
               >
                 <Link href="/alerts-view" className="dark:text-orange-500 text-[#142A33] flex items-center w-full">
-                  <AlertTriangle className={`${menuIconStyles} dark:text-orange-500 text-[#142A33]`} />
+                  <AlertTriangle className={`h-5 w-5 ml-4 mr-1 shrink-0 dark:text-orange-500 text-[#142A33]`} />
                   <span>ALERTS</span>
                 </Link>
               </SidebarMenuButton>
@@ -198,7 +197,7 @@ export function AppSidebar() {
                 className={`w-full dark:text-orange-500 text-[#142A33] flex items-center py-2.5 px-4 ${menuItemStyles}`}
                 onClick={() => toggleSection("management")}
               >
-                <Cog className={`${menuIconStyles} dark:text-orange-500 text-[#142A33]`} />
+                <Cog className={`h-5 w-5 ml-4 mr-1 shrink-0 dark:text-orange-500 text-[#142A33]`} />
                 <span>MANAGEMENT</span>
                 <ChevronDown
                   className={`ml-2 h-4 w-4 shrink-0 dark:text-orange-500 text-[#142A33] transition-transform duration-200 ${openSections.management ? "rotate-180" : ""}`}
@@ -214,7 +213,7 @@ export function AppSidebar() {
                   <SidebarMenuSubButton
                     asChild
                     isActive={pathname === "/management/integrations"}
-                    className={`py-2 ${subMenuItemStyles} dark:text-orange-500 text-[#142A33]`}
+                    className={`py-2 ${menuItemStyles} dark:text-orange-500 text-[#142A33]`}
                   >
                     <Link href="/management/integrations">INTEGRATIONS</Link>
                   </SidebarMenuSubButton>
@@ -226,7 +225,7 @@ export function AppSidebar() {
                   <SidebarMenuSubButton
                     asChild
                     isActive={pathname === "/management/notifications"}
-                    className={`py-2 ${subMenuItemStyles} dark:text-orange-500 text-[#142A33]`}
+                    className={`py-2 ${menuItemStyles} dark:text-orange-500 text-[#142A33]`}
                   >
                     <Link href="/management/notifications">NOTIFICATIONS</Link>
                   </SidebarMenuSubButton>
@@ -238,7 +237,7 @@ export function AppSidebar() {
                   <SidebarMenuSubButton
                     asChild
                     isActive={pathname === "/management/users"}
-                    className={`py-2 ${subMenuItemStyles} dark:text-orange-500 text-[#142A33]`}
+                    className={`py-2 ${menuItemStyles} dark:text-orange-500 text-[#142A33]`}
                   >
                     <Link href="/management/users">USERS</Link>
                   </SidebarMenuSubButton>
@@ -260,7 +259,7 @@ export function AppSidebar() {
             </div>
             <button
               onClick={handleLogout}
-              className="dark:text-orange-500 text-[#142A33] hover:opacity-80 transition-colors"
+              className="dark:text-orange-500 text-[#142A33] hover:opacity-80 transition-colors group-data-[state=collapsed]:hidden"
             >
               <LogOut className="h-5 w-5" />
             </button>

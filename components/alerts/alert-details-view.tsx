@@ -169,15 +169,15 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   const getSeverityBadgeColor = (severity: string) => {
     switch (severity) {
       case "critical":
-        return "bg-red-500 text-white border-red-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
+        return "bg-red-500 text-white border-red-500 font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5"
       case "high":
-        return "bg-orange-500 text-white border-orange-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
+        return "bg-orange-500 text-white border-orange-500 font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5"
       case "medium":
-        return "bg-yellow-500 text-white border-yellow-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
+        return "bg-yellow-500 text-white border-yellow-500 font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5"
       case "low":
-        return "bg-green-500 text-white border-green-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
+        return "bg-green-500 text-white border-green-500 font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5"
       default:
-        return "bg-gray-500 text-white border-gray-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
+        return "bg-gray-500 text-white border-gray-500 font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5"
     }
   }
 
@@ -185,15 +185,15 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-blue-500 text-white border-blue-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
+        return "bg-blue-500 text-white border-blue-500 font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5"
       case "investigating":
-        return "bg-[#00AAE5] text-white border-[#00AAE5] font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
+        return "bg-[#00AAE5] text-white border-[#00AAE5] font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5"
       case "resolved":
-        return "bg-green-500 text-white border-green-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
+        return "bg-green-500 text-white border-green-500 font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5"
       case "false_positive":
-        return "bg-gray-500 text-white border-gray-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
+        return "bg-gray-500 text-white border-gray-500 font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5"
       default:
-        return "bg-gray-500 text-white border-gray-500 font-['IBM_Plex_Mono'] font-normal rounded-[2px]"
+        return "bg-gray-500 text-white border-gray-500 font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5"
     }
   }
 
@@ -202,8 +202,8 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
       className="h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto shadow-sm"
       style={{ background: '#0D1315', border: 'none' }}
     >
-      <div className="relative mb-4 w-full">
-        <div className="flex flex-col gap-2 pr-10 w-full">
+      <div className="relative mb-2 w-full">
+        <div className="flex flex-col gap-1 pr-10 w-full">
           <h3 style={{ 
             color: theme === 'light' ? '#FF7120' : '#EA661B', 
             fontWeight: 700, 
@@ -232,7 +232,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
         <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-0 right-0 h-10 w-10 md:h-6 md:w-6">
           <X className="h-6 w-6 md:h-4 md:w-4" />
         </Button>
-        <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
+        <div className="flex flex-col sm:flex-row gap-1 mt-2 w-full">
           <Button variant="outline" size="sm" onClick={copyFullAlert} className="h-10 px-2 w-full sm:w-auto">
             <Copy className="h-4 w-4 mr-1" />
             Copy
@@ -244,28 +244,52 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4 w-full">
-        <TabsList className="bg-card flex flex-wrap w-full">
-          <TabsTrigger value="formatted">Formatted View</TabsTrigger>
-          <TabsTrigger value="raw">Raw JSON</TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-2 w-full">
+        {/* Custom tab navigator styled like the logs page */}
+        <div className="flex bg-transparent p-0.5 mb-2">
+          <button
+            className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-white focus:outline-none transition-colors
+              ${activeTab === 'formatted' ? 'bg-[#506C77]' : 'bg-[#0C2027]'}
+              ${activeTab === 'formatted' ? '' : 'hover:bg-[#1a2e33]'}
+              rounded-l-[8px] ${activeTab === 'formatted' ? '' : 'border-r-0'}
+            `}
+            style={{ borderTopLeftRadius: 8, borderBottomLeftRadius: 8 }}
+            onClick={() => setActiveTab('formatted')}
+            type="button"
+          >
+            Formatted View
+          </button>
+          <button
+            className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-white focus:outline-none transition-colors
+              ${activeTab === 'raw' ? 'bg-[#506C77]' : 'bg-[#0C2027]'}
+              ${activeTab === 'raw' ? '' : 'hover:bg-[#1a2e33]'}
+              rounded-r-[8px] -ml-px
+            `}
+            style={{ borderTopRightRadius: 8, borderBottomRightRadius: 8 }}
+            onClick={() => setActiveTab('raw')}
+            type="button"
+          >
+            Raw JSON
+          </button>
+        </div>
+        {/* End custom tab navigator */}
 
         <TabsContent value="formatted">
           <ScrollArea className="h-[60vh] md:h-[calc(100vh-120px)] pr-1 md:pr-4 w-full">
-            <div className="grid grid-cols-1 gap-4 w-full">
+            <div className="grid grid-cols-1 gap-2 w-full">
               {/* Alert Management */}
-              <Card className="bg-transparent border-0 shadow-none">
+              <Card className="bg-[#0C2027] border border-[#506C77]" style={{ borderWidth: 1 }}>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg text-base md:text-xl">Alert Management</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 p-3 md:p-6">
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-1.5">
                     <div>
                       <Label htmlFor="status" className="text-sm text-muted-foreground">
                         Status
                       </Label>
                       <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger id="status" className="mt-1">
+                        <SelectTrigger id="status" className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -282,7 +306,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         Owner
                       </Label>
                       <Select value={owner} onValueChange={setOwner}>
-                        <SelectTrigger id="owner" className="mt-1">
+                        <SelectTrigger id="owner" className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
                           <SelectValue placeholder="Select owner" />
                         </SelectTrigger>
                         <SelectContent>
@@ -299,7 +323,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         value={resolvedBy}
                         onValueChange={(value) => setResolvedBy(value)}
                       >
-                        <SelectTrigger id="resolved-by" className="mt-1">
+                        <SelectTrigger id="resolved-by" className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
                           <SelectValue placeholder="Select resolved by" />
                         </SelectTrigger>
                         <SelectContent>
@@ -317,7 +341,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         value={isFalsePositive ? "true" : "false"}
                         onValueChange={(value) => setIsFalsePositive(value === "true")}
                       >
-                        <SelectTrigger id="false-positive" className="mt-1">
+                        <SelectTrigger id="false-positive" className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
                           <SelectValue placeholder="Select false positive status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -354,7 +378,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               </Card>
 
               {/* Alert Overview */}
-              <Card className="bg-transparent border-0 shadow-none">
+              <Card className="bg-[#0C2027] border border-[#506C77]" style={{ borderWidth: 1 }}>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg text-base md:text-xl">Alert Overview</CardTitle>
                 </CardHeader>
@@ -390,7 +414,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* Metadata */}
               {alert.metadata && (
-                <Card className="bg-transparent border-0 shadow-none">
+                <Card className="bg-[#0C2027] border border-[#506C77]" style={{ borderWidth: 1 }}>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">Rule Metadata</CardTitle>
                   </CardHeader>
@@ -419,7 +443,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* Event Information */}
               {alert.event && (
-                <Card className="bg-transparent border-0 shadow-none">
+                <Card className="bg-[#0C2027] border border-[#506C77]" style={{ borderWidth: 1 }}>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">Event Information</CardTitle>
                   </CardHeader>
@@ -469,7 +493,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* Security Detection */}
               {alert.security_detection && (
-                <Card className="bg-transparent border-0 shadow-none">
+                <Card className="bg-[#0C2027] border border-[#506C77]" style={{ borderWidth: 1 }}>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">Security Detection</CardTitle>
                   </CardHeader>
@@ -507,7 +531,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* MITRE Techniques */}
               {alert.mitre_techniques && alert.mitre_techniques.length > 0 && (
-                <Card className="bg-transparent border-0 shadow-none">
+                <Card className="bg-[#0C2027] border border-[#506C77]" style={{ borderWidth: 1 }}>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg text-base md:text-xl">MITRE ATT&CK Techniques</CardTitle>
                   </CardHeader>

@@ -30,7 +30,9 @@ export function AlertDetailsProvider({ children }: { children: React.ReactNode }
       <div className="flex h-full w-full relative">
         <div className={`flex-1 transition-all duration-300 ${isOpen ? "mr-[400px]" : ""}`}>{children}</div>
         {isOpen && selectedAlert && (
-          <div className="fixed top-0 right-0 h-full w-[400px] bg-[#0f1d24] border-l border-orange-600/20 overflow-auto">
+          <div
+            className="fixed z-50 top-0 right-0 h-full w-full md:w-[400px] bg-[#0f1d24] flex flex-col overflow-y-auto overflow-x-hidden transition-all duration-300 block md:block"
+          >
             <AlertDetails alert={selectedAlert} onClose={() => setIsOpen(false)} />
           </div>
         )}

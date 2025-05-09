@@ -4,12 +4,12 @@ import React from "react"
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PageHeader } from "@/components/page-header"
 import { Loading } from "@/components/loading"
 import {
   Download,
-  Search,
   Code,
   List,
   ChevronDown,
@@ -353,8 +353,14 @@ export default function LogsPage() {
       <div className="p-6 space-y-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search logs..." value={searchQuery} onChange={handleSearch} className="pl-10" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-white dark:text-white text-[#506C77]" />
+            <Input
+              placeholder="Search logs..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="pl-10 !bg-[#CAD0D2] dark:!bg-[#0D1315] !border-none !text-[#506C77] dark:!text-white placeholder-[#506C77] dark:placeholder-white rounded-[8px] h-10"
+              style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400 }}
+            />
           </div>
 
           {/* Status filter dropdown removed */}
@@ -362,11 +368,11 @@ export default function LogsPage() {
           {/* Refresh button removed */}
           {/* Advanced filters button removed */}
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Download className="h-4 w-4" />
+                <Button variant="outline" size="icon" className="!bg-[#CAD0D2] dark:!bg-[#0D1315] !border !border-[#506C77]">
+                  <Download className="h-4 w-4 text-[#506C77]" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -383,9 +389,9 @@ export default function LogsPage() {
 
             <Popover open={isColumnSelectorOpen} onOpenChange={setIsColumnSelectorOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <List className="h-4 w-4" />
-                </Button>
+                <button className="h-12 w-12 flex items-center justify-center bg-[#101918] border border-[#253136] rounded-[8px] text-white hover:bg-[#182325] transition">
+                  <List className="h-5 w-5" />
+                </button>
               </PopoverTrigger>
               <PopoverContent className="w-80">
                 <div className="space-y-4">
@@ -432,25 +438,31 @@ export default function LogsPage() {
         )}
 
         <div className="flex items-center justify-end mb-2">
-          <div className="bg-[#0f1d24] border border-orange-600/20 rounded-md p-0.5 flex">
-            <Button
-              variant={viewMode === "table" ? "default" : "ghost"}
-              size="sm"
-              className={viewMode === "table" ? "bg-orange-600 text-white" : ""}
-              onClick={() => setViewMode("table")}
+          <div className="flex bg-transparent p-0.5">
+            <button
+              className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-white focus:outline-none transition-colors
+                ${viewMode === 'table' ? 'bg-[#506C77]' : 'bg-[#0C2027]'}
+                ${viewMode === 'table' ? '' : 'hover:bg-[#1a2e33]'}
+                rounded-l-[8px] ${viewMode === 'table' ? '' : 'border-r-0'}
+              `}
+              style={{ borderTopLeftRadius: 8, borderBottomLeftRadius: 8 }}
+              onClick={() => setViewMode('table')}
             >
               <List className="h-4 w-4 mr-2" />
-              Table View
-            </Button>
-            <Button
-              variant={viewMode === "query" ? "default" : "ghost"}
-              size="sm"
-              className={viewMode === "query" ? "bg-orange-600 text-white" : ""}
-              onClick={() => setViewMode("query")}
+              Table view
+            </button>
+            <button
+              className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-white focus:outline-none transition-colors
+                ${viewMode === 'query' ? 'bg-[#506C77]' : 'bg-[#0C2027]'}
+                ${viewMode === 'query' ? '' : 'hover:bg-[#1a2e33]'}
+                rounded-r-[8px] -ml-px
+              `}
+              style={{ borderTopRightRadius: 8, borderBottomRightRadius: 8 }}
+              onClick={() => setViewMode('query')}
             >
               <Code className="h-4 w-4 mr-2" />
-              Query Editor
-            </Button>
+              Query editor
+            </button>
           </div>
         </div>
 
