@@ -237,9 +237,13 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-1 mt-[18px] w-full">
-          <Button variant="outline" size="sm" onClick={copyFullAlert} className="h-10 px-2 w-full sm:w-auto">
-            <Copy className="h-4 w-4 mr-1" />
-            Copy
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 !bg-[#0C2027] !border !border-[#506C77] flex items-center justify-center"
+            onClick={copyFullAlert}
+          >
+            <Copy className="h-4 w-4 text-[#506C77]" />
           </Button>
           <Button
             variant="outline"
