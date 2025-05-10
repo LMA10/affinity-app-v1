@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Copy, X, FileDown, PlayCircle, Save } from "lucide-react"
+import { Copy, X, Download, PlayCircle, Save } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
@@ -203,15 +203,22 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
       style={{ background: '#0D1315', border: 'none' }}
     >
       <div className="relative mb-2 w-full">
-        <div className="flex flex-col gap-1 pr-10 w-full">
-          <h3 style={{ 
-            color: theme === 'light' ? '#FF7120' : '#EA661B', 
-            fontWeight: 700, 
-            fontSize: 13,
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            lineHeight: '13px'
-          }}>Alert Details</h3>
+        <div className="flex items-center justify-between pr-0 w-full">
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={onClose} className="h-10 w-10 md:h-6 md:w-6">
+              <X className="h-6 w-6 md:h-4 md:w-4" style={{ color: '#EA661B' }} />
+            </Button>
+            <h3 style={{ 
+              color: theme === 'light' ? '#FF7120' : '#EA661B', 
+              fontWeight: 700, 
+              fontSize: 13,
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              lineHeight: '13px',
+              margin: 0,
+              whiteSpace: 'nowrap'
+            }}>Alert Details</h3>
+          </div>
+          <div className="flex items-center gap-2 ml-auto w-full justify-end">
             <Badge
               variant="outline"
               className={
@@ -220,7 +227,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                   : "bg-gray-500/20 text-gray-500"
               }
             >
-              {alert.security_detection?.severity || "Unknown"} Severity
+              {(alert.security_detection?.severity || "unknown").toLowerCase()}
             </Badge>
             {status && (
               <Badge variant="outline" className={getStatusBadgeColor(status)}>
@@ -229,48 +236,51 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
             )}
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-0 right-0 h-10 w-10 md:h-6 md:w-6">
-          <X className="h-6 w-6 md:h-4 md:w-4" />
-        </Button>
-        <div className="flex flex-col sm:flex-row gap-1 mt-2 w-full">
+        <div className="flex flex-col sm:flex-row gap-1 mt-[18px] w-full">
           <Button variant="outline" size="sm" onClick={copyFullAlert} className="h-10 px-2 w-full sm:w-auto">
             <Copy className="h-4 w-4 mr-1" />
             Copy
           </Button>
-          <Button variant="outline" size="sm" onClick={exportAlertToJson} className="h-10 px-2 w-full sm:w-auto">
-            <FileDown className="h-4 w-4 mr-1" />
-            Export
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 !bg-[#0C2027] !border !border-[#506C77] flex items-center justify-center"
+            onClick={exportAlertToJson}
+          >
+            <Download className="h-4 w-4 text-[#506C77]" />
           </Button>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-2 w-full">
         {/* Custom tab navigator styled like the logs page */}
-        <div className="flex bg-transparent p-0.5 mb-2">
-          <button
-            className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-white focus:outline-none transition-colors
-              ${activeTab === 'formatted' ? 'bg-[#506C77]' : 'bg-[#0C2027]'}
-              ${activeTab === 'formatted' ? '' : 'hover:bg-[#1a2e33]'}
-              rounded-l-[8px] ${activeTab === 'formatted' ? '' : 'border-r-0'}
-            `}
-            style={{ borderTopLeftRadius: 8, borderBottomLeftRadius: 8 }}
-            onClick={() => setActiveTab('formatted')}
-            type="button"
-          >
-            Formatted View
-          </button>
-          <button
-            className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-white focus:outline-none transition-colors
-              ${activeTab === 'raw' ? 'bg-[#506C77]' : 'bg-[#0C2027]'}
-              ${activeTab === 'raw' ? '' : 'hover:bg-[#1a2e33]'}
-              rounded-r-[8px] -ml-px
-            `}
-            style={{ borderTopRightRadius: 8, borderBottomRightRadius: 8 }}
-            onClick={() => setActiveTab('raw')}
-            type="button"
-          >
-            Raw JSON
-          </button>
+        <div className="flex w-full items-center justify-center mb-2" style={{height: '36px'}}>
+          <div className="flex w-full h-full">
+            <button
+              className={`flex-1 flex items-center justify-center px-4 py-2 h-full font-normal font-['Helvetica','Arial',sans-serif] text-white focus:outline-none transition-colors
+                ${activeTab === 'formatted' ? 'bg-[#506C77]' : 'bg-[#0C2027]'}
+                ${activeTab === 'formatted' ? '' : 'hover:bg-[#1a2e33]'}
+                rounded-l-[6px] ${activeTab === 'formatted' ? '' : 'border-r-0'}
+              `}
+              style={{ borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }}
+              onClick={() => setActiveTab('formatted')}
+              type="button"
+            >
+              Formatted View
+            </button>
+            <button
+              className={`flex-1 flex items-center justify-center px-4 py-2 h-full font-normal font-['Helvetica','Arial',sans-serif] text-white focus:outline-none transition-colors
+                ${activeTab === 'raw' ? 'bg-[#506C77]' : 'bg-[#0C2027]'}
+                ${activeTab === 'raw' ? '' : 'hover:bg-[#1a2e33]'}
+                rounded-r-[8px] -ml-px
+              `}
+              style={{ borderTopRightRadius: 6, borderBottomRightRadius: 6 }}
+              onClick={() => setActiveTab('raw')}
+              type="button"
+            >
+              Raw JSON
+            </button>
+          </div>
         </div>
         {/* End custom tab navigator */}
 
@@ -289,7 +299,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         Status
                       </Label>
                       <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger id="status" className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
+                        <SelectTrigger id="status" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -306,7 +316,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         Owner
                       </Label>
                       <Select value={owner} onValueChange={setOwner}>
-                        <SelectTrigger id="owner" className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
+                        <SelectTrigger id="owner" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
                           <SelectValue placeholder="Select owner" />
                         </SelectTrigger>
                         <SelectContent>
@@ -323,7 +333,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         value={resolvedBy}
                         onValueChange={(value) => setResolvedBy(value)}
                       >
-                        <SelectTrigger id="resolved-by" className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
+                        <SelectTrigger id="resolved-by" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
                           <SelectValue placeholder="Select resolved by" />
                         </SelectTrigger>
                         <SelectContent>
@@ -341,7 +351,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         value={isFalsePositive ? "true" : "false"}
                         onValueChange={(value) => setIsFalsePositive(value === "true")}
                       >
-                        <SelectTrigger id="false-positive" className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
+                        <SelectTrigger id="false-positive" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
                           <SelectValue placeholder="Select false positive status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -460,7 +470,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                       <Button
                         variant="outline"
                         size="sm"
-                        className="mt-2 bg-orange-600/10 hover:bg-orange-600/20 text-orange-500 border-orange-600/20"
+                        className="mt-2 w-full bg-[#EA651A] text-white border-none hover:bg-[#d95c17] btn-execute-query"
                         onClick={() => {
                           // Copy query to clipboard
                           navigator.clipboard.writeText(alert.event.query)
@@ -556,9 +566,13 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               <Switch id="prettify-json" checked={prettifyJson} onCheckedChange={setPrettifyJson} />
               <Label htmlFor="prettify-json">Prettify JSON</Label>
             </div>
-            <Button variant="outline" size="sm" className="h-10 px-2" onClick={copyFullAlert}>
-              <Copy className="h-4 w-4 mr-1" />
-              Copy
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-16 w-16 bg-[#506C77] border-2 border-[#506C77] flex items-center justify-center"
+              onClick={copyFullAlert}
+            >
+              <Copy className="h-8 w-8 text-white" />
             </Button>
           </div>
           <div className="relative w-full">

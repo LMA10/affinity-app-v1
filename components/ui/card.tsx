@@ -9,7 +9,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      "rounded-lg border bg-card text-card-foreground shadow-sm font-['Helvetica','Arial',sans-serif] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#506C77]",
       className
     )}
     {...props}
@@ -23,7 +23,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    className={cn("flex flex-col space-y-[0.375rem] p-6 pb-0 font-['Helvetica','Arial',sans-serif] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#506C77]", className)}
     {...props}
   />
 ))
@@ -36,7 +36,7 @@ const CardTitle = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "text-[16px] font-semibold leading-none tracking-tight font-['Helvetica','Arial',sans-serif] text-white",
+      "text-[16px] font-semibold leading-none tracking-tight font-['Helvetica','Arial',sans-serif] text-white [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#506C77]",
       className
     )}
     {...props}
@@ -50,7 +50,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-[12px] font-['Helvetica','Arial',sans-serif] text-[#3F6978]", className)}
+    className={cn("text-[12px] font-['Helvetica','Arial',sans-serif] text-[#3F6978] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#506C77]", className)}
     {...props}
   />
 ))
@@ -60,21 +60,37 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
-  // Wrap children to style all <p> tags
   const children = React.Children.map(props.children, child => {
     if (
       React.isValidElement(child) &&
       typeof child.type === 'string' &&
       child.type === 'p'
     ) {
+      // Check if the text content matches any of the specified labels
+      const text = (child.props as any)?.children;
+      const whiteLabels = ['Status', 'Owner', 'Alert Name', 'Client'];
+      const shouldBeWhite = whiteLabels.includes(text);
+
       return React.cloneElement(child as React.ReactElement<any>, {
-        className: cn((child.props as any)?.className, "text-[12px] font-['Helvetica','Arial',sans-serif] text-[#3F6978]")
+        className: cn(
+          (child.props as any)?.className,
+          "text-[12px] font-['Helvetica','Arial',sans-serif]",
+          shouldBeWhite ? "text-white" : "text-[#3F6978]"
+        )
       })
     }
     return child
   })
+
   return (
-    <div ref={ref} className={cn("p-6 pt-0 font-['IBM_Plex_Mono',monospace] text-white", className)} {...props}>
+    <div 
+      ref={ref} 
+      className={cn(
+        "p-6 pt-2 font-['Helvetica','Arial',sans-serif] text-white [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#506C77]",
+        className
+      )} 
+      {...props}
+    >
       {children}
     </div>
   )
@@ -87,7 +103,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
+    className={cn("flex items-center p-6 pt-0 font-['Helvetica','Arial',sans-serif] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#506C77]", className)}
     {...props}
   />
 ))
