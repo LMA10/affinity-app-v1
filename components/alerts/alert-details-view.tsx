@@ -199,7 +199,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
   return (
     <div
-      className="h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto shadow-sm"
+      className="h-full w-full p-2 md:p-6 rounded-none md:rounded-lg max-h-[90vh] md:max-h-full shadow-sm"
       style={{ background: '#0D1315', border: 'none' }}
     >
       <div className="relative mb-2 w-full">
@@ -275,8 +275,8 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
         {/* End custom tab navigator */}
 
         <TabsContent value="formatted">
-          <ScrollArea className="h-[60vh] md:h-[calc(100vh-120px)] pr-1 md:pr-4 w-full hide-scrollbar">
-            <div className="grid grid-cols-1 gap-2 w-full">
+          <ScrollArea className="h-[calc(100vh-200px)] pr-1 md:pr-4 w-full hide-scrollbar">
+            <div className="grid grid-cols-1 gap-2 w-full pb-4">
               {/* Alert Management */}
               <Card className="bg-[#0C2027] border border-[#506C77]" style={{ borderWidth: 1 }}>
                 <CardHeader className="pb-2">
