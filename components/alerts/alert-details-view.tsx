@@ -299,7 +299,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                 <CardContent className="space-y-4 p-3 md:p-6">
                   <div className="grid grid-cols-1 gap-1.5">
                     <div>
-                      <Label htmlFor="status" className="text-sm text-muted-foreground">
+                      <Label htmlFor="status" className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">
                         Status
                       </Label>
                       <Select value={status} onValueChange={setStatus}>
@@ -316,7 +316,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                     </div>
 
                     <div>
-                      <Label htmlFor="owner" className="text-sm text-muted-foreground">
+                      <Label htmlFor="owner" className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">
                         Owner
                       </Label>
                       <Select value={owner} onValueChange={setOwner}>
@@ -330,7 +330,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                     </div>
 
                     <div>
-                      <Label htmlFor="resolved-by" className="text-sm text-muted-foreground">
+                      <Label htmlFor="resolved-by" className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">
                         Resolved By
                       </Label>
                       <Select
@@ -348,7 +348,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                     </div>
 
                     <div>
-                      <Label htmlFor="false-positive" className="text-sm text-muted-foreground">
+                      <Label htmlFor="false-positive" className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">
                         False Positive
                       </Label>
                       <Select
@@ -367,8 +367,8 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
                     {alert.alert_management?.timestamp && (
                       <div>
-                        <p className="text-sm text-muted-foreground">Last Updated</p>
-                        <p>{formatTimestamp(alert.alert_management.timestamp)}</p>
+                        <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Last Updated</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{formatTimestamp(alert.alert_management.timestamp)}</p>
                       </div>
                     )}
                   </div>
@@ -399,28 +399,28 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                 <CardContent className="space-y-2 p-3 md:p-6">
                   <div className="grid grid-cols-1 gap-2">
                     <div>
-                      <p className="text-sm text-muted-foreground">Alert Name</p>
-                      <p className="font-medium">{alert.metadata?.rule_name || "-"}</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Alert Name</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.metadata?.rule_name || "-"}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Alert ID</p>
-                      <p className="font-mono text-xs break-all">{alert.alert_id}</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Alert ID</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#506C77] text-xs break-all">{alert.alert_id}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Client</p>
-                      <p>{alert.client}</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Client</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.client}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Rule ID</p>
-                      <p>{alert.rule_id}</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Rule ID</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.rule_id}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Events Count</p>
-                      <p>{alert.events}</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Events Count</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.events}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Time</p>
-                      <p>{formatTimestamp(alert.event?.time)}</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Time</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{formatTimestamp(alert.event?.time)}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -435,20 +435,20 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                   <CardContent className="space-y-2 p-3 md:p-6">
                     <div className="grid grid-cols-1 gap-2">
                       <div>
-                        <p className="text-sm text-muted-foreground">Rule Name</p>
-                        <p>{alert.metadata.rule_name}</p>
+                        <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Rule Name</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.metadata.rule_name}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Rule Type</p>
-                        <p>{alert.metadata.rule_type}</p>
+                        <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Rule Type</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.metadata.rule_type}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Enabled</p>
-                        <p>{alert.metadata.enabled ? "Yes" : "No"}</p>
+                        <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Enabled</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.metadata.enabled ? "Yes" : "No"}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Custom</p>
-                        <p>{alert.metadata.custom ? "Yes" : "No"}</p>
+                        <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Custom</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.metadata.custom ? "Yes" : "No"}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -463,12 +463,12 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                   </CardHeader>
                   <CardContent className="space-y-2 p-3 md:p-6">
                     <div>
-                      <p className="text-sm text-muted-foreground">Iteration</p>
-                      <p>{alert.event.iteration}</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Iteration</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.event.iteration}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Query</p>
-                      <pre className="font-mono text-xs bg-muted p-2 rounded-md overflow-x-auto">
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Query</p>
+                      <pre className="font-['IBM_Plex_Mono'] text-[#506C77] text-xs bg-muted p-2 rounded-md overflow-x-auto">
                         {alert.event.query}
                       </pre>
                       <Button
@@ -498,8 +498,8 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                       </Button>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Time</p>
-                      <p>{formatTimestamp(alert.event.time)}</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Time</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{formatTimestamp(alert.event.time)}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -513,31 +513,31 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                   </CardHeader>
                   <CardContent className="space-y-2 p-3 md:p-6">
                     <div>
-                      <p className="text-sm text-muted-foreground">Severity</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Severity</p>
                       <Badge variant="outline" className={getSeverityBadgeColor(alert.security_detection.severity)}>
                         {alert.security_detection.severity.toUpperCase()}
                       </Badge>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Description</p>
-                      <p>{alert.security_detection.description}</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Description</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.security_detection.description}</p>
                     </div>
                     {alert.security_detection.important_data && (
                       <div>
-                        <p className="text-sm text-muted-foreground">Important Data</p>
+                        <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Important Data</p>
                         <div className="grid grid-cols-1 gap-2">
                           {Object.entries(alert.security_detection.important_data).map(([key, value]) => (
                             <div key={key} className="bg-muted p-2 rounded-md">
-                              <p className="text-xs text-muted-foreground">{key}</p>
-                              <p className="text-sm">{typeof value === 'string' ? value : JSON.stringify(value) || "-"}</p>
+                              <p className="text-xs text-white font-['Helvetica','Arial',sans-serif] font-normal">{key}</p>
+                              <p className="text-sm font-['IBM_Plex_Mono'] text-[#506C77]">{typeof value === 'string' ? value : JSON.stringify(value) || "-"}</p>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
                     <div>
-                      <p className="text-sm text-muted-foreground">Resolution</p>
-                      <p>{alert.security_detection.resolution}</p>
+                      <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Resolution</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#506C77]">{alert.security_detection.resolution}</p>
                     </div>
                   </CardContent>
                 </Card>
