@@ -22,7 +22,7 @@ export function Paginator({ currentPage, totalPages, totalRecords, itemsPerPage,
   const goToLast = () => onPageChange(totalPages)
 
   return (
-    <div className="flex w-full items-center justify-between p-2">
+    <div className="flex w-full items-center justify-between">
       <div className="flex-1 text-sm font-['IBM_Plex_Mono'] text-[#506C77]">
         {totalRecords} item{totalRecords !== 1 ? "s" : ""} • {itemsPerPage} per page
       </div>
