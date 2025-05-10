@@ -515,7 +515,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                     <div>
                       <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Severity</p>
                       <Badge variant="outline" className={getSeverityBadgeColor(alert.security_detection.severity)}>
-                        {alert.security_detection.severity.toUpperCase()}
+                        {alert.security_detection.severity}
                       </Badge>
                     </div>
                     <div>
@@ -527,9 +527,9 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         <p className="text-sm text-white font-['Helvetica','Arial',sans-serif] font-normal">Important Data</p>
                         <div className="grid grid-cols-1 gap-2">
                           {Object.entries(alert.security_detection.important_data).map(([key, value]) => (
-                            <div key={key} className="bg-muted p-2 rounded-md">
-                              <p className="text-xs text-white font-['Helvetica','Arial',sans-serif] font-normal">{key}</p>
-                              <p className="text-sm font-['IBM_Plex_Mono'] text-[#506C77]">{typeof value === 'string' ? value : JSON.stringify(value) || "-"}</p>
+                            <div key={key} className="bg-[#142A33] p-2 rounded-md">
+                              <p className="text-xs font-['IBM_Plex_Mono'] text-[#506C77]">{key}</p>
+                              <p className="text-sm font-['IBM_Plex_Mono'] text-white">{typeof value === 'string' ? value : JSON.stringify(value) || "-"}</p>
                             </div>
                           ))}
                         </div>
@@ -552,7 +552,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
                       {alert.mitre_techniques.map((technique: string) => (
-                        <Badge key={technique} variant="outline" className="bg-blue-500/10 text-blue-500">
+                        <Badge key={technique} variant="outline" className="rounded-[4px] bg-blue-500/10 text-blue-500">
                           {technique}
                         </Badge>
                       ))}
