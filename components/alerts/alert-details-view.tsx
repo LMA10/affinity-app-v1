@@ -199,7 +199,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
   return (
     <div
-      className="h-full w-full p-2 md:p-6 rounded-none md:rounded-lg max-h-[90vh] md:max-h-full shadow-sm bg-[#C7CDCF] border border-[#506C77] dark:bg-[#0D1315] dark:border-none"
+      className="h-full w-full p-2 md:p-6 max-h-[90vh] md:max-h-full shadow-sm bg-[#C7CDCF] border border-[#506C77] dark:bg-[#0D1315] dark:border-none"
       style={{ color: '#142A33' }}
     >
       <div className="relative mb-2 w-full">
@@ -236,60 +236,59 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
             )}
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-1 mt-[18px] w-full">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 !bg-[#CAD0D2] !border !border-[#506C77] flex items-center justify-center dark:!bg-[#0C2027] dark:!border-[#506C77]"
-            onClick={copyFullAlert}
-          >
-            <Copy className="h-4 w-4 text-[#506C77]" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 !bg-[#CAD0D2] !border !border-[#506C77] flex items-center justify-center dark:!bg-[#0C2027] dark:!border-[#506C77]"
-            onClick={exportAlertToJson}
-          >
-            <Download className="h-4 w-4 text-[#506C77]" />
-          </Button>
+        <div className="flex items-center justify-between w-full mb-2 gap-1" style={{height: '44px'}}>
+          <div className="flex h-10">
+            <div className="flex w-full h-full">
+              <button
+                className={`flex-0 flex items-center justify-center px-5 py-s h-10 font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
+                  ${activeTab === 'formatted'
+                    ? 'bg-[#506C77] border border-[#506C77] text-white dark:bg-[#506C77] dark:border-[#506C77] dark:text-white'
+                    : 'bg-[#AFBABE] text-[#142A33] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77] dark:text-white'}
+                  rounded-l-[6px'] ${activeTab === 'formatted' ? '' : 'border-r-0'}
+                `}
+                style={{ borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }}
+                onClick={() => setActiveTab('formatted')}
+                type="button"
+              >
+                Formatted View
+              </button>
+              <button
+                className={`flex-1 flex items-center justify-center px-5 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
+                  ${activeTab === 'raw'
+                    ? 'bg-[#506C77] border border-[#506C77] text-white dark:bg-[#506C77] dark:border-[#506C77] dark:text-white'
+                    : 'bg-[#AFBABE] text-[#142A33] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77] dark:text-white'}
+                  rounded-r-[8px] -ml-px
+                `}
+                style={{ borderTopRightRadius: 6, borderBottomRightRadius: 6 }}
+                onClick={() => setActiveTab('raw')}
+                type="button"
+              >
+                Raw JSON
+              </button>
+            </div>
+          </div>
+          <div className="flex gap-1 h-10 ml-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10 !bg-[#CAD0D2] !border !border-[#506C77] flex items-center justify-center dark:!bg-[#0C2027] dark:!border-[#506C77]"
+              onClick={copyFullAlert}
+            >
+              <Copy className="h-4 w-4 text-[#506C77]" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10 !bg-[#CAD0D2] !border !border-[#506C77] flex items-center justify-center dark:!bg-[#0C2027] dark:!border-[#506C77]"
+              onClick={exportAlertToJson}
+            >
+              <Download className="h-4 w-4 text-[#506C77]" />
+            </Button>
+          </div>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-2 w-full">
-        {/* Custom tab navigator styled like the logs page */}
-        <div className="flex w-full items-center justify-center mb-2" style={{height: '36px'}}>
-          <div className="flex w-full h-full">
-            <button
-              className={`flex-1 flex items-center justify-center px-4 py-2 h-full font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
-                ${activeTab === 'formatted'
-                  ? 'bg-[#506C77] border border-[#506C77] text-white dark:bg-[#506C77] dark:border-[#506C77] dark:text-white'
-                  : 'bg-[#AFBABE] text-[#142A33] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77] dark:text-white'}
-                rounded-l-[6px'] ${activeTab === 'formatted' ? '' : 'border-r-0'}
-              `}
-              style={{ borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }}
-              onClick={() => setActiveTab('formatted')}
-              type="button"
-            >
-              Formatted View
-            </button>
-            <button
-              className={`flex-1 flex items-center justify-center px-4 py-2 h-full font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
-                ${activeTab === 'raw'
-                  ? 'bg-[#506C77] border border-[#506C77] text-white dark:bg-[#506C77] dark:border-[#506C77] dark:text-white'
-                  : 'bg-[#AFBABE] text-[#142A33] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77] dark:text-white'}
-                rounded-r-[8px] -ml-px
-              `}
-              style={{ borderTopRightRadius: 6, borderBottomRightRadius: 6 }}
-              onClick={() => setActiveTab('raw')}
-              type="button"
-            >
-              Raw JSON
-            </button>
-          </div>
-        </div>
-        {/* End custom tab navigator */}
-
         <TabsContent value="formatted">
           <ScrollArea className="h-[calc(100vh-200px)] pr-1 md:pr-4 w-full hide-scrollbar">
             <div className="grid grid-cols-1 gap-2 w-full pb-4">
@@ -573,8 +572,8 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
         <TabsContent value="raw">
           <div className="flex justify-between items-center mb-4 w-full">
             <div className="flex items-center space-x-2">
-              <Switch id="prettify-json" checked={prettifyJson} onCheckedChange={setPrettifyJson} />
-              <Label htmlFor="prettify-json">Prettify JSON</Label>
+              <Switch id="prettify-json" checked={prettifyJson} onCheckedChange={setPrettifyJson} className="scale-[0.7] data-[state=unchecked]:bg-[#64828E]" />
+              <Label htmlFor="prettify-json" className="font-bold text-xs md:text-sm text-[#142A33] dark:text-white">Prettify JSON</Label>
             </div>
             <Button
               variant="outline"
@@ -587,7 +586,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
           </div>
           <div className="relative w-full">
             <ScrollArea className="h-[40vh] md:h-[calc(100vh-180px)] bg-transparent p-2 md:p-4 rounded-md border-0 w-full">
-              <pre className="font-mono text-xs md:text-sm whitespace-pre-wrap break-all w-full">
+              <pre className="font-mono text-xs md:text-sm whitespace-pre-wrap break-all w-full bg-[#AFBABE] text-[#0C2027] dark:text-[#EA651A] dark:bg-[#0C2027]">
                 {JSON.stringify(alert, undefined, prettifyJson ? 2 : undefined)}
               </pre>
             </ScrollArea>
