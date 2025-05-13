@@ -86,7 +86,7 @@ const CardContent = React.forwardRef<
     <div 
       ref={ref} 
       className={cn(
-        "p-6 pt-1 font-['Helvetica','Arial',sans-serif] text-white [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6] break-words overflow-x-auto w-full",
+        "p-6 pt-0 font-['Helvetica','Arial',sans-serif] text-white [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6] break-words overflow-x-auto w-full",
         className
       )} 
       {...props}
@@ -103,7 +103,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pt-0 font-['Helvetica','Arial',sans-serif] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6]", className)}
+    className={cn("flex items-center p-6 pb-10 pt-0 font-['Helvetica','Arial',sans-serif] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6]", className)}
     {...props}
   />
 ))

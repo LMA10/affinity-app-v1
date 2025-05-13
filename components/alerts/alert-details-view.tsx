@@ -199,7 +199,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
   return (
     <div
-      className="h-full w-full p-2 md:p-6 max-h-[90vh] md:max-h-full shadow-sm bg-[#C7CDCF] border border-[#506C77] dark:bg-[#0D1315] dark:border-none"
+      className="h-full w-full p-2 md:p-6 max-h-[90vh] md:max-h-full shadow-sm bg-[#F8FAFC] border border-[#506C77] dark:bg-[#0D1315] dark:border-none"
       style={{ color: '#142A33' }}
     >
       <div className="relative mb-2 w-full">
