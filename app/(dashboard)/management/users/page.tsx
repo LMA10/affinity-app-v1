@@ -37,6 +37,8 @@ import { useToast } from "@/hooks/use-toast"
 import { UsersTable } from "@/components/users/users-table"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useTheme } from "next-themes"
+import { SearchBar } from "@/components/ui/search-bar"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -296,29 +298,15 @@ export default function UsersPage() {
           }}>
             <span style={{ color: theme === 'light' ? '#FF7120' : '#EA661B', fontWeight: 700, fontSize: 13 }}>User Management</span> / manage users and access control
           </div>
-          <div style={{ color: '#0C2027' }}>
-            <div style={{ color: '#0C2027' }}>
-              <ThemeToggle />
-            </div>
+          <div style={{ color: '#0C2027' }} className="flex items-center gap-2">
+            <ThemeToggle />
           </div>
         </div>
       </div>
-      <PageHeader
-        title="User Management"
-        description="Manage users and access control"
-        actions={
-          isAdmin && (
-            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => setIsAddUserModalOpen(true)}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add User
-            </Button>
-          )
-        }
-      />
 
       <div className="flex-1 p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-[#0f1d24] border-orange-600/20">
+          <Card className="border-orange-600/20" style={{ backgroundColor: theme === 'light' ? '#E8E8E8' : '#0f1d24' }}>
             <CardHeader className="pb-2">
               <CardDescription>Total Users</CardDescription>
               <CardTitle className="text-2xl text-orange-500">{totalUsers}</CardTitle>
@@ -331,7 +319,7 @@ export default function UsersPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-[#0f1d24] border-orange-600/20">
+          <Card className="border-orange-600/20" style={{ backgroundColor: theme === 'light' ? '#E8E8E8' : '#0f1d24' }}>
             <CardHeader className="pb-2">
               <CardDescription>Administrators</CardDescription>
               <CardTitle className="text-2xl text-orange-500">{adminUsers}</CardTitle>
@@ -344,7 +332,7 @@ export default function UsersPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-[#0f1d24] border-orange-600/20">
+          <Card className="border-orange-600/20" style={{ backgroundColor: theme === 'light' ? '#E8E8E8' : '#0f1d24' }}>
             <CardHeader className="pb-2">
               <CardDescription>Pending Invitations</CardDescription>
               <CardTitle className="text-2xl text-orange-500">{pendingInvitations}</CardTitle>
@@ -357,7 +345,7 @@ export default function UsersPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-[#0f1d24] border-orange-600/20">
+          <Card className="border-orange-600/20" style={{ backgroundColor: theme === 'light' ? '#E8E8E8' : '#0f1d24' }}>
             <CardHeader className="pb-2">
               <CardDescription>Locked Accounts</CardDescription>
               <CardTitle className="text-2xl text-orange-500">{lockedAccounts}</CardTitle>
@@ -371,22 +359,34 @@ export default function UsersPage() {
           </Card>
         </div>
 
-        <Card className="bg-[#0f1d24] border-orange-600/20">
+        <Card className="border-orange-600/20" style={{ backgroundColor: theme === 'light' ? '#E8E8E8' : '#0f1d24' }}>
           <CardHeader>
-            <CardTitle className="text-orange-500">Users</CardTitle>
-            <CardDescription>Manage system users and permissions</CardDescription>
+            {(() => {
+              const titleColor = theme === 'light' ? '#FF7120' : '#EA661B';
+              const textColor = '#506C77';
+              return (
+                <div
+                  style={{
+                    color: textColor,
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '12.3px',
+                    marginBottom: 20,
+                    lineHeight: '13px',
+                  }}
+                >
+                  <span style={{ color: titleColor, fontWeight: 700, fontSize: 13 }}>User Management</span> / manage users and access control
+                </div>
+              );
+            })()}
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search users..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <div className="flex flex-col sm:flex-row gap-2 mb-6 items-center">
+              <SearchBar
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={setSearchQuery}
+              />
               {/*
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -403,22 +403,24 @@ export default function UsersPage() {
               </DropdownMenu>
                 */}
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full sm:w-[180px]">
-                    Status:{" "}
-                    {statusFilter === "all" ? "All" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setStatusFilter("all")}>All Statuses</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("active")}>Active</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("inactive")}>Inactive</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("locked")}>Locked</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("pending")}>Pending</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] font-normal font-['Helvetica','Arial',sans-serif']">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="font-normal font-['Helvetica','Arial',sans-serif']">All Statuses</SelectItem>
+                  <SelectItem value="active" className="font-normal font-['Helvetica','Arial',sans-serif']">Active</SelectItem>
+                  <SelectItem value="inactive" className="font-normal font-['Helvetica','Arial',sans-serif']">Inactive</SelectItem>
+                  <SelectItem value="locked" className="font-normal font-['Helvetica','Arial',sans-serif']">Locked</SelectItem>
+                  <SelectItem value="pending" className="font-normal font-['Helvetica','Arial',sans-serif']">Pending</SelectItem>
+                </SelectContent>
+              </Select>
+              {isAdmin && (
+                <Button className="bg-orange-600 hover:bg-orange-700 ml-0 sm:ml-2 h-10" onClick={() => setIsAddUserModalOpen(true)}>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add User
+                </Button>
+              )}
             </div>
 
             {loading ? (

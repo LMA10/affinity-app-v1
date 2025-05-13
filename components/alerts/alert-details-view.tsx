@@ -291,7 +291,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-2 w-full">
         <TabsContent value="formatted">
           <ScrollArea className="h-[calc(100vh-200px)] pr-1 md:pr-4 w-full hide-scrollbar">
-            <div className="grid grid-cols-1 gap-2 w-full pb-4">
+            <div className="grid grid-cols-1 gap-4 w-full pb-4">
               {/* Alert Management */}
               <Card className="bg-[#E5E5E5] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77]" style={{ borderWidth: 1, color: '#142A33' }}>
                 <CardHeader className="pb-0">
