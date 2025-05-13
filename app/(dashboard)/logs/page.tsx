@@ -37,6 +37,7 @@ import type { ChangeEvent } from "react"
 import { Paginator } from "@/components/ui/paginator"
 import useLogsState from "@/lib/state/logs/logsState"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useTheme } from "next-themes"
 
 export default function LogsPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -67,7 +68,7 @@ export default function LogsPage() {
     setCurrentPage,
   } = useLogsState()
   const [hasRunQuery, setHasRunQuery] = useState(false)
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
+  const { theme } = useTheme()
 
   // Fetch databases when the component mounts
   useEffect(() => {
@@ -349,7 +350,7 @@ export default function LogsPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={{ backgroundColor: theme === 'dark' ? '#0E1A1F' : '#E5E5E5' }}>
       <div className="px-12 py-4">
         <div className="flex justify-between items-center">
           <div style={{ 

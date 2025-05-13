@@ -13,6 +13,7 @@ import { Modal } from "@/components/ui/modal"
 import { useIntegrationsStore } from "@/lib/state/integrations/integrationsState"
 import { toast } from "@/hooks/use-toast"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useTheme } from "next-themes"
 
 export default function IntegrationsPage() {
   const { integrations, isLoading, error, fetchIntegrations } = useIntegrations()
@@ -20,7 +21,7 @@ export default function IntegrationsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null)
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
+  const { theme } = useTheme()
   const deleteIntegration = useIntegrationsStore((s) => s.deleteIntegration)
 
   const handleRefresh = () => {
@@ -100,7 +101,7 @@ export default function IntegrationsPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={{ backgroundColor: theme === 'dark' ? '#0E1A1F' : '#E5E5E5' }}>
       <div className="px-12 py-4">
         <div className="flex justify-between items-center">
           <div style={{ 

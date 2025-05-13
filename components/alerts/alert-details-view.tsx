@@ -238,35 +238,35 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
         </div>
         <div className="flex items-center justify-between w-full mb-2 gap-1" style={{height: '44px'}}>
           <div className="flex h-10">
-            <div className="flex w-full h-full">
-              <button
-                className={`flex-0 flex items-center justify-center px-5 py-s h-10 font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
+          <div className="flex w-full h-full">
+            <button
+                className={`flex-0 flex items-center justify-center px-5 py-s h-10 font-bold font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
                   ${activeTab === 'formatted'
                     ? 'bg-[#506C77] border border-[#506C77] text-white dark:bg-[#506C77] dark:border-[#506C77] dark:text-white'
                     : 'bg-[#AFBABE] text-[#142A33] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77] dark:text-white'}
                   rounded-l-[6px'] ${activeTab === 'formatted' ? '' : 'border-r-0'}
-                `}
-                style={{ borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }}
-                onClick={() => setActiveTab('formatted')}
-                type="button"
-              >
-                Formatted View
-              </button>
-              <button
-                className={`flex-1 flex items-center justify-center px-5 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
+              `}
+              style={{ borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }}
+              onClick={() => setActiveTab('formatted')}
+              type="button"
+            >
+              Formatted View
+            </button>
+            <button
+                className={`flex-1 flex items-center justify-center px-4 py-2 h-10 font-bold font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
                   ${activeTab === 'raw'
                     ? 'bg-[#506C77] border border-[#506C77] text-white dark:bg-[#506C77] dark:border-[#506C77] dark:text-white'
                     : 'bg-[#AFBABE] text-[#142A33] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77] dark:text-white'}
-                  rounded-r-[8px] -ml-px
-                `}
-                style={{ borderTopRightRadius: 6, borderBottomRightRadius: 6 }}
-                onClick={() => setActiveTab('raw')}
-                type="button"
-              >
-                Raw JSON
-              </button>
-            </div>
+                rounded-r-[8px] -ml-px
+              `}
+              style={{ borderTopRightRadius: 6, borderBottomRightRadius: 6 }}
+              onClick={() => setActiveTab('raw')}
+              type="button"
+            >
+              Raw JSON
+            </button>
           </div>
+        </div>
           <div className="flex gap-1 h-10 ml-2">
             <Button
               variant="outline"
@@ -294,13 +294,13 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
             <div className="grid grid-cols-1 gap-2 w-full pb-4">
               {/* Alert Management */}
               <Card className="bg-[#E5E5E5] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77]" style={{ borderWidth: 1, color: '#142A33' }}>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-0">
                   <CardTitle className="text-lg text-base md:text-xl text-[#142A33] dark:text-[#EA651A]">Alert Management</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4 p-3 md:p-6 text-[#142A33] dark:text-white">
-                  <div className="grid grid-cols-1 gap-1.5">
+                <CardContent className="space-y-4 p-3 md:p-6 text-[#142A33] dark:text-white pt-3">
+                  <div className="grid grid-cols-1 gap-3">
                     <div>
-                      <Label htmlFor="status" className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">
+                      <Label htmlFor="status" className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">
                         Status
                       </Label>
                       <Select value={status} onValueChange={setStatus}>
@@ -317,7 +317,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                     </div>
 
                     <div>
-                      <Label htmlFor="owner" className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">
+                      <Label htmlFor="owner" className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">
                         Owner
                       </Label>
                       <Select value={owner} onValueChange={setOwner}>
@@ -331,7 +331,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                     </div>
 
                     <div>
-                      <Label htmlFor="resolved-by" className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">
+                      <Label htmlFor="resolved-by" className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">
                         Resolved By
                       </Label>
                       <Select
@@ -349,7 +349,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                     </div>
 
                     <div>
-                      <Label htmlFor="false-positive" className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">
+                      <Label htmlFor="false-positive" className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">
                         False Positive
                       </Label>
                       <Select
@@ -368,8 +368,8 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
                     {alert.alert_management?.timestamp && (
                       <div>
-                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Last Updated</p>
-                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{formatTimestamp(alert.alert_management.timestamp)}</p>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Last Updated</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{formatTimestamp(alert.alert_management.timestamp)}</p>
                       </div>
                     )}
                   </div>
@@ -398,34 +398,34 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
               {/* Alert Overview */}
               <Card className="bg-[#E5E5E5] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77]" style={{ borderWidth: 1, color: '#142A33' }}>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-0">
                   <CardTitle className="text-lg text-base md:text-xl text-[#142A33] dark:text-[#EA651A]">Alert Overview</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 p-3 md:p-6 text-[#142A33] dark:text-white">
-                  <div className="grid grid-cols-1 gap-2">
+                <CardContent className="space-y-2 p-3 md:p-6 text-[#142A33] dark:text-white pt-3">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Alert Name</p>
-                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.metadata?.rule_name || "-"}</p>
+                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Alert Name</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.metadata?.rule_name || "-"}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Alert ID</p>
-                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] break-all">{alert.alert_id}</p>
+                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Alert ID</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] break-all font-light">{alert.alert_id}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Client</p>
-                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.client}</p>
+                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Client</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.client}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Rule ID</p>
-                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.rule_id}</p>
+                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Rule ID</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.rule_id}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Events Count</p>
-                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.events}</p>
+                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Events Count</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.events}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Time</p>
-                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{formatTimestamp(alert.event?.time)}</p>
+                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Time</p>
+                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{formatTimestamp(alert.event?.time)}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -434,26 +434,26 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               {/* Metadata */}
               {alert.metadata && (
                 <Card className="bg-[#E5E5E5] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77]" style={{ borderWidth: 1, color: '#142A33' }}>
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-0">
                     <CardTitle className="text-lg text-base md:text-xl text-[#142A33] dark:text-[#EA651A]">Rule Metadata</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2 p-3 md:p-6 text-[#142A33] dark:text-white">
-                    <div className="grid grid-cols-1 gap-2">
+                  <CardContent className="space-y-2 p-3 md:p-6 text-[#142A33] dark:text-white pt-3">
+                    <div className="grid grid-cols-1 gap-4">
                       <div>
-                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Rule Name</p>
-                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.metadata.rule_name}</p>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Rule Name</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.metadata.rule_name}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Rule Type</p>
-                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.metadata.rule_type}</p>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Rule Type</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.metadata.rule_type}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Enabled</p>
-                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.metadata.enabled ? "Yes" : "No"}</p>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Enabled</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.metadata.enabled ? "Yes" : "No"}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Custom</p>
-                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.metadata.custom ? "Yes" : "No"}</p>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Custom</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.metadata.custom ? "Yes" : "No"}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -463,48 +463,43 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               {/* Event Information */}
               {alert.event && (
                 <Card className="bg-[#E5E5E5] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77]" style={{ borderWidth: 1, color: '#142A33' }}>
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-0">
                     <CardTitle className="text-lg text-base md:text-xl text-[#142A33] dark:text-[#EA651A]">Event Information</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2 p-3 md:p-6 text-[#142A33] dark:text-white">
-                    <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Iteration</p>
-                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.event.iteration}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Query</p>
-                      <pre className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-xs bg-muted p-2 rounded-md overflow-x-auto">
-                        {alert.event.query}
-                      </pre>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-2 w-full bg-[#EA651A] text-white border-none hover:bg-[#d95c17] btn-execute-query"
-                        onClick={() => {
-                          // Copy query to clipboard
-                          navigator.clipboard.writeText(alert.event.query)
-
-                          // Store query for the logs page
-                          storeQuery(alert.event.query)
-
-                          // Show toast notification
-                          toast({
-                            title: "Query copied",
-                            description: "Redirecting to logs page...",
-                            duration: 2000,
-                          })
-
-                          // Redirect to logs page
-                          router.push("/logs")
-                        }}
-                      >
-                        <PlayCircle className="h-4 w-4 mr-2" />
-                        Execute Query
-                      </Button>
-                    </div>
-                    <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Time</p>
-                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{formatTimestamp(alert.event.time)}</p>
+                  <CardContent className="space-y-2 p-3 md:p-6 text-[#142A33] dark:text-white pt-3">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Iteration</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.event.iteration}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Query</p>
+                        <pre className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-xs bg-muted p-2 rounded-md overflow-x-auto font-light">
+                          {alert.event.query}
+                        </pre>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2 w-full bg-[#EA651A] text-white border-none hover:bg-[#d95c17] btn-execute-query"
+                          onClick={() => {
+                            navigator.clipboard.writeText(alert.event.query)
+                            storeQuery(alert.event.query)
+                            toast({
+                              title: "Query copied",
+                              description: "Redirecting to logs page...",
+                              duration: 2000,
+                            })
+                            router.push("/logs")
+                          }}
+                        >
+                          <PlayCircle className="h-4 w-4 mr-2" />
+                          Execute Query
+                        </Button>
+                      </div>
+                      <div>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Time</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{formatTimestamp(alert.event.time)}</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -513,36 +508,38 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               {/* Security Detection */}
               {alert.security_detection && (
                 <Card className="bg-[#E5E5E5] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77]" style={{ borderWidth: 1, color: '#142A33' }}>
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-0">
                     <CardTitle className="text-lg text-base md:text-xl text-[#142A33] dark:text-[#EA651A]">Security Detection</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2 p-3 md:p-6 text-[#142A33] dark:text-white">
-                    <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Severity</p>
-                      <Badge variant="outline" className={getSeverityBadgeColor(alert.security_detection.severity)}>
-                        {alert.security_detection.severity}
-                      </Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Description</p>
-                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.security_detection.description}</p>
-                    </div>
-                    {alert.security_detection.important_data && (
+                  <CardContent className="space-y-2 p-3 md:p-6 text-[#142A33] dark:text-white pt-3">
+                    <div className="grid grid-cols-1 gap-4">
                       <div>
-                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Important Data</p>
-                        <div className="grid grid-cols-1 gap-2">
-                          {Object.entries(alert.security_detection.important_data).map(([key, value]) => (
-                            <div key={key} className="bg-[#142A33] p-2 rounded-md">
-                              <p className="text-xs font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white">{key}</p>
-                              <p className="text-sm font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{typeof value === 'string' ? value : JSON.stringify(value) || "-"}</p>
-                            </div>
-                          ))}
-                        </div>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Severity</p>
+                        <Badge variant="outline" className={getSeverityBadgeColor(alert.security_detection.severity)}>
+                          {alert.security_detection.severity}
+                        </Badge>
                       </div>
-                    )}
-                    <div>
-                      <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-medium">Resolution</p>
-                      <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px]">{alert.security_detection.resolution}</p>
+                      <div>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Description</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.security_detection.description}</p>
+                      </div>
+                      {alert.security_detection.important_data && (
+                        <div>
+                          <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Important Data</p>
+                          <div className="grid grid-cols-1 gap-4">
+                            {Object.entries(alert.security_detection.important_data).map(([key, value]) => (
+                              <div key={key} className="bg-[#142A33] p-2 rounded-md">
+                                <p className="text-xs font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white font-light">{key}</p>
+                                <p className="text-sm font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{typeof value === 'string' ? value : JSON.stringify(value) || "-"}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Resolution</p>
+                        <p className="font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{alert.security_detection.resolution}</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -551,13 +548,13 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               {/* MITRE Techniques */}
               {alert.mitre_techniques && alert.mitre_techniques.length > 0 && (
                 <Card className="bg-[#E5E5E5] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77]" style={{ borderWidth: 1, color: '#142A33' }}>
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-0">
                     <CardTitle className="text-lg text-base md:text-xl text-[#142A33] dark:text-[#EA651A]">MITRE ATT&CK Techniques</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
                       {alert.mitre_techniques.map((technique: string) => (
-                        <Badge key={technique} variant="outline" className="rounded-[4px] bg-blue-500/10 text-blue-500">
+                        <Badge key={technique} variant="outline" className="rounded-[4px] bg-[#00AAE5]/10 text-[#00AAE5]">
                           {technique}
                         </Badge>
                       ))}

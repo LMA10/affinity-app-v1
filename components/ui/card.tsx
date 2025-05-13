@@ -9,7 +9,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm font-['Helvetica','Arial',sans-serif] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6]",
+      "rounded-lg border bg-card text-card-foreground shadow-sm font-['Helvetica','Arial',sans-serif] font-bold [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6]",
       className
     )}
     {...props}
@@ -23,7 +23,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-[0.375rem] p-6 pb-0 font-['Helvetica','Arial',sans-serif] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6]", className)}
+    className={cn("flex flex-col space-y-[0.375rem] p-6 pb-0 font-['Helvetica','Arial',sans-serif] font-bold [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6]", className)}
     {...props}
   />
 ))
@@ -50,7 +50,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-[12px] font-['Helvetica','Arial',sans-serif] text-[#849DA6] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6]", className)}
+    className={cn("text-[12px] font-['Helvetica','Arial',sans-serif] font-bold text-[#849DA6] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6]", className)}
     {...props}
   />
 ))
@@ -74,7 +74,7 @@ const CardContent = React.forwardRef<
       return React.cloneElement(child as React.ReactElement<any>, {
         className: cn(
           (child.props as any)?.className,
-          "text-[12px] font-['Helvetica','Arial',sans-serif]",
+          "text-[12px] font-['Helvetica','Arial',sans-serif] font-bold",
           shouldBeWhite ? "text-white" : "text-[#849DA6]"
         )
       })
@@ -86,7 +86,7 @@ const CardContent = React.forwardRef<
     <div 
       ref={ref} 
       className={cn(
-        "p-6 pt-0 font-['Helvetica','Arial',sans-serif] text-white [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6] break-words overflow-x-auto w-full",
+        "p-6 pt-0 font-['Helvetica','Arial',sans-serif] font-bold text-white [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6] break-words overflow-x-auto w-full",
         className
       )} 
       {...props}
@@ -103,7 +103,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pb-10 pt-0 font-['Helvetica','Arial',sans-serif] [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6]", className)}
+    className={cn("flex items-center p-6 pb-10 pt-0 font-['Helvetica','Arial',sans-serif] font-bold [&_button:disabled]:bg-[#0C2027] [&_button:disabled]:border [&_button:disabled]:border-[#849DA6]", className)}
     {...props}
   />
 ))

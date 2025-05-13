@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Loading } from "@/components/loading"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useTheme } from "next-themes"
 
 // Mock data for notification rules
 const notificationRules = [
@@ -114,7 +115,7 @@ export default function NotificationsPage() {
   const [isEditChannelModalOpen, setIsEditChannelModalOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedChannel, setSelectedChannel] = useState<NotificationChannel | null>(null)
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
+  const { theme } = useTheme()
   const { channels, isLoading, error, fetchChannels, deleteChannel } = useNotificationState()
 
   // Fetch channels on component mount
@@ -168,7 +169,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={{ backgroundColor: theme === 'dark' ? '#0E1A1F' : '#E5E5E5' }}>
       <div className="px-12 py-4">
         <div className="flex justify-between items-center">
           <div style={{ 

@@ -36,6 +36,7 @@ import { Modal } from "@/components/ui/modal"
 import { useToast } from "@/hooks/use-toast"
 import { UsersTable } from "@/components/users/users-table"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useTheme } from "next-themes"
 
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -52,7 +53,7 @@ export default function UsersPage() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showRepeatNewPassword, setShowRepeatNewPassword] = useState(false)
   const [userGroups, setUserGroups] = useState<{ [username: string]: string[] }>({})
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
+  const { theme } = useTheme()
   const groupsFetchedRef = useRef(false)
   const [currentUser, setCurrentUser] = useState<string | null>(null)
   const [deleteUserModalOpen, setDeleteUserModalOpen] = useState(false)
@@ -282,7 +283,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={{ backgroundColor: theme === 'dark' ? '#0E1A1F' : '#E5E5E5' }}>
       <div className="px-12 py-4">
         <div className="flex justify-between items-center">
           <div style={{ 
