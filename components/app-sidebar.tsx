@@ -114,7 +114,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="dark:!bg-[#142A33] !bg-[#CAD0D2] border-r dark:border-orange-500 border-transparent">
       <div className="absolute right-0 top-8 translate-x-1/2 z-20 dark:!bg-[#142A33] !bg-[#CAD0D2] rounded-md p-0.5 shadow-md flex border border-orange-500">
-        <SidebarTrigger className="h-7 w-6 dark:text-orange-500 text-[#142A33] flex items-center justify-center font-['IBM_Plex_Mono'] text-lg -translate-y-0.5" />
+        <SidebarTrigger className="h-7 w-6 dark:text-orange-500 text-[#142A33] flex items-center justify-center font-['IBM_Plex_Mono'] text-lg text-[14px] -translate-y-0.5" />
       </div>
       <SidebarHeader className="dark:!bg-[#142A33] !bg-[#CAD0D2]">
         <div className="flex items-center p-4 translate-x-[30px]">
@@ -252,7 +252,7 @@ export function AppSidebar() {
         {userEmail && (
           <div className="flex items-center justify-between px-4">
             <div>
-              <div className="text-[10px] text-[#506C77] mb-1 font-['IBM_Plex_Mono'] font-normal">Signed in as</div>
+              <div className="text-[10px] text-[#506C77] mb-1 font-['IBM_Plex_Mono'] font-normal text-[14px]">Signed in as</div>
               <div className="text-xs dark:text-[#EA661B] text-[#142A33] mb-2 truncate" title={userEmail}>
                 {userEmail}
               </div>

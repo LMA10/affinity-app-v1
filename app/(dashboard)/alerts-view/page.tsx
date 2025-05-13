@@ -183,7 +183,7 @@ export default function AlertsViewPage() {
           {/* Search and Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-white dark:text-white text-[#506C77]" />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-[#0C2027] dark:text-white" />
               <Input placeholder="Search alerts..." value={searchQuery} onChange={handleSearch} className="pl-10 !bg-[#CAD0D2] dark:!bg-[#0D1315] !border-none !text-[#506C77] dark:!text-white placeholder-[#506C77] dark:placeholder-white" />
             </div>
 
