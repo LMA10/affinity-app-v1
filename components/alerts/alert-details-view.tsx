@@ -199,7 +199,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
 
   return (
     <div
-      className="h-full w-full p-2 md:p-6 max-h-[90vh] md:max-h-full shadow-sm bg-[#F8FAFC] border border-[#506C77] dark:bg-[#0D1315] dark:border-none"
+      className="h-full w-full p-2 md:p-6 max-h-[90vh] md:max-h-full shadow-sm bg-[#C7CDCF] border border-[#506C77] dark:bg-[#0D1315] dark:border-none"
       style={{ color: '#142A33' }}
     >
       <div className="relative mb-2 w-full">
@@ -240,10 +240,10 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
           <div className="flex h-10">
           <div className="flex w-full h-full">
             <button
-                className={`flex-0 flex items-center justify-center px-5 py-s h-10 font-bold font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
+                className={`flex-0 flex items-center justify-center px-5 py-s h-10 font-['Helvetica','Arial',sans-serif] font-normal text-sm focus:outline-none transition-colors
                   ${activeTab === 'formatted'
                     ? 'bg-[#506C77] border border-[#506C77] text-white dark:bg-[#506C77] dark:border-[#506C77] dark:text-white'
-                    : 'bg-[#AFBABE] text-[#142A33] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77] dark:text-white'}
+                    : 'bg-[#AFBABE] text-[#142A33] dark:bg-[#0C2027] dark:text-white'}
                   rounded-l-[6px'] ${activeTab === 'formatted' ? '' : 'border-r-0'}
               `}
               style={{ borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }}
@@ -253,10 +253,10 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               Formatted View
             </button>
             <button
-                className={`flex-1 flex items-center justify-center px-4 py-2 h-10 font-bold font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
+                className={`flex-1 flex items-center justify-center px-4 py-2 h-10 font-['Helvetica','Arial',sans-serif] font-normal text-sm focus:outline-none transition-colors
                   ${activeTab === 'raw'
                     ? 'bg-[#506C77] border border-[#506C77] text-white dark:bg-[#506C77] dark:border-[#506C77] dark:text-white'
-                    : 'bg-[#AFBABE] text-[#142A33] border border-[#506C77] dark:bg-[#0C2027] dark:border-[#506C77] dark:text-white'}
+                    : 'bg-[#AFBABE] text-[#142A33] dark:bg-[#0C2027] dark:text-white'}
                 rounded-r-[8px] -ml-px
               `}
               style={{ borderTopRightRadius: 6, borderBottomRightRadius: 6 }}
@@ -304,14 +304,14 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         Status
                       </Label>
                       <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger id="status" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
+                        <SelectTrigger id="status" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1 font-['Helvetica','Arial',sans-serif] font-normal">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="open">Open</SelectItem>
-                          <SelectItem value="investigating">Investigating</SelectItem>
-                          <SelectItem value="resolved">Resolved</SelectItem>
-                          <SelectItem value="false_positive">False Positive</SelectItem>
+                          <SelectItem value="open" className="font-['Helvetica','Arial',sans-serif] font-normal">Open</SelectItem>
+                          <SelectItem value="investigating" className="font-['Helvetica','Arial',sans-serif] font-normal">Investigating</SelectItem>
+                          <SelectItem value="resolved" className="font-['Helvetica','Arial',sans-serif] font-normal">Resolved</SelectItem>
+                          <SelectItem value="false_positive" className="font-['Helvetica','Arial',sans-serif] font-normal">False Positive</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -321,11 +321,11 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         Owner
                       </Label>
                       <Select value={owner} onValueChange={setOwner}>
-                        <SelectTrigger id="owner" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
+                        <SelectTrigger id="owner" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1 font-['Helvetica','Arial',sans-serif] font-normal">
                           <SelectValue placeholder="Select owner" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={userEmail}>{userEmail}</SelectItem>
+                          <SelectItem value={userEmail} className="font-['Helvetica','Arial',sans-serif] font-normal">{userEmail}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -338,12 +338,12 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         value={resolvedBy}
                         onValueChange={(value) => setResolvedBy(value)}
                       >
-                        <SelectTrigger id="resolved-by" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
+                        <SelectTrigger id="resolved-by" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1 font-['Helvetica','Arial',sans-serif] font-normal">
                           <SelectValue placeholder="Select resolved by" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="not_resolved">Not Resolved</SelectItem>
-                          <SelectItem value="resolved">Resolved</SelectItem>
+                          <SelectItem value="not_resolved" className="font-['Helvetica','Arial',sans-serif] font-normal">Not Resolved</SelectItem>
+                          <SelectItem value="resolved" className="font-['Helvetica','Arial',sans-serif] font-normal">Resolved</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -356,12 +356,12 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         value={isFalsePositive ? "true" : "false"}
                         onValueChange={(value) => setIsFalsePositive(value === "true")}
                       >
-                        <SelectTrigger id="false-positive" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1">
+                        <SelectTrigger id="false-positive" className="w-full !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] mt-1 font-['Helvetica','Arial',sans-serif] font-normal">
                           <SelectValue placeholder="Select false positive status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="false">No</SelectItem>
-                          <SelectItem value="true">Yes</SelectItem>
+                          <SelectItem value="false" className="font-['Helvetica','Arial',sans-serif] font-normal">No</SelectItem>
+                          <SelectItem value="true" className="font-['Helvetica','Arial',sans-serif] font-normal">Yes</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -526,11 +526,11 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                       {alert.security_detection.important_data && (
                         <div>
                           <p className="text-sm text-[#849DA6] dark:text-[#849DA6] font-['Helvetica','Arial',sans-serif] font-bold">Important Data</p>
-                          <div className="grid grid-cols-1 gap-4">
+                          <div className="grid grid-cols-1 gap-1">
                             {Object.entries(alert.security_detection.important_data).map(([key, value]) => (
-                              <div key={key} className="bg-[#142A33] p-2 rounded-md">
-                                <p className="text-xs font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white font-light">{key}</p>
-                                <p className="text-sm font-['IBM_Plex_Mono'] text-[#142A33] dark:text-white text-[14px] font-light">{typeof value === 'string' ? value : JSON.stringify(value) || "-"}</p>
+                              <div key={key} className="bg-[#AFBABE] dark:bg-[#0D1315] rounded-md mb-2 p-[10px] text-[#142A33] dark:text-[#CAD0D2]">
+                                <p className="text-xs font-['IBM_Plex_Mono'] text-[#142A33] dark:text-[#CAD0D2]">{key}</p>
+                                <p className="text-sm font-['IBM_Plex_Mono'] text-[14px] font-light text-[#142A33] dark:text-[#CAD0D2]">{typeof value === 'string' ? value : JSON.stringify(value) || "-"}</p>
                               </div>
                             ))}
                           </div>
