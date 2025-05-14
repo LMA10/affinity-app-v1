@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { CheckCircle, AlertCircle, Pencil, Save, X } from "lucide-react"
 import { useIntegrations } from "@/lib/hooks/use-integrations"
 import { toast } from "@/components/ui/use-toast"
+import { useTheme } from "next-themes"
 
 interface IntegrationDetailsModalProps {
   integration: Integration | null
@@ -21,6 +22,7 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
   const [editedIntegration, setEditedIntegration] = useState<Integration | null>(null)
   const { updateIntegration } = useIntegrations()
   const [isSaving, setIsSaving] = useState(false)
+  const { theme } = useTheme()
 
   // Reset state when modal opens with new integration
   useEffect(() => {
@@ -72,14 +74,51 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Integration Details: ${integration.log_name}`}
       className="sm:max-w-[700px]"
     >
-      <div className="p-6 space-y-6">
+      <div
+        className="p-6 space-y-6"
+        style={{
+          background: theme === 'dark' ? '#0C2027' : '#F2F2F2',
+          border: '1px solid #506C77',
+        }}
+      >
+        {/* Custom header */}
+        <div className="flex items-center gap-2 mb-4">
+          <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 700, color: '#EA661B', fontSize: 12 }}>
+            Integration detail
+          </span>
+          <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: '#506C77', fontSize: 12 }}>
+            / {integration.log_name}
+          </span>
+        </div>
+
         {/* Header with Status and Edit/Save buttons */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <h3 className="text-lg font-medium">Status</h3>
+        <div className="flex items-center w-full mb-4">
+          <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 700, color: '#EA661B' }}>Status</span>
+          {!isEditing && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-2 h-7 w-7 !bg-[#0D1315] dark:!bg-[#0D1315] !border-none hover:!bg-[#182325]"
+              style={{ boxShadow: 'none' }}
+              onClick={() => setIsEditing(true)}
+            >
+              <Pencil className="h-4 w-4" style={{ color: '#64828E' }} />
+            </Button>
+          )}
+          {isEditing && (
+            <>
+              <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving} className="ml-2">
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSave} disabled={isSaving} className="ml-2">
+                <Save className="h-4 w-4 mr-1" />
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+            </>
+          )}
+          <div className="flex-1 flex justify-end">
             <Badge
               variant="outline"
               className={
@@ -91,29 +130,9 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
               {editedIntegration.enabled ? "Active" : "Inactive"}
             </Badge>
           </div>
-
-          <div className="flex gap-2">
-            {isEditing ? (
-              <>
-                <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving}>
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-                <Button size="sm" onClick={handleSave} disabled={isSaving}>
-                  <Save className="h-4 w-4 mr-1" />
-                  {isSaving ? "Saving..." : "Save"}
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                <Pencil className="h-4 w-4 mr-1" />
-                Edit
-              </Button>
-            )}
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Left Column */}
           <div className="space-y-6">
             {/* Basic Information */}
@@ -124,7 +143,9 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
 
               <div className="grid grid-cols-[140px_1fr] gap-y-3 text-sm">
                 <span className="text-muted-foreground">Integration ID:</span>
-                <span className="font-mono text-xs break-all">{editedIntegration.integration_id}</span>
+                <div className="flex w-full justify-end items-center">
+                  <span className="font-mono text-xs break-all text-right" style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }}>{editedIntegration.integration_id}</span>
+                </div>
 
                 <span className="text-muted-foreground">Log Name:</span>
                 {isEditing ? (
@@ -134,11 +155,15 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                     className="h-7 text-sm"
                   />
                 ) : (
-                  <span>{editedIntegration.log_name || ""}</span>
+                  <div className="flex w-full justify-end items-center">
+                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.log_name || ""}</span>
+                  </div>
                 )}
 
                 <span className="text-muted-foreground">Log Type:</span>
-                <span>{editedIntegration.log_type || ""}</span>
+                <div className="flex w-full justify-end items-center">
+                  <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.log_type || ""}</span>
+                </div>
 
                 <span className="text-muted-foreground">Client:</span>
                 {isEditing ? (
@@ -149,7 +174,9 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                     className="h-7 text-sm"
                   />
                 ) : (
-                  <span>{editedIntegration.client || ""}</span>
+                  <div className="flex w-full justify-end items-center">
+                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.client || ""}</span>
+                  </div>
                 )}
 
                 <span className="text-muted-foreground">Auth Profile:</span>
@@ -161,23 +188,27 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                     className="h-7 text-sm"
                   />
                 ) : (
-                  <span>{editedIntegration.auth_profile || ""}</span>
+                  <div className="flex w-full justify-end items-center">
+                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.auth_profile || ""}</span>
+                  </div>
                 )}
 
                 <span className="text-muted-foreground">Connection:</span>
-                <span className="flex items-center">
-                  {editedIntegration.enabled ? (
-                    <>
-                      <CheckCircle className="h-3 w-3 text-green-500 mr-1" />
-                      Connected
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="h-3 w-3 text-yellow-500 mr-1" />
-                      Disabled
-                    </>
-                  )}
-                </span>
+                <div className="flex w-full justify-end items-center">
+                  <span className="flex items-center">
+                    {editedIntegration.enabled ? (
+                      <>
+                        <CheckCircle className="h-3 w-3 text-green-500 mr-1" />
+                        Connected
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-3 w-3 text-yellow-500 mr-1" />
+                        Disabled
+                      </>
+                    )}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -194,7 +225,9 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                     className="h-7 text-sm"
                   />
                 ) : (
-                  <span>{editedIntegration.auth_type || ""}</span>
+                  <div className="flex w-full justify-end items-center">
+                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.auth_type || ""}</span>
+                  </div>
                 )}
 
                 <span className="text-muted-foreground">Keys Retrieved:</span>
@@ -207,10 +240,14 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                       onChange={(e) => handleInputChange("keys_retrieved", e.target.checked)}
                       className="mr-2 h-4 w-4"
                     />
-                    <span>{editedIntegration.keys_retrieved ? "Yes" : "No"}</span>
+                    <div className="flex w-full justify-end items-center">
+                      <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.keys_retrieved ? "Yes" : "No"}</span>
+                    </div>
                   </div>
                 ) : (
-                  <span>{editedIntegration.keys_retrieved ? "Yes" : "No"}</span>
+                  <div className="flex w-full justify-end items-center">
+                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.keys_retrieved ? "Yes" : "No"}</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -233,7 +270,9 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                     className="h-7 text-sm"
                   />
                 ) : (
-                  <span>{editedIntegration.region || "N/A"}</span>
+                  <div className="flex w-full justify-end items-center">
+                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.region || "N/A"}</span>
+                  </div>
                 )}
 
                 <span className="text-muted-foreground">Bucket Name:</span>
@@ -244,7 +283,9 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                     className="h-7 text-sm"
                   />
                 ) : (
-                  <span className="break-all">{editedIntegration.bucket_name || "N/A"}</span>
+                  <div className="flex w-full justify-end items-center">
+                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.bucket_name || "N/A"}</span>
+                  </div>
                 )}
 
                 <span className="text-muted-foreground">Bucket Prefix:</span>
@@ -255,7 +296,9 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                     className="h-7 text-sm"
                   />
                 ) : (
-                  <span className="break-all">{editedIntegration.bucket_prefix || "N/A"}</span>
+                  <div className="flex w-full justify-end items-center">
+                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.bucket_prefix || "N/A"}</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -276,7 +319,9 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                       className="h-7 text-sm"
                     />
                   ) : (
-                    <span>{editedIntegration.github_organization || "N/A"}</span>
+                    <div className="flex w-full justify-end items-center">
+                      <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.github_organization || "N/A"}</span>
+                    </div>
                   )}
 
                   <span className="text-muted-foreground">Enterprise:</span>
@@ -287,7 +332,9 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                       className="h-7 text-sm"
                     />
                   ) : (
-                    <span>{editedIntegration.github_enterprise || "N/A"}</span>
+                    <div className="flex w-full justify-end items-center">
+                      <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.github_enterprise || "N/A"}</span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -310,10 +357,14 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                       onChange={(e) => handleInputChange("new_integration", e.target.checked)}
                       className="mr-2 h-4 w-4"
                     />
-                    <span>{editedIntegration.new_integration ? "Yes" : "No"}</span>
+                    <div className="flex w-full justify-end items-center">
+                      <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.new_integration ? "Yes" : "No"}</span>
+                    </div>
                   </div>
                 ) : (
-                  <span>{editedIntegration.new_integration ? "Yes" : "No"}</span>
+                  <div className="flex w-full justify-end items-center">
+                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.new_integration ? "Yes" : "No"}</span>
+                  </div>
                 )}
 
                 <span className="text-muted-foreground">Enabled:</span>
@@ -325,10 +376,14 @@ export function IntegrationDetailsModal({ integration, isOpen, onClose }: Integr
                       onChange={(e) => handleInputChange("enabled", e.target.checked)}
                       className="mr-2 h-4 w-4"
                     />
-                    <span>{editedIntegration.enabled ? "Yes" : "No"}</span>
+                    <div className="flex w-full justify-end items-center">
+                      <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.enabled ? "Yes" : "No"}</span>
+                    </div>
                   </div>
                 ) : (
-                  <span>{editedIntegration.enabled ? "Yes" : "No"}</span>
+                  <div className="flex w-full justify-end items-center">
+                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }} className="text-right">{editedIntegration.enabled ? "Yes" : "No"}</span>
+                  </div>
                 )}
               </div>
             </div>

@@ -171,10 +171,22 @@ export default function IntegrationsPage() {
               {integrations.map((integration, index) => {
                 const details = getIntegrationDetails(integration)
                 return (
-                  <Card key={index} className="bg-[#0f1d24] border-orange-600/20">
-                    <CardHeader className="pb-2">
+                  <Card
+                    key={index}
+                    className="border" 
+                    style={{
+                      background: theme === 'dark' ? '#0C2027' : '#F2F2F2',
+                      border: '1px solid #506C77',
+                    }}
+                  >
+                    <CardHeader className="pb-4">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg text-orange-500">{details.name}</CardTitle>
+                        <CardTitle
+                          className="text-lg"
+                          style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 700, color: '#EA651A' }}
+                        >
+                          {details.name}
+                        </CardTitle>
                         <Badge
                           variant="outline"
                           className={
@@ -186,13 +198,24 @@ export default function IntegrationsPage() {
                           {integration.enabled ? "Active" : "Inactive"}
                         </Badge>
                       </div>
-                      <CardDescription>{details.description}</CardDescription>
+                      <CardDescription
+                        style={{ fontFamily: 'IBM Plex Mono', fontWeight: 300, color: '#849DA6' }}
+                      >
+                        {details.description}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-1 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Status:</span>
-                          <span className="flex items-center">
+                          <span
+                            style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 700, color: '#849DA6' }}
+                          >
+                            Status:
+                          </span>
+                          <span
+                            className="flex items-center"
+                            style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }}
+                          >
                             {integration.enabled ? (
                               <>
                                 <CheckCircle className="h-3 w-3 text-green-500 mr-1" />
@@ -207,25 +230,40 @@ export default function IntegrationsPage() {
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Client:</span>
-                          <span>{integration.client}</span>
+                          <span
+                            style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 700, color: '#849DA6' }}
+                          >
+                            Client:
+                          </span>
+                          <span
+                            style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }}
+                          >
+                            {integration.client}
+                          </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Type:</span>
-                          <span>{integration.log_type}</span>
+                          <span
+                            style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 700, color: '#849DA6' }}
+                          >
+                            Type:
+                          </span>
+                          <span
+                            style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400, color: theme === 'dark' ? '#FFFFFF' : '#0C2027' }}
+                          >
+                            {integration.log_type}
+                          </span>
                         </div>
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-between pt-2">
-                      <Button variant="outline" size="sm" onClick={() => openIntegrationDetails(integration)}>
-                        <Settings className="h-4 w-4 mr-1" />
-                        Configure
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => openIntegrationDetails(integration)}>
+                        <Settings className="h-4 w-4" />
                       </Button>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="px-2" onClick={handleRefresh}>
+                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleRefresh}>
                           <RefreshCw className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" className="px-2 text-red-500 hover:text-red-600" onClick={() => handleOpenDeleteModal(integration)}>
+                        <Button variant="outline" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => handleOpenDeleteModal(integration)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
