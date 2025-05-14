@@ -371,10 +371,10 @@ export default function LogsPage() {
         </div>
       </div>
 
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-3">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-white dark:text-white text-[#506C77]" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-[#0D1315] dark:text-white" />
             <Input
               placeholder="Search logs..."
               value={searchQuery}
@@ -384,16 +384,11 @@ export default function LogsPage() {
             />
           </div>
 
-          {/* Status filter dropdown removed */}
-          {/* Time range dropdown removed */}
-          {/* Refresh button removed */}
-          {/* Advanced filters button removed */}
-
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center h-10">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="!bg-[#CAD0D2] dark:!bg-[#0D1315] !border !border-[#506C77]">
-                  <Download className="h-4 w-4 text-[#506C77]" />
+                <Button variant="outline" size="icon" className="h-10 w-10 !bg-[#CAD0D2] dark:!bg-[#0D1315] !border !border-[#64828E] flex items-center justify-center">
+                  <Download className="h-5 w-5 text-[#64828E]" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -410,12 +405,12 @@ export default function LogsPage() {
 
             <Popover open={isColumnSelectorOpen} onOpenChange={setIsColumnSelectorOpen}>
               <PopoverTrigger asChild>
-                <button className="h-12 w-12 flex items-center justify-center bg-[#101918] border border-[#253136] rounded-[8px] text-white hover:bg-[#182325] transition">
-                  <List className="h-5 w-5" />
+                <button className="h-10 w-10 flex items-center justify-center bg-[#CAD0D2] dark:bg-[#0D1315] border border-[#64828E] rounded-[8px] text-[#64828E] hover:bg-[#e0e4e5] dark:hover:bg-[#182325] transition">
+                  <List className="h-5 w-5 text-[#64828E]" />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-80">
-                <div className="space-y-4">
+                <div>
                   <h4 className="font-medium">Visible Columns</h4>
                   <div className="space-y-2 max-h-[300px] overflow-y-auto">
                     {headers.map((header) => (
@@ -461,24 +456,24 @@ export default function LogsPage() {
         <div className="flex items-center justify-end mb-2">
           <div className="flex bg-transparent p-0.5">
             <button
-              className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-white focus:outline-none transition-colors
-                ${viewMode === 'table' ? 'bg-[#506C77]' : 'bg-[#0C2027]'}
-                ${viewMode === 'table' ? '' : 'hover:bg-[#1a2e33]'}
-                rounded-l-[8px] ${viewMode === 'table' ? '' : 'border-r-0'}
+              className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
+                ${viewMode === 'table'
+                  ? 'bg-[#506C77] text-white'
+                  : 'bg-[#CAD0D2] text-[#506C77] dark:bg-[#0D1315] dark:text-[#CAD0D2]'}
+                rounded-l-[8px] border-0
               `}
-              style={{ borderTopLeftRadius: 8, borderBottomLeftRadius: 8 }}
               onClick={() => setViewMode('table')}
             >
               <List className="h-4 w-4 mr-2" />
               Table view
             </button>
             <button
-              className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-white focus:outline-none transition-colors
-                ${viewMode === 'query' ? 'bg-[#506C77]' : 'bg-[#0C2027]'}
-                ${viewMode === 'query' ? '' : 'hover:bg-[#1a2e33]'}
-                rounded-r-[8px] -ml-px
+              className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
+                ${viewMode === 'query'
+                  ? 'bg-[#506C77] text-white'
+                  : 'bg-[#CAD0D2] text-[#506C77] dark:bg-[#0D1315] dark:text-[#CAD0D2]'}
+                rounded-r-[8px] -ml-px border-0
               `}
-              style={{ borderTopRightRadius: 8, borderBottomRightRadius: 8 }}
               onClick={() => setViewMode('query')}
             >
               <Code className="h-4 w-4 mr-2" />
@@ -495,9 +490,8 @@ export default function LogsPage() {
 
         {viewMode === "table" && !hasRunQuery ? (
           <div className="rounded-md border bg-[#0f1d24] p-12 flex flex-col items-center justify-center text-center">
-            <Database className="h-16 w-16 text-orange-500/30 mb-6" />
-            <h3 className="text-xl font-medium mb-3">No logs to display</h3>
-            <p className="text-muted-foreground max-w-md mb-6">
+            <h3 className="text-xl mb-4 font-bold" style={{ fontFamily: 'Helvetica, Arial, sans-serif', color: '#FF7120' }}>No logs to display</h3>
+            <p className="max-w-md mb-8" style={{ fontFamily: 'IBM Plex Mono', color: '#CAD0D2', fontWeight: 100, fontSize: '13px' }}>
               Use the Query Editor to search and analyze your security logs. Write a SQL query to get started.
             </p>
             <Button
