@@ -122,9 +122,14 @@ export default function IntegrationsPage() {
         </div>
       </div>
 
-      <div className="flex-1 p-6 space-y-6">
-        <div className="bg-[#0f1d24] px-4 py-2 rounded-md">
-          <h2 className="text-sm font-medium">Installed ({integrations.length})</h2>
+      <div className="flex-1 pl-12 pr-6 pt-0 space-y-6">
+        <div className="px-4 py-2 rounded-md bg-[#CAD0D2] dark:bg-[#0C2027]">
+          <h2
+            className="text-sm font-normal"
+            style={{ fontFamily: 'Helvetica, Arial, sans-serif', color: theme === 'dark' ? '#EA651A' : '#0C2027' }}
+          >
+            Installed ({integrations.length})
+          </h2>
         </div>
 
         <div className="space-y-4">

@@ -371,63 +371,91 @@ export default function LogsPage() {
         </div>
       </div>
 
-      <div className="p-6 space-y-3">
+      <div className="pl-12 pr-6 pt-0 space-y-3">
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-[#0D1315] dark:text-white" />
-            <Input
-              placeholder="Search logs..."
-              value={searchQuery}
-              onChange={handleSearch}
-              className="pl-10 !bg-[#CAD0D2] dark:!bg-[#0D1315] !border-none !text-[#506C77] dark:!text-white placeholder-[#506C77] dark:placeholder-white rounded-[8px] h-10"
-              style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400 }}
-            />
-          </div>
-
-          <div className="flex gap-2 items-center h-10">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="h-10 w-10 !bg-[#CAD0D2] dark:!bg-[#0D1315] !border !border-[#64828E] flex items-center justify-center">
-                  <Download className="h-5 w-5 text-[#64828E]" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={exportToCSV}>
-                  <FileDown className="h-4 w-4 mr-2" />
-                  Export to CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportToCSV()}>
-                  <FileDown className="h-4 w-4 mr-2" />
-                  Export filtered logs
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Popover open={isColumnSelectorOpen} onOpenChange={setIsColumnSelectorOpen}>
-              <PopoverTrigger asChild>
-                <button className="h-10 w-10 flex items-center justify-center bg-[#CAD0D2] dark:bg-[#0D1315] border border-[#64828E] rounded-[8px] text-[#64828E] hover:bg-[#e0e4e5] dark:hover:bg-[#182325] transition">
-                  <List className="h-5 w-5 text-[#64828E]" />
+          <div className="flex w-full items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-[#0D1315] dark:text-white" />
+              <Input
+                placeholder="Search logs..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="pl-10 !bg-[#CAD0D2] dark:!bg-[#0D1315] !border-none !text-[#506C77] dark:!text-white placeholder-[#506C77] dark:placeholder-white rounded-[8px] h-10"
+                style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontWeight: 400 }}
+              />
+            </div>
+            <div className="flex items-center">
+              <div className="flex bg-transparent p-0.5">
+                <button
+                  className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
+                    ${viewMode === 'table'
+                      ? 'bg-[#506C77] text-white'
+                      : 'bg-[#CAD0D2] text-[#506C77] dark:bg-[#0D1315] dark:text-[#CAD0D2]'}
+                    rounded-l-[8px] border-0
+                  `}
+                  onClick={() => setViewMode('table')}
+                >
+                  <List className="h-4 w-4 mr-2" />
+                  Table view
                 </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div>
-                  <h4 className="font-medium">Visible Columns</h4>
-                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                    {headers.map((header) => (
-                      <div key={header} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`column-${header}`}
-                          checked={visibleColumns.includes(header)}
-                          onCheckedChange={() => toggleColumnVisibility(header)}
-                          disabled={visibleColumns.length === 1 && visibleColumns.includes(header)}
-                        />
-                        <Label htmlFor={`column-${header}`}>{header}</Label>
-                      </div>
-                    ))}
+                <button
+                  className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
+                    ${viewMode === 'query'
+                      ? 'bg-[#506C77] text-white'
+                      : 'bg-[#CAD0D2] text-[#506C77] dark:bg-[#0D1315] dark:text-[#CAD0D2]'}
+                    rounded-r-[8px] -ml-px border-0
+                  `}
+                  onClick={() => setViewMode('query')}
+                >
+                  <Code className="h-4 w-4 mr-2" />
+                  Query editor
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-2 items-center h-10">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-10 w-10 !bg-[#CAD0D2] dark:!bg-[#0D1315] !border !border-[#64828E] flex items-center justify-center">
+                    <Download className="h-5 w-5 text-[#64828E]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={exportToCSV}>
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Export to CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportToCSV()}>
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Export filtered logs
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Popover open={isColumnSelectorOpen} onOpenChange={setIsColumnSelectorOpen}>
+                <PopoverTrigger asChild>
+                  <button className="h-10 w-10 flex items-center justify-center bg-[#CAD0D2] dark:bg-[#0D1315] border border-[#64828E] rounded-[8px] text-[#64828E] hover:bg-[#e0e4e5] dark:hover:bg-[#182325] transition">
+                    <List className="h-5 w-5 text-[#64828E]" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div>
+                    <h4 className="font-medium">Visible Columns</h4>
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                      {headers.map((header) => (
+                        <div key={header} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`column-${header}`}
+                            checked={visibleColumns.includes(header)}
+                            onCheckedChange={() => toggleColumnVisibility(header)}
+                            disabled={visibleColumns.length === 1 && visibleColumns.includes(header)}
+                          />
+                          <Label htmlFor={`column-${header}`}>{header}</Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         </div>
 
@@ -452,35 +480,6 @@ export default function LogsPage() {
             </Button>
           </div>
         )}
-
-        <div className="flex items-center justify-end mb-2">
-          <div className="flex bg-transparent p-0.5">
-            <button
-              className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
-                ${viewMode === 'table'
-                  ? 'bg-[#506C77] text-white'
-                  : 'bg-[#CAD0D2] text-[#506C77] dark:bg-[#0D1315] dark:text-[#CAD0D2]'}
-                rounded-l-[8px] border-0
-              `}
-              onClick={() => setViewMode('table')}
-            >
-              <List className="h-4 w-4 mr-2" />
-              Table view
-            </button>
-            <button
-              className={`flex items-center px-4 py-2 h-10 font-normal font-['Helvetica','Arial',sans-serif] text-sm focus:outline-none transition-colors
-                ${viewMode === 'query'
-                  ? 'bg-[#506C77] text-white'
-                  : 'bg-[#CAD0D2] text-[#506C77] dark:bg-[#0D1315] dark:text-[#CAD0D2]'}
-                rounded-r-[8px] -ml-px border-0
-              `}
-              onClick={() => setViewMode('query')}
-            >
-              <Code className="h-4 w-4 mr-2" />
-              Query editor
-            </button>
-          </div>
-        </div>
 
         {viewMode === "query" && (
           <div className="mb-6">
