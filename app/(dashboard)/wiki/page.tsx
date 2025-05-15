@@ -11,265 +11,157 @@ export default function WikiPage() {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="bg-[#0f1d24] border border-orange-600/20">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="architecture">Architecture</TabsTrigger>
-            <TabsTrigger value="data-sources">Data Sources</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="logs">Logs</TabsTrigger>
+            <TabsTrigger value="alerts">Alerts</TabsTrigger>
+            <TabsTrigger value="management">Management</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
             <Card className="bg-[#0f1d24] border-orange-600/20">
               <CardHeader>
                 <CardTitle className="text-orange-500">Affinity Platform</CardTitle>
-                <CardDescription>A comprehensive security information and event management solution</CardDescription>
+                <CardDescription>Cybersecurity that scales with your vision.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-300">
-                <h3 className="text-lg font-medium text-orange-400">Introduction</h3>
                 <p>
-                  Affinity is a next-generation security information and event management platform designed to help
-                  organizations monitor, detect, and respond to security threats across their infrastructure. The
-                  platform integrates with multiple cloud providers and security tools to provide a unified view of your
-                  security posture.
+                  Affinity is a cloud-native security platform built for modern teams — from agile startups to growing tech-driven companies. We bring real-time alerts, deep log analysis, and seamless data integrations into a unified space designed for speed, clarity, and action.
                 </p>
-
-                <h3 className="text-lg font-medium text-orange-400 mt-6">Key Features</h3>
-                <ul className="list-disc pl-6 space-y-2">
-                  <li>Multi-cloud security monitoring (AWS, Azure, GCP, GitHub)</li>
-                  <li>Real-time threat detection and alerting</li>
-                  <li>Comprehensive log management and analysis</li>
-                  <li>Compliance status monitoring and reporting</li>
-                  <li>Interactive dashboards and visualizations</li>
-                </ul>
-
-                <h3 className="text-lg font-medium text-orange-400 mt-6">Getting Started</h3>
                 <p>
-                  To get started with Affinity, navigate to the Analytics section to view security insights across
-                  your connected cloud providers. The Cloud Status section provides real-time information about the
-                  security posture of your cloud resources. Use the Logs and Alerts sections to investigate security
-                  events and respond to threats.
+                  Whether you're a one-person security team or scaling fast, Affinity empowers you with tools to detect threats, investigate incidents, and continuously strengthen your security posture — all without the enterprise bloat.
                 </p>
+                <h4 className="text-orange-400 font-bold mt-6">Built by Solidarity Labs</h4>
+                <p>
+                  Born from the belief that security should be accessible, efficient, and empowering — not overwhelming. We design with purpose, for the people.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 my-4">
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Lightning Fast Search</h4>
+                    <p>Instantly find the data you need, no matter how large your environment.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Real-Time Alerts</h4>
+                    <p>Get notified about what matters most, right when it happens.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Effortless Collaboration</h4>
+                    <p>Share insights and investigations with your team in a single click.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Enterprise-Grade Security</h4>
+                    <p>Built from the ground up for organizations that demand the best.</p>
+                  </div>
+                </div>
+                <div className="mt-4 p-4 bg-[#1a2a32] border-l-4 border-orange-500 rounded">
+                  <b>Pro Tip:</b> Use the sidebar for one-click access to every major feature. Affinity is designed for speed and clarity.
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="architecture" className="mt-6">
+          <TabsContent value="logs" className="mt-6">
             <Card className="bg-[#0f1d24] border-orange-600/20">
               <CardHeader>
-                <CardTitle className="text-orange-500">Platform Architecture</CardTitle>
-                <CardDescription>
-                  Understanding the components and data flow of the Affinity platform
-                </CardDescription>
+                <CardTitle className="text-orange-500">Logs</CardTitle>
+                <CardDescription>How to use the Logs page</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-300">
-                <h3 className="text-lg font-medium text-orange-400">Core Components</h3>
-                <p>The Affinity platform consists of several interconnected components:</p>
-
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">Data Collection</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Agents and API integrations that collect security events and logs from various sources including
-                      cloud providers, on-premises systems, and security tools.
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">Data Processing</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Real-time processing pipeline that normalizes, enriches, and correlates security events to
-                      identify patterns and potential threats.
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">Analytics Engine</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Advanced analytics capabilities including machine learning models that detect anomalies and
-                      identify sophisticated attack patterns.
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">Visualization Layer</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Interactive dashboards and reports that provide actionable insights into your security posture and
-                      help identify areas for improvement.
-                    </CardContent>
-                  </Card>
+                <h3 className="text-lg font-medium text-orange-400">Powerful Log Analysis—Made for Experts</h3>
+                <p>
+                  Affinity's log management is built for security teams who need answers fast and with precision. Go beyond basic search—use advanced tools to investigate, correlate, and export exactly what you need.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 my-4">
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">SQL Query Builder</h4>
+                    <p>Write and run custom SQL queries directly on your logs. Get the exact data you need, every time.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Advanced Filtering</h4>
+                    <p>Filter logs by any field, time range, or value—combine multiple filters for pinpoint accuracy.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">SQL Query Editor</h4>
+                    <p>Use the built-in editor for complex queries, with syntax highlighting and instant results.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Export & Investigate</h4>
+                    <p>Export results for compliance or reporting, or jump straight into an investigation from any log entry.</p>
+                  </div>
                 </div>
-
-                <h3 className="text-lg font-medium text-orange-400 mt-6">Data Flow</h3>
-                <p>Security data flows through the platform in the following sequence:</p>
-                <ol className="list-decimal pl-6 space-y-2 mt-2">
-                  <li>Collection: Data is collected from cloud providers, on-premises systems, and security tools</li>
-                  <li>Ingestion: Raw data is ingested into the platform's data lake</li>
-                  <li>Processing: Data is normalized, enriched, and correlated</li>
-                  <li>Analysis: Advanced analytics identify patterns, anomalies, and potential threats</li>
-                  <li>Visualization: Insights are presented through interactive dashboards and reports</li>
-                  <li>Response: Automated or manual response actions are triggered based on detected threats</li>
-                </ol>
+                <div className="mt-4 p-4 bg-[#1a2a32] border-l-4 border-orange-500 rounded">
+                  <b>Pro Tip:</b> Use the SQL Query Editor to automate repetitive investigations and save your favorite queries for future use.
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="data-sources" className="mt-6">
+          <TabsContent value="alerts" className="mt-6">
             <Card className="bg-[#0f1d24] border-orange-600/20">
               <CardHeader>
-                <CardTitle className="text-orange-500">Supported Data Sources</CardTitle>
-                <CardDescription>
-                  Cloud providers and security tools integrated with the Affinity platform
-                </CardDescription>
+                <CardTitle className="text-orange-500">Security Alerts</CardTitle>
+                <CardDescription>Monitor and respond to security alerts across your infrastructure</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-300">
-                <h3 className="text-lg font-medium text-orange-400">Cloud Providers</h3>
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">AWS</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li>CloudTrail</li>
-                        <li>GuardDuty</li>
-                        <li>Security Hub</li>
-                        <li>VPC Flow Logs</li>
-                        <li>S3 Access Logs</li>
-                        <li>AWS Config</li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">Azure</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li>Azure Activity Logs</li>
-                        <li>Azure Security Center</li>
-                        <li>Azure Sentinel</li>
-                        <li>Azure Monitor</li>
-                        <li>Azure Network Watcher</li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">GCP</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li>Cloud Audit Logs</li>
-                        <li>Security Command Center</li>
-                        <li>Cloud Logging</li>
-                        <li>VPC Flow Logs</li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">GitHub</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li>Audit Logs</li>
-                        <li>Security Alerts</li>
-                        <li>Dependabot Alerts</li>
-                        <li>Code Scanning Alerts</li>
-                      </ul>
-                    </CardContent>
-                  </Card>
+                <h3 className="text-lg font-medium text-orange-400">Actionable Security Alerts—Built for Real-World Threats</h3>
+                <p>
+                  Affinity's alerting system is designed for the challenges big companies face every day. Detect, investigate, and resolve incidents with the tools your team actually needs.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 my-4">
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Real-World Use Cases</h4>
+                    <p>Alerts are tailored to the threats that matter most—privilege escalation, suspicious logins, data exfiltration, and more.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Instant Query & Investigation</h4>
+                    <p>See the exact query that triggered any alert. Instantly pivot to related logs and start your investigation with a click.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Full Alert Management</h4>
+                    <p>Recategorize severity, assign owners, mark as false positive, or close alerts—all from one place.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Export alert data for external analysis or team collaboration.</h4>
+                    <p>Download alert details as JSON, and easily share findings with your team via your preferred communication channels or ticketing systems</p>
+                  </div>  
                 </div>
-
-                <h3 className="text-lg font-medium text-orange-400 mt-6">Security Tools</h3>
-                <p>Affinity integrates with a wide range of security tools and technologies, including:</p>
-                <ul className="list-disc pl-6 space-y-2 mt-2">
-                  <li>Endpoint Detection and Response (EDR) solutions</li>
-                  <li>Network security appliances and firewalls</li>
-                  <li>Identity and Access Management (IAM) systems</li>
-                  <li>Vulnerability management tools</li>
-                  <li>Threat intelligence platforms</li>
-                </ul>
+                <div className="mt-4 p-4 bg-[#1a2a32] border-l-4 border-orange-500 rounded">
+                  <b>Pro Tip:</b> Use the alerts query as a launchpad—investigate related events, escalate, or resolve them.
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="analytics" className="mt-6">
+          <TabsContent value="management" className="mt-6">
             <Card className="bg-[#0f1d24] border-orange-600/20">
               <CardHeader>
-                <CardTitle className="text-orange-500">Analytics Capabilities</CardTitle>
-                <CardDescription>Understanding the analytics features of the Affinity platform</CardDescription>
+                <CardTitle className="text-orange-500">Management</CardTitle>
+                <CardDescription>Manage notifications, integrations, and users</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-300">
-                <h3 className="text-lg font-medium text-orange-400">Security Analytics</h3>
+                <h3 className="text-lg font-medium text-orange-400">Total Control, Zero Hassle</h3>
                 <p>
-                  Affinity provides comprehensive security analytics capabilities to help you identify and respond
-                  to threats:
+                  Affinity's management tools put you in the driver's seat. Configure notifications, connect integrations, and manage users—all in one place.
                 </p>
-
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">Threat Detection</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Advanced algorithms and machine learning models that identify known and unknown threats based on
-                      behavior patterns and anomalies in your environment.
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">Compliance Monitoring</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Continuous assessment of your security posture against industry standards and regulatory
-                      frameworks such as CIS, NIST, PCI DSS, HIPAA, and GDPR.
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">User Behavior Analytics</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Monitoring of user activities to establish baselines and detect anomalous behaviors that may
-                      indicate compromised accounts or insider threats.
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-[#0a1419] border-orange-600/20">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-500">Cloud Security Posture</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Continuous monitoring of your cloud environments to identify misconfigurations, vulnerabilities,
-                      and deviations from security best practices.
-                    </CardContent>
-                  </Card>
+                <div className="grid md:grid-cols-2 gap-4 my-4">
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Flexible Notifications</h4>
+                    <p>Set up channels like Email, Slack, or Telegram to get alerts your way.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Easy Integrations</h4>
+                    <p>Easily ingest data from sources like AWS CloudTrail, GuardDuty, WAF, VPC Flow Logs, GitHub, Google Workspace, and more.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">User Management</h4>
+                    <p>Add, remove, and control the user access to the platform.</p>
+                  </div>
+                  <div className="p-4 bg-[#181f23] rounded border border-orange-600/20">
+                    <h4 className="text-orange-400 font-bold mb-1">Always Secure</h4>
+                    <p>Keep your environment safe with regular reviews and easy account management.</p>
+                  </div>
                 </div>
-
-                <h3 className="text-lg font-medium text-orange-400 mt-6">Visualization and Reporting</h3>
-                <p>
-                  Affinity provides powerful visualization and reporting capabilities to help you understand your
-                  security posture:
-                </p>
-                <ul className="list-disc pl-6 space-y-2 mt-2">
-                  <li>Interactive dashboards with drill-down capabilities</li>
-                  <li>Real-time monitoring of security events and alerts</li>
-                  <li>Customizable reports for different stakeholders</li>
-                  <li>Trend analysis to identify patterns over time</li>
-                  <li>Compliance reports for regulatory requirements</li>
-                </ul>
+                <div className="mt-4 p-4 bg-[#1a2a32] border-l-4 border-orange-500 rounded">
+                  <b>Pro Tip:</b> Regularly review your integrations and user permissions to keep your environment secure and efficient.
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

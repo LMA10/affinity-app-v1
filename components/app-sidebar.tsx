@@ -164,21 +164,6 @@ export function AppSidebar() {
             </SidebarMenuItem>
           )}
 
-          {/* WIKI Section */}
-          {/* {isPageVisible("/wiki") && (
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname === "/wiki"}
-                className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
-              >
-                <Link href="/wiki" className="text-orange-500 flex items-center w-full">
-                  <BookOpen className={menuIconStyles} />
-                  <span>WIKI</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )} */}
 
           {/* LEGAL Section */}
           {/* {isPageVisible("/legal") && (
@@ -256,6 +241,17 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-orange-600/20 p-4">
+        {/* Wiki & Help quick access */}
+        <Link
+          href="/wiki"
+          className="block mx-0 mb-3 p-3 rounded border text-center font-bold flex items-center justify-center border-orange-600/20
+            bg-white text-gray-900 hover:bg-orange-50
+            dark:bg-[#181f23] dark:text-orange-400 dark:hover:bg-orange-600/10
+            transition-colors"
+        >
+          <BookOpen className="inline-block mr-2 h-4 w-4 text-orange-500" />
+          Wiki & Help
+        </Link>
         {userEmail && (
           <>
             <div className="text-[10px] text-orange-400 mb-1">Signed in as</div>

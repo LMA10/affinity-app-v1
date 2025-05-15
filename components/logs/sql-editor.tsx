@@ -169,7 +169,7 @@ export function SqlEditor({ value, onChange, status, error }: SqlEditorProps) {
     >
       <pre
         ref={highlightedRef}
-        className={`absolute inset-0 p-4 pointer-events-none font-mono text-sm whitespace-pre-wrap overflow-auto ${isDarkTheme ? "text-white" : "text-gray-800"}`}
+        className={`absolute inset-0 p-4 pointer-events-none font-mono text-sm whitespace-pre-wrap overflow-hidden ${isDarkTheme ? "text-white" : "text-gray-800"}`}
       >
         {getHighlightedCode()}
       </pre>

@@ -557,7 +557,7 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
           </div>
         </div>
 
-        <div className="flex-1 w-full overflow-x-auto p-2 md:p-4">
+        <div className="flex-1 w-full p-2 md:p-4">
           <SqlEditor
             value={activeTabData.sql}
             onChange={(value) => updateSql(activeTab, value)}
