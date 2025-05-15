@@ -1,15 +1,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, ChevronDown, Plus, Minus, Loader2 } from "lucide-react"
+import { X, ChevronDown, Plus, Minus, Loader2, AlertCircle, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import useLogsState from "@/lib/state/logs/logsState"
+import { validateSqlQuery } from "@/lib/utils/sql-validator"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 // Operators for conditions
 const OPERATORS = ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "NOT IN", "IS NULL", "IS NOT NULL"]
@@ -148,9 +151,60 @@ interface QueryBuilderProps {
   isOpen: boolean
   onClose: () => void
   onApply: (query: string) => void
+  onLoadExample?: (query: string) => void
+  builderSyncState?: any
 }
 
-export function SQLQueryBuilder({ isOpen, onClose, onApply }: QueryBuilderProps) {
+const EXAMPLE_QUERIES = [
+  {
+    name: "Console Login Attempts",
+    description: "Detect users attempting to log into the AWS Management Console",
+    query: `SELECT
+  "eventtime",
+  "useridentity.username",
+  "sourceipaddress",
+  "useragent"
+FROM "cloudtrail"
+WHERE "eventname" = 'ConsoleLogin'
+  AND "eventsource" = 'signin.amazonaws.com'
+  AND "useridentity.type" = 'IAMUser'
+ORDER BY "eventtime" DESC
+LIMIT 20;`
+  },
+  {
+    name: "New IAM Users Created in the Last 7 Days",
+    description: "Track provisioning of new users",
+    query: `SELECT
+  "eventtime",
+  "useridentity.username" AS created_by,
+  "requestid",
+  "eventsource",
+  "eventname"
+FROM "cloudtrail"
+WHERE "eventname" = 'CreateUser'
+  AND from_iso8601_timestamp("eventtime") > current_timestamp - INTERVAL '7' DAY
+ORDER BY from_iso8601_timestamp("eventtime") DESC
+LIMIT 20;`
+  },
+  {
+    name: "API Keys Used (AccessKeyId Logged) in the Last 7 Days",
+    description: "Track usage of access keys",
+    query: `SELECT
+  "eventtime",
+  "useridentity.username",
+  "useridentity.accesskeyid",
+  "eventname",
+  "eventsource"
+FROM "cloudtrail"
+WHERE "useridentity.accesskeyid" IS NOT NULL
+  AND from_iso8601_timestamp("eventtime") > current_timestamp - interval '7' day
+ORDER BY from_iso8601_timestamp("eventtime") DESC
+LIMIT 20;
+`
+  },
+];
+
+export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, builderSyncState }: QueryBuilderProps) {
   // Get tables from state
   const { tables, loadingTables, fetchDatabases } = useLogsState()
 
@@ -170,12 +224,45 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply }: QueryBuilderProps)
   const [showDateTimeFilter, setShowDateTimeFilter] = useState<boolean>(false)
   const [generatedSQL, setGeneratedSQL] = useState<string>("")
 
+  // State for validation errors
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   // Fetch tables when the component mounts
   useEffect(() => {
     if (isOpen && Object.keys(tables).length === 0) {
       fetchDatabases()
     }
   }, [isOpen, tables, fetchDatabases])
+
+  // Sync builder state from builderSyncState prop
+  useEffect(() => {
+    if (builderSyncState && isOpen) {
+      if (builderSyncState.table) setSelectedTable(builderSyncState.table);
+
+      // Only update columns if present and non-empty
+      if (builderSyncState.columns && builderSyncState.columns.length > 0) {
+        setSelectedColumns(builderSyncState.columns);
+      } else if (builderSyncState.groupBy && builderSyncState.groupBy.length > 0) {
+        setSelectedColumns(builderSyncState.groupBy);
+      }
+      // Otherwise, do not overwrite selectedColumns
+
+      if (typeof builderSyncState.distinct === 'boolean') setUseDistinct(builderSyncState.distinct);
+      if (builderSyncState.aggregates) setAggregations(builderSyncState.aggregates);
+      if (builderSyncState.where) setConditions(
+        builderSyncState.where.map((cond: string) => ({
+          type: "WHERE",
+          column: cond.split(' ')[0].replace(/"/g, ''),
+          operator: cond.split(' ')[1],
+          value: cond.split(' ').slice(2).join(' ').replace(/['"]/g, '')
+        }))
+      );
+      if (builderSyncState.limit) setConditions((prev: any) => [
+        ...prev.filter((c: any) => c.type !== 'LIMIT'),
+        { type: 'LIMIT', column: '', operator: '', value: builderSyncState.limit }
+      ]);
+    }
+  }, [builderSyncState, isOpen]);
 
   // Get columns for the selected table
   const getTableColumns = () => {
@@ -374,22 +461,90 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply }: QueryBuilderProps)
   useEffect(() => {
     const sql = generateSQL()
     setGeneratedSQL(sql)
-  }, [selectedTable, selectedColumns, useDistinct, conditions, aggregations, showDateTimeFilter, dateTimeFilter])
+    
+    // Clear validation error when SQL changes
+    if (validationError) {
+      setValidationError(null)
+    }
+  }, [selectedTable, selectedColumns, useDistinct, conditions, aggregations, showDateTimeFilter, dateTimeFilter, validationError])
 
   // Apply the generated SQL
   const handleApply = () => {
+    // Validate the SQL before applying it
+    const validationResult = validateSqlQuery(generatedSQL);
+    if (!validationResult.isValid) {
+      // Show the validation error to the user
+      setValidationError(validationResult.error || "Invalid SQL query");
+      return;
+    }
+
     onApply(generatedSQL)
     onClose()
   }
 
+  // Parse example query
+  const parseExampleQuery = (query: string) => {
+    
+    // Extract table name
+    const fromMatch = query.match(/FROM\s+"([^"]+)"/i);
+    if (fromMatch) {
+      setSelectedTable(fromMatch[1]);
+    }
+
+    // Extract WHERE conditions
+    const whereMatch = query.match(/WHERE\s+(.+?)(?=(GROUP BY|ORDER BY|LIMIT|$))/i);
+    if (whereMatch) {
+      const conditions = whereMatch[1].split(/\s+AND\s+/i).map(condition => {
+        const parts = condition.match(/"([^"]+)"\s*([=<>!]+|IS|LIKE|IN)\s*(.+)/i);
+        if (parts) {
+          return {
+            type: "WHERE",
+            column: parts[1],
+            operator: parts[2],
+            value: parts[3].replace(/['"]/g, '')
+          };
+        }
+        return null;
+      }).filter(Boolean);
+      
+      setConditions(conditions as Condition[]);
+    }
+
+    // Extract GROUP BY columns
+    const groupByMatch = query.match(/GROUP BY\s+(.+?)(?=(HAVING|ORDER BY|LIMIT|$))/i);
+    if (groupByMatch) {
+      const columns = groupByMatch[1].split(',').map(col => col.trim().replace(/"/g, ''));
+      setSelectedColumns(columns);
+    }
+
+    // Extract aggregations
+    const aggregateMatch = query.match(/SELECT\s+(.+?)\s+FROM/i);
+    if (aggregateMatch) {
+      const aggregates = aggregateMatch[1].split(',').map(agg => {
+        const funcMatch = agg.match(/(\w+)\((.*?)\)(?:\s+AS\s+(\w+))?/i);
+        if (funcMatch) {
+          return {
+            function: funcMatch[1],
+            column: funcMatch[2].replace(/"/g, ''),
+            alias: funcMatch[3] || ''
+          };
+        }
+        return null;
+      }).filter(Boolean);
+      
+      setAggregations(aggregates as Aggregation[]);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl bg-[#0a1419] border-orange-600/20 text-white">
+
         <DialogHeader>
           <DialogTitle className="text-2xl text-orange-500 flex justify-between items-center">
             SQL Query Builder
             <Button variant="ghost" size="icon" onClick={onClose} className="text-orange-500">
-
+              <X className="h-5 w-5" />
             </Button>
           </DialogTitle>
         </DialogHeader>
@@ -745,13 +900,57 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply }: QueryBuilderProps)
             </div>
           )}
 
+          {/* Example Queries */}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-orange-500">Example Queries</h3>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-orange-500">
+                    <BookOpen className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Click an example to load it into the query builder</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+
+          <ScrollArea className="h-40 rounded-md border border-orange-600/20">
+            <div className="p-4 space-y-4">
+              {EXAMPLE_QUERIES.map((example, index) => (
+                <div
+                  key={index}
+                  className="p-3 rounded-lg border border-orange-600/20 hover:bg-orange-600/10 cursor-pointer transition-colors"
+                  onClick={() => {
+                    setGeneratedSQL(example.query);
+                    // Parse and set the query components
+                    parseExampleQuery(example.query);
+                  }}
+                >
+                  <h4 className="font-medium text-orange-500">{example.name}</h4>
+                  <p className="text-sm text-gray-400">{example.description}</p>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+
           {/* Generated SQL */}
           <div>
             <textarea
               value={generatedSQL}
               readOnly
-              className="w-full h-32 bg-[#0a1419] border border-orange-600/20 rounded-md p-2 text-orange-500 font-mono"
+              className={`w-full h-32 bg-[#0a1419] border ${validationError ? 'border-red-500' : 'border-orange-600/20'} rounded-md p-2 text-orange-500 font-mono`}
             />
+            {validationError && (
+              <div className="mt-2 p-2 bg-red-950/20 border border-red-800 rounded-md">
+                <div className="flex items-start">
+                  <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 mr-2" />
+                  <p className="text-sm text-red-400">{validationError}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

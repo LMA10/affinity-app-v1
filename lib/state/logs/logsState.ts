@@ -29,6 +29,7 @@ interface LogsState {
   setLoading: (loading: boolean) => void
   setError: (error: string | null, details?: { message: string; status: string } | null) => void
   setCurrentPage: (page: number) => void
+  clearLogs: () => void
 }
 
 export const useLogsState = create<LogsState>((set, get) => ({
@@ -287,6 +288,20 @@ export const useLogsState = create<LogsState>((set, get) => ({
   setLoading: (loading: boolean) => set({ loading }),
   setError: (error: string | null, details = null) => set({ error, errorDetails: details }),
   setCurrentPage: (page: number) => set({ currentPage: page }),
+
+  // Clear logs/results state
+  clearLogs: () => set({
+    logs: [],
+    headers: [],
+    totalRows: 0,
+    error: null,
+    errorDetails: null,
+    executionId: null,
+    nextToken: null,
+    currentPage: 1,
+    pageTokens: { 1: null },
+    lastQuery: null,
+  }),
 }))
 
 export default useLogsState

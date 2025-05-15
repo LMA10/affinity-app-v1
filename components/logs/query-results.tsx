@@ -315,8 +315,8 @@ export function QueryResults({ queryStatus, queryError, queryMetrics, onRetry, o
     )
   }
 
-  // If query was successful but no results
-  if (queryStatus === "success") {
+  // If query was successful but no results, do not render the table
+  if (queryStatus === "success" && (!logs || logs.length === 0)) {
     return (
       <div className="flex-1 flex items-center justify-center p-8 text-green-500">
         <div className="flex flex-col items-center gap-2">

@@ -14,6 +14,8 @@ import { formatSql } from "@/lib/services/sql-formatter"
 import { useTheme } from "next-themes"
 // Import the query storage utilities at the top of the file
 import { getStoredQuery, clearStoredQuery } from "@/lib/utils/query-storage"
+import { validateSqlQuery, validateSqlSyntax, parseSqlToBuilderState } from "@/lib/utils/sql-validator"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 
 export type QueryStatus = "idle" | "running" | "error" | "success"
 
@@ -53,16 +55,9 @@ const safeLocalStorage = {
 }
 
 export function QueryEditor({ onRunQuery }: QueryEditorProps) {
-  const [tabs, setTabs] = useState<QueryTab[]>([
-    {
-      id: "query-1",
-      name: "Query 1",
-      sql: 'SELECT * FROM "cloudtrail" LIMIT 10;',
-      status: "idle",
-      error: null,
-    },
-  ])
-  const [activeTab, setActiveTab] = useState("query-1")
+  const hasLoadedTabs = useRef(false)
+  const [tabs, setTabs] = useState<QueryTab[]>([])
+  const [activeTab, setActiveTab] = useState<string>("")
   const [isQueryBuilderOpen, setIsQueryBuilderOpen] = useState(false)
   const [editingTabId, setEditingTabId] = useState<string | null>(null)
   const [editingTabName, setEditingTabName] = useState("")
@@ -73,20 +68,38 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
 
   // Ref to track if we've already updated the tab status for the current error
   const errorProcessedRef = useRef(false)
+  const [dismissedError, setDismissedError] = useState<boolean>(false)
+  const [builderSyncState, setBuilderSyncState] = useState<any | null>(null)
 
-  // Load tabs from local storage on initial render
+  // Load tabs from local storage on initial render (only once)
   useEffect(() => {
-    const savedTabs = safeLocalStorage.getItem(LOCAL_STORAGE_KEY)
-    if (savedTabs) {
-      try {
-        const parsedTabs = JSON.parse(savedTabs)
-        if (Array.isArray(parsedTabs) && parsedTabs.length > 0) {
-          setTabs(parsedTabs)
-          setActiveTab(parsedTabs[0].id)
+    if (!hasLoadedTabs.current) {
+      const savedTabs = safeLocalStorage.getItem(LOCAL_STORAGE_KEY)
+      if (savedTabs) {
+        try {
+          const parsedTabs = JSON.parse(savedTabs)
+          if (Array.isArray(parsedTabs) && parsedTabs.length > 0) {
+            setTabs(parsedTabs)
+            setActiveTab(parsedTabs[0].id)
+            hasLoadedTabs.current = true
+            return
+          }
+        } catch (e) {
+          //console.error("Error parsing saved tabs:", e)
         }
-      } catch (e) {
-        //console.error("Error parsing saved tabs:", e)
       }
+      // If nothing in storage, set default
+      setTabs([
+        {
+          id: "query-1",
+          name: "Query 1",
+          sql: 'SELECT * FROM "cloudtrail" LIMIT 10;',
+          status: "idle",
+          error: null,
+        },
+      ])
+      setActiveTab("query-1")
+      hasLoadedTabs.current = true
     }
   }, [])
 
@@ -103,11 +116,17 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
     }
   }, [editingTabId])
 
+  // Reset dismissed error when activeTab changes or when error changes
+  useEffect(() => {
+    setDismissedError(false)
+  }, [activeTab, error])
+
   // Update tab status when error state changes - with safeguards to prevent infinite loops
   useEffect(() => {
     // Only process if there's an error and we haven't processed it yet
     if (error && !errorProcessedRef.current && !loading) {
       errorProcessedRef.current = true
+      setDismissedError(false)
 
       setTabs((prevTabs) =>
         prevTabs.map((tab) => (tab.id === activeTab ? { ...tab, status: "error", error: error } : tab)),
@@ -130,6 +149,7 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
     }
     setTabs([...tabs, newTab])
     setActiveTab(newTabId)
+    useLogsState.getState().clearLogs(); // Clear logs/results for new tab
   }, [tabs])
 
   // Close a tab
@@ -219,13 +239,45 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
     }
   }, [editingTabId, saveTabName])
 
-  // Update SQL in a tab
+  // Add real-time syntax validation and builder sync when updating SQL
   const updateSql = useCallback(
     (tabId: string, sql: string) => {
-      setTabs(tabs.map((tab) => (tab.id === tabId ? { ...tab, sql } : tab)))
+      // Apply basic syntax validation in real-time
+      const syntaxResult = validateSqlSyntax(sql);
+      // Parse SQL to builder state if valid
+      let parsedBuilderState = null;
+      if (syntaxResult.isValid) {
+        try {
+          parsedBuilderState = parseSqlToBuilderState(sql);
+        } catch (e) {
+          parsedBuilderState = null;
+        }
+      }
+      setTabs(tabs.map((tab) =>
+        tab.id === tabId
+          ? {
+              ...tab,
+              sql,
+              status: !syntaxResult.isValid ? "error" : "idle",
+              error: !syntaxResult.isValid ? syntaxResult.error || null : null
+            }
+          : tab
+      ));
+      if (parsedBuilderState) setBuilderSyncState(parsedBuilderState);
     },
     [tabs],
-  )
+  );
+
+  // When the active tab SQL changes, update builderSyncState
+  useEffect(() => {
+    const tab = tabs.find((t) => t.id === activeTab);
+    if (tab && tab.sql) {
+      try {
+        const parsed = parseSqlToBuilderState(tab.sql);
+        setBuilderSyncState(parsed);
+      } catch {}
+    }
+  }, [activeTab, tabs]);
 
   // Format SQL in the active tab
   const formatSqlInActiveTab = useCallback(() => {
@@ -243,6 +295,23 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
 
     // Reset error processed flag
     errorProcessedRef.current = false
+
+    // Validate SQL query before execution
+    const validationResult = validateSqlQuery(tab.sql);
+    if (!validationResult.isValid) {
+      setTabs(
+        tabs.map((t) =>
+          t.id === activeTab
+            ? {
+                ...t,
+                status: "error",
+                error: validationResult.error || "Invalid SQL query",
+              }
+            : t
+        )
+      );
+      return;
+    }
 
     // Update tab status to running
     setTabs(tabs.map((t) => (t.id === activeTab ? { ...t, status: "running", error: null } : t)))
@@ -278,6 +347,7 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
 
   // Clear the active tab
   const clearActiveTab = useCallback(() => {
+    setDismissedError(false)
     setTabs(
       tabs.map((tab) =>
         tab.id === activeTab
@@ -306,14 +376,14 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
     setActiveTab("query-1")
   }, [])
 
-  // Handle query from builder
+  // When an example query is selected in the builder, update both SQL and builder state
   const handleQueryFromBuilder = (query: string) => {
     updateSql(activeTab, query)
     setIsQueryBuilderOpen(false)
   }
 
   // Get the active tab data
-  const activeTabData = tabs.find((tab) => tab.id === activeTab) || tabs[0]
+  const activeTabData = tabs.find((tab) => tab.id === activeTab) || tabs[0] || {};
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -342,6 +412,11 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
       // runQuery();
     }
   }, [activeTab, updateSql, runQuery])
+
+  // Clear logs/results when switching tabs
+  useEffect(() => {
+    useLogsState.getState().clearLogs();
+  }, [activeTab])
 
   return (
     <div
@@ -384,18 +459,23 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
                         onClick={(e) => e.stopPropagation()}
                       />
                     ) : (
-                      <>
-                        <span>{tab.name}</span>
-                        <span
-                          onClick={(e) => { e.stopPropagation(); startEditingTab(tab.id, e); }}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                          role="button"
-                          tabIndex={0}
-                        >
-                          <Pencil className={`h-3 w-3 ${isDarkTheme ? "text-orange-500" : "text-orange-600"}`} />
-                        </span>
-                      </>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="truncate max-w-[120px] cursor-pointer">{tab.name}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{tab.name}</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
+                    <span
+                      onClick={(e) => { e.stopPropagation(); startEditingTab(tab.id, e); }}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <Pencil className={`h-3 w-3 ${isDarkTheme ? "text-orange-500" : "text-orange-600"}`} />
+                    </span>
                     <span
                       onClick={(e) => { e.stopPropagation(); closeTab(tab.id, e); }}
                       className={`ml-2 rounded-full p-0.5 ${isDarkTheme ? "hover:bg-gray-700" : "hover:bg-gray-200"} cursor-pointer`}
@@ -456,9 +536,9 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
               size="sm"
               className="w-full md:w-auto bg-orange-600 hover:bg-orange-700 text-white"
               onClick={runQuery}
-              disabled={loading || activeTabData.status === "running"}
+              disabled={loading || activeTabData?.status === "running"}
             >
-              {loading || activeTabData.status === "running" ? (
+              {(loading || activeTabData?.status === "running") ? (
                 <>
                   <Play className="mr-2 h-4 w-4 animate-spin" />
                   Running...
@@ -482,15 +562,52 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
             value={activeTabData.sql}
             onChange={(value) => updateSql(activeTab, value)}
             status={activeTabData.status}
-            error={activeTabData.error || error}
+            error={null}
           />
         </div>
+        
+        {/* Error Panel - Prominently display query errors */}
+        {(activeTabData.error || error) && !dismissedError && (
+          <div className={`p-4 border-t ${isDarkTheme ? "bg-red-950/20 border-red-600/30" : "bg-red-50 border-red-200"}`}>
+            <div className="flex items-start max-w-full">
+              <AlertCircle className={`h-5 w-5 mr-3 flex-shrink-0 ${isDarkTheme ? "text-red-500" : "text-red-600"}`} />
+              <div className="flex-1 overflow-auto">
+                <h4 className={`font-medium mb-1 ${isDarkTheme ? "text-red-400" : "text-red-700"}`}>
+                  SQL Query Error
+                </h4>
+                <p className={`text-sm ${isDarkTheme ? "text-red-300" : "text-red-600"} whitespace-pre-wrap break-words`}>
+                  {activeTabData.error || error}
+                </p>
+                
+                {/* Show actionable advice */}
+                <div className="mt-2 text-xs text-gray-400">
+                  Tip: Check your SQL syntax, ensure table names and columns are correct, and that all quotes and parentheses are balanced.
+                </div>
+              </div>
+              <button 
+                onClick={() => setDismissedError(true)}
+                className={`flex-shrink-0 p-1 rounded-full ${isDarkTheme ? "hover:bg-red-800/30" : "hover:bg-red-200"}`}
+                aria-label="Dismiss error"
+              >
+                <X className={`h-4 w-4 ${isDarkTheme ? "text-red-400" : "text-red-600"}`} />
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {/* No Results Panel - Shows when query executed but no results found */}
+        {activeTabData.status === "success" && !loading && !error && !activeTabData.error && (
+          <div className="p-4 border-t border-orange-600/20 bg-[#0a1419]/50 text-center">
+            <p className="text-gray-400">No logs found matching your criteria</p>
+          </div>
+        )}
       </div>
 
       <SQLQueryBuilder
         isOpen={isQueryBuilderOpen}
         onClose={() => setIsQueryBuilderOpen(false)}
         onApply={handleQueryFromBuilder}
+        builderSyncState={builderSyncState}
       />
     </div>
   )

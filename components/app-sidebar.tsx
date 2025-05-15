@@ -115,7 +115,7 @@ export function AppSidebar() {
       <div className="absolute right-0 top-4 translate-x-1/2 z-20 bg-sidebar rounded-full p-1 shadow-md border border-sidebar-border hidden group-data-[state=collapsed]:flex">
         <SidebarTrigger className="h-6 w-6 text-orange-500" />
       </div>
-      <SidebarHeader className="border-b border-orange-600/20">
+      <SidebarHeader>
         <div className="flex items-center p-4">
           <Link href="/alerts-view" className="flex items-center gap-2">
             <img

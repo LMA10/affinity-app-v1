@@ -11,6 +11,26 @@ interface SqlEditorProps {
   error?: string | null
 }
 
+const SQL_KEYWORDS = {
+  clauses: [
+    "SELECT", "FROM", "WHERE", "GROUP BY", "HAVING", "ORDER BY", "LIMIT", "OFFSET"
+  ],
+  operators: [
+    "AND", "OR", "IN", "NOT IN", "LIKE", "IS NULL", "IS NOT NULL", "BETWEEN", "EXISTS"
+  ],
+  functions: [
+    "COUNT", "SUM", "AVG", "MIN", "MAX", "ARRAY_AGG", "from_iso8601_timestamp",
+    "DATE_TRUNC", "TO_CHAR", "TO_DATE", "CAST", "COALESCE", "NULLIF",
+    "EXTRACT", "INTERVAL", "CURRENT_TIMESTAMP"
+  ],
+  joins: [
+    "JOIN", "LEFT JOIN", "RIGHT JOIN", "INNER JOIN", "OUTER JOIN", "CROSS JOIN", "NATURAL JOIN"
+  ],
+  modifiers: [
+    "DISTINCT", "ASC", "DESC"
+  ]
+};
+
 export function SqlEditor({ value, onChange, status, error }: SqlEditorProps) {
   const editorRef = useRef<HTMLTextAreaElement>(null)
   const highlightedRef = useRef<HTMLPreElement>(null)
@@ -49,84 +69,50 @@ export function SqlEditor({ value, onChange, status, error }: SqlEditorProps) {
     // Split the input by spaces and newlines to tokenize
     const tokens = value.split(/(\s+|[.,(){}[\];])/g).filter(Boolean)
 
-    // Define token types
-    const keywords = [
-      "SELECT",
-      "FROM",
-      "WHERE",
-      "AND",
-      "OR",
-      "ORDER",
-      "BY",
-      "GROUP",
-      "HAVING",
-      "LIMIT",
-      "OFFSET",
-      "JOIN",
-      "LEFT",
-      "RIGHT",
-      "INNER",
-      "OUTER",
-      "UNION",
-      "ALL",
-      "INSERT",
-      "UPDATE",
-      "DELETE",
-      "CREATE",
-      "ALTER",
-      "DROP",
-      "TABLE",
-      "VIEW",
-      "INDEX",
-      "DISTINCT",
-      "AS",
-      "ON",
-      "BETWEEN",
-      "IN",
-      "IS",
-      "NULL",
-      "NOT",
-      "LIKE",
-      "CASE",
-      "WHEN",
-      "THEN",
-      "ELSE",
-      "END",
-    ]
-
-    const functions = [
-      "COUNT",
-      "SUM",
-      "AVG",
-      "MIN",
-      "MAX",
-      "COALESCE",
-      "NULLIF",
-      "CAST",
-      "EXTRACT",
-      "DATE_TRUNC",
-      "TO_CHAR",
-      "TO_DATE",
-      "ROUND",
-    ]
-
-    const operators = ["+", "-", "*", "/", "=", "<>", "!=", ">", "<", ">=", "<=", "||"]
-
     // Process tokens and apply appropriate classes
     return tokens.map((token, index) => {
-      // Check if token is a keyword
-      if (keywords.includes(token.toUpperCase())) {
+      const upperToken = token.toUpperCase()
+
+      // Check if token is a clause
+      if (SQL_KEYWORDS.clauses.includes(upperToken)) {
         return (
-          <span key={index} className={isDarkTheme ? "text-blue-400 font-semibold" : "text-blue-600 font-semibold"}>
+          <span key={index} className={`${isDarkTheme ? "text-blue-400" : "text-blue-600"} font-bold`}>
+            {token}
+          </span>
+        )
+      }
+
+      // Check if token is an operator
+      if (SQL_KEYWORDS.operators.includes(upperToken)) {
+        return (
+          <span key={index} className={isDarkTheme ? "text-purple-400" : "text-purple-600"}>
             {token}
           </span>
         )
       }
 
       // Check if token is a function
-      if (functions.some((fn) => token.toUpperCase().startsWith(fn))) {
+      if (SQL_KEYWORDS.functions.some(fn => upperToken.startsWith(fn))) {
         return (
-          <span key={index} className={isDarkTheme ? "text-yellow-400" : "text-amber-600"}>
+          <span key={index} className={isDarkTheme ? "text-yellow-400" : "text-yellow-600"}>
+            {token}
+          </span>
+        )
+      }
+
+      // Check if token is a join
+      if (SQL_KEYWORDS.joins.some(join => upperToken.includes(join))) {
+        return (
+          <span key={index} className={`${isDarkTheme ? "text-green-400" : "text-green-600"} font-semibold`}>
+            {token}
+          </span>
+        )
+      }
+
+      // Check if token is a modifier
+      if (SQL_KEYWORDS.modifiers.includes(upperToken)) {
+        return (
+          <span key={index} className={isDarkTheme ? "text-pink-400" : "text-pink-600"}>
             {token}
           </span>
         )
@@ -135,7 +121,7 @@ export function SqlEditor({ value, onChange, status, error }: SqlEditorProps) {
       // Check if token is a number
       if (/^\d+(\.\d+)?$/.test(token)) {
         return (
-          <span key={index} className={isDarkTheme ? "text-purple-400" : "text-purple-600"}>
+          <span key={index} className={isDarkTheme ? "text-cyan-400" : "text-cyan-600"}>
             {token}
           </span>
         )
@@ -144,7 +130,7 @@ export function SqlEditor({ value, onChange, status, error }: SqlEditorProps) {
       // Check if token is a string literal (starts and ends with single quote)
       if (/^'.*'$/.test(token)) {
         return (
-          <span key={index} className={isDarkTheme ? "text-green-400" : "text-green-600"}>
+          <span key={index} className={isDarkTheme ? "text-orange-400" : "text-orange-600"}>
             {token}
           </span>
         )
@@ -153,16 +139,16 @@ export function SqlEditor({ value, onChange, status, error }: SqlEditorProps) {
       // Check if token is an identifier (starts and ends with double quote)
       if (/^".*"$/.test(token)) {
         return (
-          <span key={index} className={isDarkTheme ? "text-orange-400" : "text-orange-600"}>
+          <span key={index} className={isDarkTheme ? "text-teal-400" : "text-teal-600"}>
             {token}
           </span>
         )
       }
 
-      // Check if token is an operator
-      if (operators.includes(token)) {
+      // Check if token is a special character
+      if (/^[.,(){}[\];]$/.test(token)) {
         return (
-          <span key={index} className={isDarkTheme ? "text-red-400" : "text-red-600"}>
+          <span key={index} className="text-gray-400">
             {token}
           </span>
         )
@@ -195,13 +181,6 @@ export function SqlEditor({ value, onChange, status, error }: SqlEditorProps) {
         placeholder="Enter your SQL query here..."
         spellCheck={false}
       />
-      {error && status === "error" && (
-        <div
-          className={`mt-2 p-2 ${isDarkTheme ? "bg-red-950/20 border-red-800" : "bg-red-50 border-red-300"} border rounded-md`}
-        >
-          <p className={`text-sm ${isDarkTheme ? "text-red-400" : "text-red-600"}`}>{error}</p>
-        </div>
-      )}
     </div>
   )
 }
