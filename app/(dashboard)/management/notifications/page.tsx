@@ -190,23 +190,56 @@ export default function NotificationsPage() {
         </div>
       </div>
 
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 px-12 pt-2 pb-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-[#0f1d24] border-orange-600/20">
-            <CardHeader className="pb-2">
-              <CardDescription>Total Channels</CardDescription>
-              <CardTitle className="text-2xl text-orange-500">{channels?.length || 0}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Bell className="h-4 w-4 text-muted-foreground mr-2" />
-                <span className="text-xs text-muted-foreground">{activeChannelsCount} active channels</span>
+          <Card className="rounded-lg border" style={{ 
+            background: theme === 'dark' ? '#0C2027' : '#E5E5E5',
+            borderColor: '#506C77',
+            borderWidth: 1,
+            padding: '15px'
+          }}>
+            <div className="flex flex-row items-center w-full justify-between">
+              <div className="flex flex-col" style={{ marginLeft: 20 }}>
+                <div style={{ 
+                  color: theme === 'dark' ? '#FFFFFF' : '#0E1A1F',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  lineHeight: 0.3
+                }}>
+                  Total Channels
+                </div>
+                <div style={{ 
+                  color: '#849DA6',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontWeight: 400,
+                  fontSize: 14,
+                  marginTop: 8
+                }}>
+                  {activeChannelsCount} active channels
+                </div>
               </div>
-            </CardContent>
+              <div className="flex flex-row items-center" style={{ marginRight: 15 }}>
+                <Bell className="h-12 w-12 text-[#EA661B]" />
+                <span style={{ 
+                  color: '#EA661B',
+                  fontWeight: 400,
+                  fontSize: 64,
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  lineHeight: 1,
+                  marginLeft: -20,
+                  display: 'inline-block',
+                  minWidth: 56,
+                  textAlign: 'right'
+                }}>
+                  {channels?.length || 0}
+                </span>
+              </div>
+            </div>
           </Card>
 
           <Card className="bg-[#0f1d24] border-orange-600/20">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-0">
               <CardDescription>Delivery Status</CardDescription>
               <CardTitle className="text-2xl text-green-500">Operational</CardTitle>
             </CardHeader>
@@ -220,9 +253,14 @@ export default function NotificationsPage() {
         </div>
 
         <Tabs defaultValue="channels" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="bg-[#0f1d24]">
-            <TabsTrigger value="channels">Notification Channels</TabsTrigger>
-          </TabsList>
+          <div className="px-4 py-2 rounded-md bg-[#CAD0D2] dark:bg-[#0C2027]">
+            <h2
+              className="text-sm font-normal"
+              style={{ fontFamily: 'Helvetica, Arial, sans-serif', color: theme === 'dark' ? '#EA651A' : '#0C2027' }}
+            >
+              Notification Channels ({channels?.length || 0})
+            </h2>
+          </div>
 
           <TabsContent value="channels" className="space-y-4">
             <Card className="bg-[#0f1d24] border-orange-600/20">
