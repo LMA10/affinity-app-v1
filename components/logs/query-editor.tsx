@@ -62,7 +62,7 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
   const [editingTabId, setEditingTabId] = useState<string | null>(null)
   const [editingTabName, setEditingTabName] = useState("")
   const editInputRef = useRef<HTMLInputElement>(null)
-  const { fetchLogs, loading, error } = useLogsState()
+  const { fetchLogs, loading, error, logs } = useLogsState()
   const { resolvedTheme } = useTheme()
   const isDarkTheme = resolvedTheme === "dark"
 
@@ -572,13 +572,20 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
             <div className="flex items-start max-w-full">
               <AlertCircle className={`h-5 w-5 mr-3 flex-shrink-0 ${isDarkTheme ? "text-red-500" : "text-red-600"}`} />
               <div className="flex-1 overflow-auto">
-                <h4 className={`font-medium mb-1 ${isDarkTheme ? "text-red-400" : "text-red-700"}`}>
-                  SQL Query Error
-                </h4>
+                <h4 className={`font-medium mb-1 ${isDarkTheme ? "text-red-400" : "text-red-700"}`}>SQL Query Error</h4>
                 <p className={`text-sm ${isDarkTheme ? "text-red-300" : "text-red-600"} whitespace-pre-wrap break-words`}>
-                  {activeTabData.error || error}
+                  {/* Filter technical backend errors */}
+                  {(() => {
+                    const msg = activeTabData.error || error;
+                    if (
+                      msg?.toLowerCase().includes("cannot read properties of undefined") ||
+                      msg?.toLowerCase().includes("reading 'message'")
+                    ) {
+                      return "An unexpected error occurred. Please check your query and try again.";
+                    }
+                    return msg;
+                  })()}
                 </p>
-                
                 {/* Show actionable advice */}
                 <div className="mt-2 text-xs text-gray-400">
                   Tip: Check your SQL syntax, ensure table names and columns are correct, and that all quotes and parentheses are balanced.
@@ -594,9 +601,8 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
             </div>
           </div>
         )}
-        
         {/* No Results Panel - Shows when query executed but no results found */}
-        {activeTabData.status === "success" && !loading && !error && !activeTabData.error && (
+        {activeTabData.status === "success" && !loading && !error && !activeTabData.error && logs.length === 0 && (
           <div className="p-4 border-t border-orange-600/20 bg-[#0a1419]/50 text-center">
             <p className="text-gray-400">No logs found matching your criteria</p>
           </div>

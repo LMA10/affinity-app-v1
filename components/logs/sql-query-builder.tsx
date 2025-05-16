@@ -538,7 +538,7 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl bg-[#0a1419] border-orange-600/20 text-white">
+      <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col bg-[#0a1419] border-orange-600/20 text-white">
 
         <DialogHeader>
           <DialogTitle className="text-2xl text-orange-500 flex justify-between items-center">
@@ -549,7 +549,7 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="flex-1 overflow-y-auto space-y-4 py-4">
           {/* Table Selection */}
           <div>
             <Select value={selectedTable} onValueChange={setSelectedTable}>

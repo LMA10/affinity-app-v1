@@ -71,8 +71,16 @@ export function QueryResults({ queryStatus, queryError, queryMetrics, onRetry, o
   // If there's an error, show it with more details
   if ((queryStatus === "error" && queryError) || error) {
     // Use the error details from the state if available
-    const errorMessage = errorDetails?.message || error || queryError || "Unknown error"
+    let errorMessage = errorDetails?.message || error || queryError || "Unknown error"
     const queryExecutionStatus = errorDetails?.status || "FAILED"
+
+    // Filter technical backend errors
+    if (
+      errorMessage?.toLowerCase().includes("cannot read properties of undefined") ||
+      errorMessage?.toLowerCase().includes("reading 'message'")
+    ) {
+      errorMessage = "An unexpected error occurred. Please check your query and try again."
+    }
 
     return (
       <div className="flex-1 flex flex-col">
@@ -324,7 +332,6 @@ export function QueryResults({ queryStatus, queryError, queryMetrics, onRetry, o
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
           <div className="text-xl font-medium">Query Completed</div>
-          <div className="text-sm text-muted-foreground">Query executed successfully, but returned no results.</div>
         </div>
       </div>
     )

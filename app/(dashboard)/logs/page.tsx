@@ -161,8 +161,9 @@ export default function LogsPage() {
     filterLogs()
   }, [filterLogs, logs, debouncedSearch, statusFilter, activeFilters])
 
-  // Calculate total pages based on total rows and records per page
-  const totalPages = Math.ceil(totalRows / recordsPerPage)
+  // Calculate total records robustly
+  const totalRecords = totalRows > 0 ? totalRows : logs.length;
+  const totalPages = Math.ceil(totalRecords / recordsPerPage);
 
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
@@ -481,12 +482,12 @@ export default function LogsPage() {
             {(loading || logsLoading) && <Loading className="absolute right-4 top-4" />}
 
             {/* Paginator only (no summary or selector) */}
-            {logs.length > 0 && (
+            {filteredLogs.length > 0 && (
               <div className="flex items-center justify-center px-2 py-2 md:px-4 md:py-2">
                 <Paginator
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  totalRecords={totalRows}
+                  totalRecords={totalRecords}
                   itemsPerPage={recordsPerPage}
                   onPageChange={(page) => {
                     if (page > currentPage && nextToken) {
@@ -499,196 +500,200 @@ export default function LogsPage() {
               </div>
             )}
 
-            {/* Mobile: Card/List layout */}
-            <div className="block md:hidden space-y-4 p-2">
-              {filteredLogs.length > 0 ? (
-                filteredLogs.map((log, index) => (
-                  <div key={index} className="rounded-xl border border-orange-600/20 bg-[#0f1d24] p-5 flex flex-col gap-4 shadow-lg">
-                    <div className="flex items-center justify-between sticky top-0 bg-[#0f1d24] z-10 pb-2">
-                      <span className="font-extrabold text-orange-400 text-xl">Log #{index + 1}</span>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <ChevronDown className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => copyLogToClipboard(log)}>
-                            <Copy className="h-4 w-4 mr-2" />
-                            Copy to clipboard
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => exportLogToJSON(log)}>
-                            <FileDown className="h-4 w-4 mr-2" />
-                            Export as JSON
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => setExpandedLogId(expandedLogId === String(index) ? null : String(index))}>
-                            {expandedLogId === String(index) ? (
-                              <>
-                                <ChevronUp className="h-4 w-4 mr-2" />
-                                Collapse details
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="h-4 w-4 mr-2" />
-                                View details
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    {/* Show up to 5 fields as summary in a grid */}
-                    <div className="grid grid-cols-1 gap-y-1 gap-x-4 text-sm">
-                      {visibleColumns.slice(0, 5).map((column) => (
-                        <div key={column} className="flex gap-2 items-center">
-                          <span className="text-muted-foreground font-medium">{column}:</span>
-                          <span className="font-mono text-xs break-all max-w-full">
-                            {column === "albstatuscode" ? (
-                              <Badge variant="outline" className={getStatusBadgeColor(String(log[column]))}>
-                                {log[column] !== null ? String(log[column]) : "-"}
-                              </Badge>
-                            ) : log[column] !== null ? (
-                              String(log[column])
-                            ) : (
-                              "-"
-                            )}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Divider */}
-                    <div className="border-t border-orange-600/10" />
-                    {/* Expanded details */}
-                    {expandedLogId === String(index) && (
-                      <div className="pt-3 text-xs flex flex-col gap-1">
-                        <LogDetailsView
-                          log={log}
-                          headers={headers}
-                          onClose={() => setExpandedLogId(null)}
-                          onValueClick={(field, value) => handleValueClick(field, value)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">{loading || logsLoading ? "Loading logs..." : "No logs found matching your criteria"}</div>
-              )}
-            </div>
-
-            {/* Desktop: Table layout */}
-            <div className="hidden md:block">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40px]"></TableHead>
-                    {visibleColumns.map((column) => (
-                      <TableHead key={column}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableHead>
-                    ))}
-                    <TableHead className="w-[80px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+            {/* Only show table if there are query results */}
+            {logs.length > 0 ? (
+              <>
+                {/* Mobile: Card/List layout */}
+                <div className="block md:hidden space-y-4 p-2">
                   {filteredLogs.length > 0 ? (
                     filteredLogs.map((log, index) => (
-                      <React.Fragment key={index}>
-                        <TableRow
-                          className={`hover:bg-[#0a1419] transition-colors ${expandedLogId === String(index) ? "bg-[#0a1419]" : ""}`}
-                        >
-                          <TableCell className="p-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => toggleRowExpansion(index)}
-                            >
-                              {expandedLogId === String(index) ? (
-                                <ChevronDown className="h-4 w-4 text-orange-500" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </Button>
-                          </TableCell>
-                          {visibleColumns.map((column) => (
-                            <TableCell
-                              key={column}
-                              className="font-mono text-xs cursor-pointer hover:bg-orange-500/10"
-                              onClick={() => {
-                                if (log[column] !== null) {
-                                  handleValueClick(column, String(log[column]))
-                                }
-                              }}
-                            >
-                              {column === "albstatuscode" ? (
-                                <Badge variant="outline" className={getStatusBadgeColor(String(log[column]))}>
-                                  {log[column] !== null ? String(log[column]) : "-"}
-                                </Badge>
-                              ) : log[column] !== null ? (
-                                String(log[column])
-                              ) : (
-                                "-"
-                              )}
-                            </TableCell>
+                      <div key={index} className="rounded-xl border border-orange-600/20 bg-[#0f1d24] p-5 flex flex-col gap-4 shadow-lg">
+                        <div className="flex items-center justify-between sticky top-0 bg-[#0f1d24] z-10 pb-2">
+                          <span className="font-extrabold text-orange-400 text-xl">Log #{index + 1}</span>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => copyLogToClipboard(log)}>
+                                <Copy className="h-4 w-4 mr-2" />
+                                Copy to clipboard
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => exportLogToJSON(log)}>
+                                <FileDown className="h-4 w-4 mr-2" />
+                                Export as JSON
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => setExpandedLogId(expandedLogId === String(index) ? null : String(index))}>
+                                {expandedLogId === String(index) ? (
+                                  <>
+                                    <ChevronUp className="h-4 w-4 mr-2" />
+                                    Collapse details
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="h-4 w-4 mr-2" />
+                                    View details
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        {/* Show up to 5 fields as summary in a grid */}
+                        <div className="grid grid-cols-1 gap-y-1 gap-x-4 text-sm">
+                          {visibleColumns.slice(0, 5).map((column) => (
+                            <div key={column} className="flex gap-2 items-center">
+                              <span className="text-muted-foreground font-medium">{column}:</span>
+                              <span className="font-mono text-xs break-all max-w-full">
+                                {column === "albstatuscode" ? (
+                                  <Badge variant="outline" className={getStatusBadgeColor(String(log[column]))}>
+                                    {log[column] !== null ? String(log[column]) : "-"}
+                                  </Badge>
+                                ) : log[column] !== null ? (
+                                  String(log[column])
+                                ) : (
+                                  "-"
+                                )}
+                              </span>
+                            </div>
                           ))}
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7">
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => copyLogToClipboard(log)}>
-                                  <Copy className="h-4 w-4 mr-2" />
-                                  Copy to clipboard
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => exportLogToJSON(log)}>
-                                  <FileDown className="h-4 w-4 mr-2" />
-                                  Export as JSON
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => toggleRowExpansion(index)}>
-                                  {expandedLogId === String(index) ? (
-                                    <>
-                                      <ChevronUp className="h-4 w-4 mr-2" />
-                                      Collapse details
-                                    </>
-                                  ) : (
-                                    <>
-                                      <ChevronDown className="h-4 w-4 mr-2" />
-                                      View details
-                                    </>
-                                  )}
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
+                        </div>
+                        {/* Divider */}
+                        <div className="border-t border-orange-600/10" />
+                        {/* Expanded details */}
                         {expandedLogId === String(index) && (
-                          <TableRow>
-                            <TableCell colSpan={visibleColumns.length + 2} className="p-0 border-0">
-                              <LogDetailsView
-                                log={log}
-                                headers={headers}
-                                onClose={() => setExpandedLogId(null)}
-                                onValueClick={(field, value) => handleValueClick(field, value)}
-                              />
-                            </TableCell>
-                          </TableRow>
+                          <div className="pt-3 text-xs flex flex-col gap-1">
+                            <LogDetailsView
+                              log={log}
+                              headers={headers}
+                              onClose={() => setExpandedLogId(null)}
+                              onValueClick={(field, value) => handleValueClick(field, value)}
+                            />
+                          </div>
                         )}
-                      </React.Fragment>
+                      </div>
                     ))
                   ) : (
-                    <TableRow>
-                      <TableCell colSpan={visibleColumns.length + 2} className="h-24 text-center">
-                        {loading || logsLoading ? "Loading logs..." : "No logs found matching your criteria"}
-                      </TableCell>
-                    </TableRow>
+                    <div className="text-center py-8 text-muted-foreground">No rows match your filter</div>
                   )}
-                </TableBody>
-              </Table>
-            </div>
+                </div>
+                {/* Desktop: Table layout */}
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[40px]"></TableHead>
+                        {visibleColumns.map((column) => (
+                          <TableHead key={column}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableHead>
+                        ))}
+                        <TableHead className="w-[80px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredLogs.length > 0 ? (
+                        filteredLogs.map((log, index) => (
+                          <React.Fragment key={index}>
+                            <TableRow
+                              className={`hover:bg-[#0a1419] transition-colors ${expandedLogId === String(index) ? "bg-[#0a1419]" : ""}`}
+                            >
+                              <TableCell className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => toggleRowExpansion(index)}
+                                >
+                                  {expandedLogId === String(index) ? (
+                                    <ChevronDown className="h-4 w-4 text-orange-500" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                  )}
+                                </Button>
+                              </TableCell>
+                              {visibleColumns.map((column) => (
+                                <TableCell
+                                  key={column}
+                                  className="font-mono text-xs cursor-pointer hover:bg-orange-500/10"
+                                  onClick={() => {
+                                    if (log[column] !== null) {
+                                      handleValueClick(column, String(log[column]))
+                                    }
+                                  }}
+                                >
+                                  {column === "albstatuscode" ? (
+                                    <Badge variant="outline" className={getStatusBadgeColor(String(log[column]))}>
+                                      {log[column] !== null ? String(log[column]) : "-"}
+                                    </Badge>
+                                  ) : log[column] !== null ? (
+                                    String(log[column])
+                                  ) : (
+                                    "-"
+                                  )}
+                                </TableCell>
+                              ))}
+                              <TableCell>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                                      <ChevronDown className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => copyLogToClipboard(log)}>
+                                      <Copy className="h-4 w-4 mr-2" />
+                                      Copy to clipboard
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => exportLogToJSON(log)}>
+                                      <FileDown className="h-4 w-4 mr-2" />
+                                      Export as JSON
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => toggleRowExpansion(index)}>
+                                      {expandedLogId === String(index) ? (
+                                        <>
+                                          <ChevronUp className="h-4 w-4 mr-2" />
+                                          Collapse details
+                                        </>
+                                      ) : (
+                                        <>
+                                          <ChevronDown className="h-4 w-4 mr-2" />
+                                          View details
+                                        </>
+                                      )}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                            {expandedLogId === String(index) && (
+                              <TableRow>
+                                <TableCell colSpan={visibleColumns.length + 2} className="p-0 border-0">
+                                  <LogDetailsView
+                                    log={log}
+                                    headers={headers}
+                                    onClose={() => setExpandedLogId(null)}
+                                    onValueClick={(field, value) => handleValueClick(field, value)}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </React.Fragment>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={visibleColumns.length + 2} className="h-24 text-center">
+                            No rows match your filter
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
+            ) : null}
           </div>
         ) : null}
       </div>
