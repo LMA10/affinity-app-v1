@@ -18,6 +18,9 @@ import {
   Copy,
   ChevronUp,
   Database,
+  MoreHorizontal,
+  Eye,
+  Trash2,
 } from "lucide-react"
 import { QueryEditor } from "@/components/logs/query-editor"
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -47,6 +51,8 @@ export default function LogsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [viewMode, setViewMode] = useState<"table" | "query">("table")
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null)
+  const [selectedLog, setSelectedLog] = useState<any | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [activeFilters, setActiveFilters] = useState<{ field: string; value: string }[]>([])
   const [visibleColumns, setVisibleColumns] = useState<string[]>([])
   const [isColumnSelectorOpen, setIsColumnSelectorOpen] = useState(false)
@@ -349,6 +355,28 @@ export default function LogsPage() {
     setHasRunQuery(true)
   }
 
+  const handleViewDetails = (log: any) => {
+    setSelectedLog(log)
+    setExpandedLogId(String(logs.indexOf(log)))
+  }
+
+  const handleDeleteLog = (log: any) => {
+    setSelectedLog(log)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteLog = async () => {
+    if (selectedLog) {
+      try {
+        // Add your delete logic here
+        setIsDeleteDialogOpen(false)
+        setSelectedLog(null)
+      } catch (error) {
+        console.error('Error deleting log:', error)
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: theme === 'dark' ? '#0E1A1F' : '#E5E5E5' }}>
       <div className="px-12 py-4">
@@ -534,32 +562,31 @@ export default function LogsPage() {
                       <span className="font-extrabold text-orange-400 text-xl">Log #{index + 1}</span>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <ChevronDown className="h-4 w-4" />
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="text-[#849DA6] dark:text-[#506C77] hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-[#142A33] dark:hover:text-white"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open menu</span>
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => copyLogToClipboard(log)}>
-                            <Copy className="h-4 w-4 mr-2" />
-                            Copy to clipboard
+                        <DropdownMenuContent align="end" className="bg-[#CAD0D2] dark:bg-[#0D1315] border border-[#506C77]">
+                          <DropdownMenuLabel className="text-[#142A33] dark:text-white font-['Helvetica'] font-normal">Actions</DropdownMenuLabel>
+                          <DropdownMenuItem 
+                            onClick={() => handleViewDetails(log)}
+                            className="text-[#142A33] dark:text-white hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-[#142A33] dark:hover:text-white focus:bg-[#FFB082] dark:focus:bg-[#C25F28] focus:text-[#142A33] dark:focus:text-white"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => exportLogToJSON(log)}>
-                            <FileDown className="h-4 w-4 mr-2" />
-                            Export as JSON
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => setExpandedLogId(expandedLogId === String(index) ? null : String(index))}>
-                            {expandedLogId === String(index) ? (
-                              <>
-                                <ChevronUp className="h-4 w-4 mr-2" />
-                                Collapse details
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="h-4 w-4 mr-2" />
-                                View details
-                              </>
-                            )}
+                          <DropdownMenuSeparator className="bg-[#506C77]" />
+                          <DropdownMenuItem 
+                            className="text-red-500 hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-red-500 focus:bg-[#FFB082] dark:focus:bg-[#C25F28] focus:text-red-500" 
+                            onClick={() => handleDeleteLog(log)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Log
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -623,28 +650,27 @@ export default function LogsPage() {
                           className={`hover:bg-[#0a1419] transition-colors ${expandedLogId === String(index) ? "bg-[#0a1419]" : ""}`}
                         >
                           <TableCell className="p-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => toggleRowExpansion(index)}
-                            >
-                              {expandedLogId === String(index) ? (
-                                <ChevronDown className="h-4 w-4 text-orange-500" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => toggleRowExpansion(index)}
+                              >
+                                {expandedLogId === String(index) ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <span className="font-mono text-xs">{index + 1}</span>
+                            </div>
                           </TableCell>
                           {visibleColumns.map((column) => (
                             <TableCell
                               key={column}
-                              className="font-mono text-xs cursor-pointer hover:bg-orange-500/10"
-                              onClick={() => {
-                                if (log[column] !== null) {
-                                  handleValueClick(column, String(log[column]))
-                                }
-                              }}
+                              className="font-mono text-xs py-2"
+                              onClick={() => handleValueClick(column, String(log[column]))}
                             >
                               {column === "albstatuscode" ? (
                                 <Badge variant="outline" className={getStatusBadgeColor(String(log[column]))}>
@@ -660,32 +686,31 @@ export default function LogsPage() {
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7">
-                                  <ChevronDown className="h-4 w-4" />
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  className="text-[#849DA6] dark:text-[#506C77] hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-[#142A33] dark:hover:text-white"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Open menu</span>
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => copyLogToClipboard(log)}>
-                                  <Copy className="h-4 w-4 mr-2" />
-                                  Copy to clipboard
+                              <DropdownMenuContent align="end" className="bg-[#CAD0D2] dark:bg-[#0D1315] border border-[#506C77]">
+                                <DropdownMenuLabel className="text-[#142A33] dark:text-white font-['Helvetica'] font-normal">Actions</DropdownMenuLabel>
+                                <DropdownMenuItem 
+                                  onClick={() => handleViewDetails(log)}
+                                  className="text-[#142A33] dark:text-white hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-[#142A33] dark:hover:text-white focus:bg-[#FFB082] dark:focus:bg-[#C25F28] focus:text-[#142A33] dark:focus:text-white"
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => exportLogToJSON(log)}>
-                                  <FileDown className="h-4 w-4 mr-2" />
-                                  Export as JSON
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => toggleRowExpansion(index)}>
-                                  {expandedLogId === String(index) ? (
-                                    <>
-                                      <ChevronUp className="h-4 w-4 mr-2" />
-                                      Collapse details
-                                    </>
-                                  ) : (
-                                    <>
-                                      <ChevronDown className="h-4 w-4 mr-2" />
-                                      View details
-                                    </>
-                                  )}
+                                <DropdownMenuSeparator className="bg-[#506C77]" />
+                                <DropdownMenuItem 
+                                  className="text-red-500 hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-red-500 focus:bg-[#FFB082] dark:focus:bg-[#C25F28] focus:text-red-500" 
+                                  onClick={() => handleDeleteLog(log)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete Log
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>

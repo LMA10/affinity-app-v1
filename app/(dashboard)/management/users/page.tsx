@@ -304,7 +304,7 @@ export default function UsersPage() {
         </div>
       </div>
 
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 px-12 pt-0 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="border-orange-600/20" style={{ backgroundColor: theme === 'light' ? '#E8E8E8' : '#0f1d24' }}>
             <CardHeader className="pb-2">
@@ -359,92 +359,53 @@ export default function UsersPage() {
           </Card>
         </div>
 
-        <Card className="border-orange-600/20" style={{ backgroundColor: theme === 'light' ? '#E8E8E8' : '#0f1d24' }}>
-          <CardHeader>
-            {(() => {
-              const titleColor = theme === 'light' ? '#FF7120' : '#EA661B';
-              const textColor = '#506C77';
-              return (
-                <div
-                  style={{
-                    color: textColor,
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: 400,
-                    fontSize: '12.3px',
-                    marginBottom: 20,
-                    lineHeight: '13px',
-                  }}
-                >
-                  <span style={{ color: titleColor, fontWeight: 700, fontSize: 13 }}>User Management</span> / manage users and access control
-                </div>
-              );
-            })()}
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-2 mb-6 items-center">
-              <SearchBar
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={setSearchQuery}
-              />
-              {/*
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full sm:w-[180px]">
-                    Role: {roleFilter === "all" ? "All" : roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setRoleFilter("all")}>All Roles</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter("administrators")}>administrators</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter("users")}>User</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-                */}
+        <div className="flex flex-col sm:flex-row gap-2 mb-6 items-center">
+          <SearchBar
+            placeholder="Search users..."
+            value={searchQuery}
+            onChange={setSearchQuery}
+          />
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] font-normal font-['Helvetica','Arial',sans-serif']">
-                  <SelectValue placeholder="All Statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" className="font-normal font-['Helvetica','Arial',sans-serif']">All Statuses</SelectItem>
-                  <SelectItem value="active" className="font-normal font-['Helvetica','Arial',sans-serif']">Active</SelectItem>
-                  <SelectItem value="inactive" className="font-normal font-['Helvetica','Arial',sans-serif']">Inactive</SelectItem>
-                  <SelectItem value="locked" className="font-normal font-['Helvetica','Arial',sans-serif']">Locked</SelectItem>
-                  <SelectItem value="pending" className="font-normal font-['Helvetica','Arial',sans-serif']">Pending</SelectItem>
-                </SelectContent>
-              </Select>
-              {isAdmin && (
-                <Button className="bg-orange-600 hover:bg-orange-700 ml-0 sm:ml-2 h-10" onClick={() => setIsAddUserModalOpen(true)}>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Add User
-                </Button>
-              )}
-            </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-[180px] !bg-[#CAD0D2] dark:!bg-[#0D1315] !text-[#506C77] dark:!text-[#506C77] !border !border-[#506C77] font-normal font-['Helvetica','Arial',sans-serif']">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="font-normal font-['Helvetica','Arial',sans-serif']">All Statuses</SelectItem>
+              <SelectItem value="active" className="font-normal font-['Helvetica','Arial',sans-serif']">Active</SelectItem>
+              <SelectItem value="inactive" className="font-normal font-['Helvetica','Arial',sans-serif']">Inactive</SelectItem>
+              <SelectItem value="locked" className="font-normal font-['Helvetica','Arial',sans-serif']">Locked</SelectItem>
+              <SelectItem value="pending" className="font-normal font-['Helvetica','Arial',sans-serif']">Pending</SelectItem>
+            </SelectContent>
+          </Select>
+          {isAdmin && (
+            <Button className="bg-orange-600 hover:bg-orange-700 ml-0 sm:ml-2 h-10" onClick={() => setIsAddUserModalOpen(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add User
+            </Button>
+          )}
+        </div>
 
-            {loading ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-              </div>
-            ) : error ? (
-              <div className="text-red-500 p-4 text-center">Error loading users: {error}</div>
-            ) : (
-              <>
-                <UsersTable
-                  users={filteredUsers}
-                  userGroups={userGroups}
-                  isAdmin={isAdmin}
-                  isSelf={isSelf}
-                  onToggleAdmin={handleToggleAdmin}
-                  onToggleUserEnabled={handleToggleUserEnabled}
-                  onChangePassword={handleOpenChangePassword}
-                  onDeleteUser={handleOpenDeleteUser}
-                />
-              </>
-            )}
-          </CardContent>
-        </Card>
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          </div>
+        ) : error ? (
+          <div className="text-red-500 p-4 text-center">Error loading users: {error}</div>
+        ) : (
+          <>
+            <UsersTable
+              users={filteredUsers}
+              userGroups={userGroups}
+              isAdmin={isAdmin}
+              isSelf={isSelf}
+              onToggleAdmin={handleToggleAdmin}
+              onToggleUserEnabled={handleToggleUserEnabled}
+              onChangePassword={handleOpenChangePassword}
+              onDeleteUser={handleOpenDeleteUser}
+            />
+          </>
+        )}
       </div>
       <GenericAddUserModal
         isOpen={isAddUserModalOpen}

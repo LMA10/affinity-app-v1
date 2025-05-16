@@ -198,8 +198,8 @@ export default function NotificationsPage() {
             borderWidth: 1,
             padding: '15px'
           }}>
-            <div className="flex flex-row items-center w-full justify-between">
-              <div className="flex flex-col" style={{ marginLeft: 20 }}>
+            <div className="flex flex-row items-center w-full justify-between" style={{ minHeight: 50 }}>
+              <div className="flex flex-col justify-center" style={{ marginLeft: 20 }}>
                 <div style={{ 
                   color: theme === 'dark' ? '#FFFFFF' : '#0E1A1F',
                   fontFamily: 'Helvetica, Arial, sans-serif',
@@ -238,17 +238,37 @@ export default function NotificationsPage() {
             </div>
           </Card>
 
-          <Card className="bg-[#0f1d24] border-orange-600/20">
-            <CardHeader className="pb-0">
-              <CardDescription>Delivery Status</CardDescription>
-              <CardTitle className="text-2xl text-green-500">Operational</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Check className="h-4 w-4 text-green-500 mr-2" />
-                <span className="text-xs text-muted-foreground">All systems operational</span>
+          <Card className="rounded-lg border" style={{ 
+            background: theme === 'dark' ? '#0C2027' : '#E5E5E5',
+            borderColor: '#22C55E',
+            borderWidth: 1,
+            padding: '15px'
+          }}>
+            <div className="flex flex-row items-center w-full justify-between" style={{ minHeight: 60 }}>
+              <div className="flex flex-col justify-center" style={{ marginLeft: 20 }}>
+                <div style={{ 
+                  color: theme === 'dark' ? '#FFFFFF' : '#0E1A1F',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  lineHeight: 0.3
+                }}>
+                  Delivery Status
+                </div>
+                <div style={{ 
+                  color: '#849DA6',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontWeight: 400,
+                  fontSize: 14,
+                  marginTop: 8
+                }}>
+                  all systems operational
+                </div>
               </div>
-            </CardContent>
+              <div className="flex flex-row items-center" style={{ marginRight: 10 }}>
+                <Check className="h-12 w-12 text-green-500" />
+              </div>
+            </div>
           </Card>
         </div>
 
@@ -263,7 +283,7 @@ export default function NotificationsPage() {
           </div>
 
           <TabsContent value="channels" className="space-y-4">
-            <Card className="bg-[#0f1d24] border-orange-600/20">
+            <Card className="bg-[#0f1d24] border-orange-600/20 rounded-[8px] border-0">
               <CardContent className="p-0">
                 {isLoading ? (
                   <div className="flex justify-center items-center p-8">
@@ -329,14 +349,14 @@ export default function NotificationsPage() {
                     {/* Desktop: Table layout */}
                     <div className="hidden md:block overflow-x-auto">
                       <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Channel Name</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Target</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Client</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                        <TableHeader className="bg-[#CAD0D2] dark:bg-[#0D1315]">
+                          <TableRow className="border-b-0 hover:bg-transparent">
+                            <TableHead className="font-['Helvetica'] font-normal text-[#142A33] dark:text-[#849DA6]">Channel Name</TableHead>
+                            <TableHead className="font-['Helvetica'] font-normal text-[#142A33] dark:text-[#849DA6]">Type</TableHead>
+                            <TableHead className="font-['Helvetica'] font-normal text-[#142A33] dark:text-[#849DA6]">Target</TableHead>
+                            <TableHead className="font-['Helvetica'] font-normal text-[#142A33] dark:text-[#849DA6]">Status</TableHead>
+                            <TableHead className="font-['Helvetica'] font-normal text-[#142A33] dark:text-[#849DA6]">Client</TableHead>
+                            <TableHead className="text-right font-['Helvetica'] font-normal text-[#142A33] dark:text-[#849DA6]">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -347,48 +367,67 @@ export default function NotificationsPage() {
                               </TableCell>
                             </TableRow>
                           ) : (
-                            channels.map((channel) => {
+                            channels.map((channel, idx) => {
                               if (!channel) return null // Skip undefined channels
                               const ChannelIcon = getChannelIcon(channel.notification_type || "")
+                              const targetText = channel.channel || "N/A"
+                              const hasHash = targetText.includes("#")
                               return (
-                                <TableRow key={channel.notification_id}>
-                                  <TableCell>
+                                <TableRow 
+                                  key={channel.notification_id}
+                                  className={`border-b cursor-pointer transition 
+                                    ${idx % 2 === 0 ? 'bg-[#E8E8E8] dark:bg-[#142A33]' : 'bg-[#CAD0D2] dark:bg-[#0D1315]'}
+                                    hover:bg-[#F3DED1] dark:hover:bg-[#252422]`}
+                                >
+                                  <TableCell className="font-['Helvetica'] font-normal text-[14px] text-[#0D1315] dark:text-white py-2">
                                     <div className="flex items-center">
                                       <ChannelIcon className="h-4 w-4 mr-2 text-orange-500" />
-                                      <span className="font-medium">{channel.name || "Unnamed Channel"}</span>
+                                      <span>{channel.name || "Unnamed Channel"}</span>
                                     </div>
                                   </TableCell>
-                                  <TableCell className="capitalize">{channel.notification_type || "Unknown"}</TableCell>
-                                  <TableCell className="font-mono text-xs">{channel.channel || "N/A"}</TableCell>
-                                  <TableCell>
+                                  <TableCell className="font-['Helvetica'] font-normal text-[14px] text-[#0D1315] dark:text-white capitalize py-2">{channel.notification_type || "Unknown"}</TableCell>
+                                  <TableCell className={`font-['Helvetica'] font-normal text-[14px] ${hasHash ? 'text-[#EA661B]' : 'text-[#0D1315] dark:text-white'} py-2`}>
+                                    {targetText}
+                                  </TableCell>
+                                  <TableCell className="py-2">
                                     <Badge
                                       variant="outline"
-                                      className={
+                                      className={`font-['IBM_Plex_Mono'] font-normal rounded-[4px] text-[10px] px-1.5 py-0.5 ${
                                         channel.enabled
-                                          ? "bg-green-500/10 text-green-500 border-green-500/20"
-                                          : "bg-red-500/10 text-red-500 border-red-500/20"
-                                      }
+                                          ? "bg-green-500 text-white border-green-500"
+                                          : "bg-gray-500 text-white border-gray-500"
+                                      }`}
                                     >
-                                      {channel.enabled ? "Active" : "Inactive"}
+                                      {channel.enabled ? "Enabled" : "Disabled"}
                                     </Badge>
                                   </TableCell>
-                                  <TableCell>{channel.client || "N/A"}</TableCell>
+                                  <TableCell className="font-['Helvetica'] font-normal text-[14px] text-[#0D1315] dark:text-white py-2">{channel.client || "N/A"}</TableCell>
                                   <TableCell className="text-right">
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon">
+                                        <Button 
+                                          variant="ghost" 
+                                          size="icon"
+                                          className="text-[#849DA6] dark:text-[#506C77] hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-[#142A33] dark:hover:text-white"
+                                        >
                                           <MoreHorizontal className="h-4 w-4" />
                                           <span className="sr-only">Open menu</span>
                                         </Button>
                                       </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                        <DropdownMenuItem onClick={() => handleEditChannel(channel)}>
+                                      <DropdownMenuContent align="end" className="bg-[#CAD0D2] dark:bg-[#0D1315] border border-[#506C77]">
+                                        <DropdownMenuLabel className="text-[#142A33] dark:text-white font-['Helvetica'] font-normal">Actions</DropdownMenuLabel>
+                                        <DropdownMenuItem 
+                                          onClick={() => handleEditChannel(channel)}
+                                          className="text-[#142A33] dark:text-white hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-[#142A33] dark:hover:text-white focus:bg-[#FFB082] dark:focus:bg-[#C25F28] focus:text-[#142A33] dark:focus:text-white"
+                                        >
                                           <Edit className="h-4 w-4 mr-2" />
                                           Edit Channel
                                         </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem className="text-red-500" onClick={() => handleDeleteChannel(channel)}>
+                                        <DropdownMenuSeparator className="bg-[#506C77]" />
+                                        <DropdownMenuItem 
+                                          className="text-red-500 hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-red-500 focus:bg-[#FFB082] dark:focus:bg-[#C25F28] focus:text-red-500" 
+                                          onClick={() => handleDeleteChannel(channel)}
+                                        >
                                           <Trash2 className="h-4 w-4 mr-2" />
                                           Delete Channel
                                         </DropdownMenuItem>

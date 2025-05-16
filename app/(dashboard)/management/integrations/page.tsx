@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Plus, RefreshCw, Settings, Trash2, AlertCircle } from "lucide-react"
+import { CheckCircle, Plus, RefreshCw, Settings, Trash2, AlertCircle, MoreHorizontal, Edit } from "lucide-react"
 import { useIntegrations } from "@/lib/hooks/use-integrations"
 import type { Integration } from "@/lib/types/integration"
 import { IntegrationDetailsModal } from "@/components/integrations/integration-details-modal"
@@ -14,6 +14,7 @@ import { useIntegrationsStore } from "@/lib/state/integrations/integrationsState
 import { toast } from "@/hooks/use-toast"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useTheme } from "next-themes"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export default function IntegrationsPage() {
   const { integrations, isLoading, error, fetchIntegrations } = useIntegrations()
@@ -263,9 +264,36 @@ export default function IntegrationsPage() {
                         <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleRefresh}>
                           <RefreshCw className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => handleOpenDeleteModal(integration)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              className="text-[#849DA6] dark:text-[#506C77] hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-[#142A33] dark:hover:text-white"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-[#CAD0D2] dark:bg-[#0D1315] border border-[#506C77]">
+                            <DropdownMenuLabel className="text-[#142A33] dark:text-white font-['Helvetica'] font-normal">Actions</DropdownMenuLabel>
+                            <DropdownMenuItem 
+                              onClick={() => openIntegrationDetails(integration)}
+                              className="text-[#142A33] dark:text-white hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-[#142A33] dark:hover:text-white focus:bg-[#FFB082] dark:focus:bg-[#C25F28] focus:text-[#142A33] dark:focus:text-white"
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Integration
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-[#506C77]" />
+                            <DropdownMenuItem 
+                              className="text-red-500 hover:bg-[#FFB082] dark:hover:bg-[#C25F28] hover:text-red-500 focus:bg-[#FFB082] dark:focus:bg-[#C25F28] focus:text-red-500" 
+                              onClick={() => handleOpenDeleteModal(integration)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete Integration
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </CardFooter>
                   </Card>

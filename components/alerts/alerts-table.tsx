@@ -70,13 +70,13 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
       <div className="hidden md:block">
         <Table>
           <TableHeader>
-            <TableRow className="border-b">
-              <TableHead className="w-[180px]">Timestamp</TableHead>
-              <TableHead className="w-[100px]">Severity</TableHead>
-              <TableHead>Alert</TableHead>
-              <TableHead className="w-[100px]">Source</TableHead>
-              <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[100px] text-right">Actions</TableHead>
+            <TableRow className="border-b-0 hover:bg-transparent">
+              <TableHead className="w-[180px] font-['Helvetica'] font-normal text-[#849DA6] dark:text-[#849DA6] text-[#506C77]">Timestamp</TableHead>
+              <TableHead className="w-[100px] font-['Helvetica'] font-normal text-[#849DA6] dark:text-[#849DA6] text-[#506C77]">Severity</TableHead>
+              <TableHead className="font-['Helvetica'] font-normal text-[#849DA6] dark:text-[#849DA6] text-[#506C77]">Alert</TableHead>
+              <TableHead className="w-[100px] font-['Helvetica'] font-normal text-[#849DA6] dark:text-[#849DA6] text-[#506C77]">Source</TableHead>
+              <TableHead className="w-[100px] font-['Helvetica'] font-normal text-[#849DA6] dark:text-[#849DA6] text-[#506C77]">Status</TableHead>
+              <TableHead className="w-[100px] text-right font-['Helvetica'] font-normal text-[#849DA6] dark:text-[#849DA6] text-[#506C77]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -90,16 +90,18 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
               alerts.map((alert, idx) => (
                 <TableRow
                   key={alert.alert_id}
-                  className={`border-b cursor-pointer hover:bg-orange-600/10 transition 
-                    ${idx % 2 === 0 ? 'bg-[#E8E8E8] dark:bg-[#142A33]' : 'bg-[#CAD0D2] dark:bg-[#0D1315]'}`}
+                  className={`border-b cursor-pointer transition 
+                    ${isOpen && selectedAlert?.alert_id === alert.alert_id 
+                      ? 'bg-[#F28B51] text-white hover:bg-[#F28B51]' 
+                      : `hover:bg-[#F3DED1] dark:hover:bg-[#252422] ${idx % 2 === 0 ? 'bg-[#E8E8E8] dark:bg-[#142A33]' : 'bg-[#CAD0D2] dark:bg-[#0D1315]'}`}`}
                   onClick={() => handleViewDetails(alert)}
                 >
-                  <TableCell className="font-mono text-xs">
+                  <TableCell className="font-['Helvetica'] font-normal text-[14px] py-2">
                     {alert.event?.time
                       ? new Date(alert.event.time).toISOString().replace("T", "\n").substring(0, 19)
                       : "-"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <Badge
                       variant="outline"
                       className={getSeverityBadgeColor(alert.security_detection?.severity || "unknown")}
@@ -107,9 +109,9 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
                       {alert.security_detection?.severity || "unknown"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="font-medium">{alert.metadata?.rule_name || "-"}</TableCell>
-                  <TableCell>{alert.client}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-['Helvetica'] font-normal text-[14px] py-2">{alert.metadata?.rule_name || "-"}</TableCell>
+                  <TableCell className="font-['Helvetica'] font-normal text-[14px] py-2">{alert.client}</TableCell>
+                  <TableCell className="py-2">
                     <Badge
                       variant="outline"
                       className={getStatusBadgeColor(alert.alert_management?.status || "unknown")}
@@ -118,8 +120,17 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right" onClick={e => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm" onClick={() => handleViewDetails(alert)}>
-                      Details
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleViewDetails(alert)} 
+                      className={`font-['Helvetica'] font-normal underline lowercase hover:bg-transparent ${
+                        isOpen && selectedAlert?.alert_id === alert.alert_id 
+                          ? 'text-[#0E1A1F] hover:text-[#0E1A1F]' 
+                          : 'text-[#EA661B] hover:text-[#EA661B]'
+                      }`}
+                    >
+                      details
                     </Button>
                   </TableCell>
                 </TableRow>
