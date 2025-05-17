@@ -113,8 +113,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="dark:!bg-[#142A33] !bg-[#CAD0D2] border-r dark:border-orange-500 border-transparent">
-      <div className="absolute right-0 top-8 translate-x-1/2 z-20 dark:!bg-[#142A33] !bg-[#CAD0D2] rounded-md p-0.5 shadow-md flex border border-orange-500">
-        <SidebarTrigger className="h-7 w-6 dark:text-orange-500 text-[#142A33] flex items-center justify-center font-['IBM_Plex_Mono'] text-lg text-[14px] -translate-y-0.5" />
+      <div className="absolute right-0 top-8 translate-x-1/2 z-20 dark:!bg-[#142A33] !bg-[#CAD0D2] rounded-md shadow-md flex items-center justify-center border dark:border-orange-500 border-[#0C2027] ">
+        <SidebarTrigger className="h-7 w-6 dark:text-orange-500 text-[#142A33] flex items-center justify-center font-['IBM_Plex_Mono'] text-lg text-[14px]" />
       </div>
       <SidebarHeader className="dark:!bg-[#142A33] !bg-[#CAD0D2]">
         <div className="flex items-center p-4 translate-x-[30px]">
