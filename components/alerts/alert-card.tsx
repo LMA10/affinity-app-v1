@@ -39,7 +39,7 @@ export function AlertCard({ type, count, marginRight = 15, displayText }: AlertC
 
     return (
         <Card
-            className="bg-transparent dark:bg-[#0f1d24] rounded-lg border"
+            className="bg-transparent dark:bg-[#0f1d24] rounded-lg border overflow-x-hidden"
             style={{
                 borderColor: isCritical ? severityColors[theme].critical : '#506C77',
                 borderWidth: isCritical ? 1 : 0.5
