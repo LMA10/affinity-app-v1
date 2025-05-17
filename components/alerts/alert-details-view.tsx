@@ -203,14 +203,14 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
       style={{ color: '#142A33' }}
     >
       <div className="relative mb-2 w-full">
-        <div className="flex items-center justify-between pr-0 w-full">
+        <div className="flex items-center justify-between pr-0 w-full mb-[13px]">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={onClose} className="h-10 w-10 md:h-6 md:w-6">
               <X className="h-6 w-6 md:h-4 md:w-4" style={{ color: '#EA661B' }} />
             </Button>
-            <h3 style={{ 
-              color: theme === 'light' ? '#FF7120' : '#EA661B', 
-              fontWeight: 700, 
+            <h3 style={{
+              color: theme === 'light' ? '#FF7120' : '#EA661B',
+              fontWeight: 700,
               fontSize: 13,
               fontFamily: 'Helvetica, Arial, sans-serif',
               lineHeight: '13px',
@@ -236,38 +236,38 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
             )}
           </div>
         </div>
-        <div className="flex items-center justify-between w-full mb-2 gap-1" style={{height: '44px'}}>
+        <div className="flex items-center w-full mb-2 gap-1" style={{ height: '44px' }}>
           <div className="flex h-10">
-          <div className="flex w-full h-full">
-            <button
+            <div className="flex w-full h-full">
+              <button
                 className={`flex-0 flex items-center justify-center px-5 py-s h-10 font-['Helvetica','Arial',sans-serif] font-normal text-sm focus:outline-none transition-colors
                   ${activeTab === 'formatted'
                     ? 'bg-[#506C77] border border-[#506C77] text-white dark:bg-[#506C77] dark:border-[#506C77] dark:text-white'
                     : 'bg-[#AFBABE] text-[#142A33] dark:bg-[#0C2027] dark:text-white'}
                   rounded-l-[6px'] ${activeTab === 'formatted' ? '' : 'border-r-0'}
               `}
-              style={{ borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }}
-              onClick={() => setActiveTab('formatted')}
-              type="button"
-            >
-              Formatted View
-            </button>
-            <button
+                style={{ borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }}
+                onClick={() => setActiveTab('formatted')}
+                type="button"
+              >
+                Formatted View
+              </button>
+              <button
                 className={`flex-1 flex items-center justify-center px-4 py-2 h-10 font-['Helvetica','Arial',sans-serif] font-normal text-sm focus:outline-none transition-colors
                   ${activeTab === 'raw'
                     ? 'bg-[#506C77] border border-[#506C77] text-white dark:bg-[#506C77] dark:border-[#506C77] dark:text-white'
                     : 'bg-[#AFBABE] text-[#142A33] dark:bg-[#0C2027] dark:text-white'}
                 rounded-r-[8px] -ml-px
               `}
-              style={{ borderTopRightRadius: 6, borderBottomRightRadius: 6 }}
-              onClick={() => setActiveTab('raw')}
-              type="button"
-            >
-              Raw JSON
-            </button>
+                style={{ borderTopRightRadius: 6, borderBottomRightRadius: 6 }}
+                onClick={() => setActiveTab('raw')}
+                type="button"
+              >
+                Raw JSON
+              </button>
+            </div>
           </div>
-        </div>
-          <div className="flex gap-1 h-10 ml-2">
+          <div className="flex gap-1 h-10">
             <Button
               variant="outline"
               size="icon"
