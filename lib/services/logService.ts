@@ -155,4 +155,35 @@ export async function getDatabases(): Promise<DatabasesResponse> {
   }
 }
 
-export default { searchLogs, searchLogsNextPage, getDatabases }
+export async function downloadFullCsv(executionId: string): Promise<Blob | null> {
+  try {
+    const token = sessionState.token || '';
+    if (!token) {
+      throw new Error("No authorization token found")
+    }
+    const response = await fetch(`${urlapi}/logs/search/${executionId}`, {
+      method: "POST",
+      headers: {
+        Authorization: token,
+      } as HeadersInit,
+    })
+    if (!response.ok) throw new Error("Failed to download full CSV")
+    const data = await response.json()
+    // Expecting { affinity_full_results: base64_content }
+    const base64 = data.affinity_full_results
+    if (!base64) throw new Error("No CSV content returned")
+    // Decode base64 to Blob
+    const byteCharacters = atob(base64)
+    const byteNumbers = new Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    const byteArray = new Uint8Array(byteNumbers)
+    return new Blob([byteArray], { type: 'text/csv' })
+  } catch (error) {
+    //console.error("Error downloading full CSV:", error)
+    return null
+  }
+}
+
+export default { searchLogs, searchLogsNextPage, getDatabases, downloadFullCsv }

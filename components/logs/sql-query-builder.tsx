@@ -390,12 +390,13 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
     if (validConditions.length > 0) {
       query += " WHERE "
       const whereParts = validConditions.map((cond) => {
+        const quotedColumn = `\"${cond.column}\"`
         if (cond.operator === "IS NULL" || cond.operator === "IS NOT NULL") {
-          return `${cond.column} ${cond.operator}`
+          return `${quotedColumn} ${cond.operator}`
         } else if (cond.operator === "IN" || cond.operator === "NOT IN") {
-          return `${cond.column} ${cond.operator} (${cond.value})`
+          return `${quotedColumn} ${cond.operator} (${cond.value})`
         } else {
-          return `${cond.column} ${cond.operator} '${cond.value}'`
+          return `${quotedColumn} ${cond.operator} '${cond.value}'`
         }
       })
       query += whereParts.join(" AND ")

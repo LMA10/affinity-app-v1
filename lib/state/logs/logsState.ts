@@ -30,6 +30,7 @@ interface LogsState {
   setError: (error: string | null, details?: { message: string; status: string } | null) => void
   setCurrentPage: (page: number) => void
   clearLogs: () => void
+  exportFullCsv: () => Promise<Blob | null>
 }
 
 export const useLogsState = create<LogsState>((set, get) => ({
@@ -302,6 +303,12 @@ export const useLogsState = create<LogsState>((set, get) => ({
     pageTokens: { 1: null },
     lastQuery: null,
   }),
+
+  exportFullCsv: async () => {
+    const { executionId } = get();
+    if (!executionId) throw new Error("No execution ID available for export");
+    return await logService.downloadFullCsv(executionId);
+  },
 }))
 
 export default useLogsState

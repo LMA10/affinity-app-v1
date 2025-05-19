@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useRef } from "react"
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,7 +19,7 @@ import {
   ChevronUp,
   Database,
 } from "lucide-react"
-import { QueryEditor } from "@/components/logs/query-editor"
+import { QueryEditor, QueryEditorHandle } from "@/components/logs/query-editor"
 import { Badge } from "@/components/ui/badge"
 import { LogDetailsView } from "@/components/logs/log-details-view"
 import {
@@ -36,6 +36,9 @@ import { useToast } from "@/hooks/use-toast"
 import type { ChangeEvent } from "react"
 import { Paginator } from "@/components/ui/paginator"
 import useLogsState from "@/lib/state/logs/logsState"
+import config from "@/lib/config/configDev"
+import sessionState from "@/lib/state/sessionState/sessionState"
+import pako from "pako"
 
 export default function LogsPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -66,6 +69,7 @@ export default function LogsPage() {
     setCurrentPage,
   } = useLogsState()
   const [hasRunQuery, setHasRunQuery] = useState(false)
+  const queryEditorRef = useRef<QueryEditorHandle>(null)
 
   // Fetch databases when the component mounts
   useEffect(() => {
@@ -239,54 +243,99 @@ export default function LogsPage() {
     setCurrentPage(1)
   }
 
-  // Export logs to CSV
-  const exportToCSV = () => {
+  // Utility to download and decompress base64 gzipped CSV
+  const downloadCsvFile = (fileContent: string, filename: string = 'data.csv') => {
+    try {
+      const binaryString = atob(fileContent);
+      const binaryLength = binaryString.length;
+      const bytes = new Uint8Array(binaryLength);
+      for (let i = 0; i < binaryLength; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      // @ts-ignore: pako is assumed to be available globally or imported
+      const decompressedData = pako.ungzip(bytes, { to: 'string' });
+      const blob = new Blob([decompressedData], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading CSV file:', error);
+    }
+  };
+
+  // Export logs to CSV (full export)
+  const exportToCSV = async () => {
+    try {
+      const base64 = await (async () => {
+        const { executionId } = useLogsState.getState();
+        if (!executionId) throw new Error("No data to export");
+        const response = await fetch(`${config.urlAPI}/logs/search/${executionId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: sessionState.token || '',
+          },
+        });
+        if (!response.ok) throw new Error("Failed to download full CSV");
+        const data = await response.json();
+        return data.body?.affinity_full_results;
+      })();
+      if (!base64) throw new Error("No CSV data returned");
+      downloadCsvFile(base64, `logs_full_export_${new Date().toISOString().slice(0, 10)}.csv`);
+      toast({
+        title: "Export successful",
+        description: `Full logs exported to CSV`,
+        duration: 2000,
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: error instanceof Error ? error.message : String(error),
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
+  };
+
+  // Export filtered logs to CSV (old logic)
+  const exportFilteredLogsToCSV = () => {
     if (!hasRunQuery || filteredLogs.length === 0) {
       toast({
         title: "No data to export",
         description: "Please run a query first",
         duration: 2000,
-      })
-      return
+      });
+      return;
     }
-
-    // Determine which logs to export (filtered or all)
-    const logsToExport = filteredLogs
-
-    // Create CSV header
-    const csvHeader = visibleColumns.join(",")
-
-    // Create CSV rows
+    const logsToExport = filteredLogs;
+    const csvHeader = visibleColumns.join(",");
     const csvRows = logsToExport.map((log) => {
       return visibleColumns
         .map((column) => {
-          // Handle null values and escape commas in values
-          const value = log[column] === null ? "" : String(log[column])
-          return `"${value.replace(/"/g, '""')}"`
+          const value = log[column] === null ? "" : String(log[column]);
+          return `"${value.replace(/"/g, '""')}"`;
         })
-        .join(",")
-    })
-
-    // Combine header and rows
-    const csvContent = [csvHeader, ...csvRows].join("\n")
-
-    // Create a blob and download link
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.setAttribute("href", url)
-    link.setAttribute("download", `logs_export_${new Date().toISOString().slice(0, 10)}.csv`)
-    link.style.visibility = "hidden"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-
+        .join(",");
+    });
+    const csvContent = [csvHeader, ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `logs_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     toast({
       title: "Export successful",
       description: `${logsToExport.length} logs exported to CSV`,
       duration: 2000,
-    })
-  }
+    });
+  };
 
   // Export selected log to JSON
   const exportLogToJSON = (log: any) => {
@@ -347,6 +396,17 @@ export default function LogsPage() {
     setHasRunQuery(true)
   }
 
+  // Generate SQL from filters
+  const handleGenerateSqlFromFilters = () => {
+    if (activeFilters.length === 0) return
+    const whereClause = activeFilters
+      .map(f => `"${f.field}" = '${f.value.replace(/'/g, "''")}'`)
+      .join(' AND ')
+    const sql = `SELECT * FROM "cloudtrail"${whereClause ? ` WHERE ${whereClause}` : ''} LIMIT 1000;`
+    queryEditorRef.current?.setSqlForActiveTab(sql)
+    setViewMode('query')
+  }
+
   return (
     <div className="flex flex-col h-full">
       <PageHeader title="Security Logs" description="View and analyze security event logs across your infrastructure" />
@@ -373,11 +433,11 @@ export default function LogsPage() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={exportToCSV}>
                   <FileDown className="h-4 w-4 mr-2" />
-                  Export to CSV
+                  Export Full Results
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportToCSV()}>
+                <DropdownMenuItem onClick={exportFilteredLogsToCSV}>
                   <FileDown className="h-4 w-4 mr-2" />
-                  Export filtered logs
+                  Export Filtered Results
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -429,6 +489,9 @@ export default function LogsPage() {
             <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-7">
               Clear all
             </Button>
+            <Button variant="outline" size="sm" className="text-xs h-7" onClick={handleGenerateSqlFromFilters}>
+              Generate SQL from Filters
+            </Button>
           </div>
         )}
 
@@ -457,7 +520,7 @@ export default function LogsPage() {
 
         {viewMode === "query" && (
           <div className="mb-6">
-            <QueryEditor onRunQuery={handleQueryRun} />
+            <QueryEditor ref={queryEditorRef} onRunQuery={handleQueryRun} />
           </div>
         )}
 

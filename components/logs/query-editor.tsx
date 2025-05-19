@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from "react"
 import { Plus, X, MoreVertical, Play, AlertCircle, CheckCircle, Wand2, AlignLeft, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -54,7 +54,11 @@ const safeLocalStorage = {
   },
 }
 
-export function QueryEditor({ onRunQuery }: QueryEditorProps) {
+export interface QueryEditorHandle {
+  setSqlForActiveTab: (sql: string) => void;
+}
+
+export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(function QueryEditor({ onRunQuery }, ref) {
   const hasLoadedTabs = useRef(false)
   const [tabs, setTabs] = useState<QueryTab[]>([])
   const [activeTab, setActiveTab] = useState<string>("")
@@ -413,10 +417,12 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
     }
   }, [activeTab, updateSql, runQuery])
 
-  // Clear logs/results when switching tabs
-  useEffect(() => {
-    useLogsState.getState().clearLogs();
-  }, [activeTab])
+  useImperativeHandle(ref, () => ({
+    setSqlForActiveTab: (sql: string) => {
+      updateSql(activeTab, sql)
+      setActiveTab(activeTab) // ensure tab is focused
+    },
+  }), [activeTab, updateSql])
 
   return (
     <div
@@ -617,4 +623,4 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
       />
     </div>
   )
-}
+})
