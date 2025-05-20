@@ -15,6 +15,8 @@ import { Modal } from '@/components/ui/modal';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import { useUmbrellaState } from "@/lib/state/umbrellaState";
 import { crossReferenceIPs } from "@/lib/services/umbrellaService";
+import { storeQuery } from '@/lib/utils/query-storage';
+import { useRouter } from 'next/navigation';
 
 const IOC_COLORS: Record<string, string> = {
     ipv4: "bg-blue-700",
@@ -50,13 +52,6 @@ const IOC_TYPE_META: Record<string, { icon: any; color: string; label: string }>
 
 const ICON_OPTIONS = [
     { label: 'FileText', value: 'FileText', icon: FileText },
-    { label: 'ShieldCheck', value: 'ShieldCheck', icon: ShieldCheck },
-    { label: 'ClipboardList', value: 'ClipboardList', icon: ClipboardList },
-    { label: 'UploadCloud', value: 'UploadCloud', icon: UploadCloud },
-    { label: 'History', value: 'History', icon: History },
-    { label: 'X', value: 'X', icon: X },
-    { label: 'Share2', value: 'Share2', icon: Share2 },
-    { label: 'Clock', value: 'Clock', icon: Clock },
 ];
 
 function AnimatedCount({ end, duration = 800 }: { end: number; duration?: number }) {
@@ -443,26 +438,42 @@ function IncidentResponsePageInner() {
 
     // Handle Grep button
     const [analyzing, setAnalyzing] = useState(false);
+    const [whitelisting, setWhitelisting] = useState(false);
     const handleGrep = async () => {
         setAnalyzing(true);
+        setWhitelisting(false);
+        setShouldLoadWhitelist(false);
         await runExtraction();
         setExtracted(true);
-        setAnalyzing(false);
-        // Only load whitelist if there are IPv4 or domain IOCs
-        if ((iocResults?.ipv4 || []).length > 0 || (iocResults?.domain || []).length > 0) setShouldLoadWhitelist(true);
-        // After whitelist is loaded, resolve domains if present
-        setTimeout(() => {
+        // Always trigger whitelist if there are IPv4 or domain IOCs
+        let needsWhitelist = (iocResults?.ipv4 || []).length > 0 || (iocResults?.domain || []).length > 0;
+        if (needsWhitelist) {
+            setWhitelisting(true);
+            setShouldLoadWhitelist(true);
+        } else {
+            setAnalyzing(false);
+        }
+    };
+
+    // Watch for whitelist loading completion
+    useEffect(() => {
+        if (whitelisting && !whitelistLoading) {
+            setWhitelisting(false);
+            setAnalyzing(false);
+            // After whitelist is loaded, resolve domains if present
             if ((iocResults?.domain || []).length > 0 && whitelist && whitelist.size > 0) {
                 resolveAndCrossDomains(iocResults.domain, whitelist);
             }
-        }, 500);
-    };
+        }
+    }, [whitelisting, whitelistLoading, iocResults, whitelist, resolveAndCrossDomains]);
 
     // Handle Reset button
     const handleReset = () => {
         setRawText("");
         setExtracted(false);
         setSearchTerms({});
+        setWhitelisting(false);
+        setShouldLoadWhitelist(false);
     };
 
     // Add exportIOCs function to the component
@@ -633,7 +644,14 @@ function IncidentResponsePageInner() {
             });
         });
 
-        if (selected.length === 0) {
+        // Deduplicate by type+value
+        const uniqueSelected = Array.from(new Set(selected.map(ioc => `${ioc.type}:${ioc.value}`)))
+            .map(key => {
+                const [type, ...valueParts] = key.split(":");
+                return { type, value: valueParts.join(":") };
+            });
+
+        if (uniqueSelected.length === 0) {
             // Show a toast notification
             const toast = document.createElement('div');
             toast.textContent = 'Please select at least one IOC to query';
@@ -652,8 +670,8 @@ function IncidentResponsePageInner() {
             return;
         }
 
-        setSelectedIocs(selected);
-        const query = generateSqlQuery(selected, false);
+        setSelectedIocs(uniqueSelected);
+        const query = generateSqlQuery(uniqueSelected, false);
         setQueryString(query);
         setLogsQuery(query);
         setIsDrawerOpen(true);
@@ -661,6 +679,7 @@ function IncidentResponsePageInner() {
 
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploading, setUploading] = useState(false);
+    const router = useRouter();
 
     return (
         <div className="min-h-screen flex flex-col items-center bg-[#181c20] p-0">
@@ -778,7 +797,7 @@ function IncidentResponsePageInner() {
                     )}
                 </div>
                 {/* Results Card */}
-                {step === 2 && (
+                {step === 2 && !analyzing && !whitelisting && (
                     <div className="bg-[#181f22] border border-orange-900/40 rounded-lg p-6 shadow-sm">
                         {/* Animated Summary Bar & Heatmap */}
                         <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -813,6 +832,7 @@ function IncidentResponsePageInner() {
                                 const meta = IOC_TYPE_META[iocType] || { icon: FileText, color: 'text-gray-400', label: iocType };
                                 // IPv4 filter controls and whitelist logic
                                 let displayValues = values;
+                                let showIpv4Spinner = false;
                                 if (iocType === 'ipv4') {
                                     let whitelisted: string[] = [];
                                     let unmatched: string[] = [];
@@ -826,6 +846,7 @@ function IncidentResponsePageInner() {
                                     // Public/Private filter
                                     if (ipv4PubPrivFilter === 'public') displayValues = displayValues.filter(ip => !isPrivateIPv4(ip));
                                     else if (ipv4PubPrivFilter === 'private') displayValues = displayValues.filter(ip => isPrivateIPv4(ip));
+                                    showIpv4Spinner = whitelisting || whitelistLoading;
                                 }
                                 // Domain filter controls and whitelist logic
                                 if (iocType === 'domain') {
@@ -840,10 +861,11 @@ function IncidentResponsePageInner() {
                                     <div key={iocType}>
                                         {iocType === 'ipv4' && (
                                             <div className="mb-2">
-                                                <div className="flex gap-2 mb-2">
+                                                <div className="flex gap-2 mb-2 items-center">
                                                     <button onClick={() => setIpv4WhitelistFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
-                                                    <button onClick={() => setIpv4WhitelistFilter('whitelist')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'whitelist' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Whitelist</button>
-                                                    <button onClick={() => setIpv4WhitelistFilter('unmatched')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'unmatched' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Unmatched</button>
+                                                    <button onClick={() => setIpv4WhitelistFilter('whitelist')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'whitelist' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Whitelisted</button>
+                                                    <button onClick={() => setIpv4WhitelistFilter('unmatched')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'unmatched' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Non-Whitelisted</button>
+                                                    {showIpv4Spinner && <Loader2 className="animate-spin w-4 h-4 text-orange-400 ml-2" aria-label="Whitelisting..." />}
                                                 </div>
                                                 <div className="flex gap-2 mb-2">
                                                     <button onClick={() => setIpv4PubPrivFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
@@ -898,11 +920,12 @@ function IncidentResponsePageInner() {
                 {rawText.length} characters
             </div>
             {/* Spinner overlay when analyzing */}
-            {analyzing && (
+            {(analyzing || whitelisting) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="flex flex-col items-center gap-2 p-8 bg-[#23282e] rounded-lg shadow-lg border border-orange-700/40">
                         <Loader2 className="animate-spin w-8 h-8 text-orange-500" />
-                        <span className="text-orange-300 font-semibold mt-2">Analyzing...</span>
+                        {analyzing && <span className="text-orange-300 font-semibold mt-2">Analyzing...</span>}
+                        {whitelisting && <span className="text-orange-300 font-semibold mt-2">Whitelisting...</span>}
                     </div>
                 </div>
             )}

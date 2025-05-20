@@ -58,6 +58,7 @@ const safeLocalStorage = {
 
 export interface QueryEditorHandle {
   setSqlForActiveTab: (sql: string) => void;
+  addTabWithQuery: (sql: string) => void;
 }
 
 export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(function QueryEditor({ onRunQuery, value }: QueryEditorProps, ref: React.Ref<QueryEditorHandle>) {
@@ -194,7 +195,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
 
   // Start editing a tab name
   const startEditingTab = useCallback(
-    (tabId: string, event?: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
+    (tabId: string, event?: React.MouseEvent<any, MouseEvent>) => {
       event?.stopPropagation()
       const tab = tabs.find((t: QueryTab) => t.id === tabId)
       if (tab) {
@@ -425,9 +426,26 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
   useImperativeHandle(ref, () => ({
     setSqlForActiveTab: (sql: string) => {
       updateSql(activeTab, sql)
-      setActiveTab(activeTab) // ensure tab is focused
+      setActiveTab(activeTab)
     },
-  }), [activeTab, updateSql])
+    addTabWithQuery: (sql: string) => {
+      // Ensure the query ends with a semicolon
+      let query = sql.trim()
+      if (!query.endsWith(';')) query += ';'
+      // Count existing IR-Query tabs
+      const irTabs = tabs.filter(tab => tab.name.startsWith('IR-Query-')).length
+      const newTabId = `query-${Date.now()}`
+      const newTab: QueryTab = {
+        id: newTabId,
+        name: `IR-Query-${irTabs + 1}`,
+        sql: query,
+        status: "idle",
+        error: null,
+      }
+      setTabs([...tabs, newTab])
+      setActiveTab(newTabId)
+    }
+  }), [activeTab, updateSql, tabs])
 
   return (
     <div
@@ -448,7 +466,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
                       ? `border-orange-600/20 data-[state=active]:bg-[#0a1419] data-[state=active]:text-orange-500 text-gray-300`
                       : `border-gray-200 data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm text-gray-700`
                   } group`}
-                  onDoubleClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => startEditingTab(tab.id, e)}
+                  onDoubleClick={(e) => startEditingTab(tab.id, e)}
                 >
                   <div className="flex items-center gap-2">
                     {tab.status === "running" && <Play className="h-3 w-3 text-blue-500 animate-pulse" />}
@@ -480,7 +498,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
                       </TooltipProvider>
                     )}
                     <span
-                      onClick={(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) => { e.stopPropagation(); startEditingTab(tab.id, e); }}
+                      onClick={(e) => { e.stopPropagation(); startEditingTab(tab.id, e); }}
                       className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                       role="button"
                       tabIndex={0}

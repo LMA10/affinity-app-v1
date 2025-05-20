@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -63,7 +63,8 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
     setCurrentPage,
   } = useLogsState()
   const [hasRunQuery, setHasRunQuery] = useState(false)
-  const [editorQuery, setEditorQuery] = useState(queryString)
+  const queryEditorRef = useRef<any>(null)
+  const [pendingQuery, setPendingQuery] = useState<string | null>(null)
 
   useEffect(() => {
     fetchDatabases()
@@ -265,11 +266,18 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
 
   useEffect(() => {
     if (queryString) {
-      setEditorQuery(queryString)
       setViewMode("query")
       setHasRunQuery(true)
+      setPendingQuery(queryString)
     }
   }, [queryString])
+
+  useEffect(() => {
+    if (viewMode === "query" && pendingQuery && queryEditorRef.current && queryEditorRef.current.addTabWithQuery) {
+      queryEditorRef.current.addTabWithQuery(pendingQuery)
+      setPendingQuery(null)
+    }
+  }, [viewMode, pendingQuery])
 
   return (
     <div className="p-6 space-y-6">
@@ -367,7 +375,7 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
       </div>
       {viewMode === "query" && (
         <div className="mb-6">
-          <QueryEditor onRunQuery={handleQueryRun} value={editorQuery} />
+          <QueryEditor ref={queryEditorRef} onRunQuery={handleQueryRun} />
         </div>
       )}
       {viewMode === "table" && !hasRunQuery ? (

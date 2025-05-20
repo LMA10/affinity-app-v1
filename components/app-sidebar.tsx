@@ -39,16 +39,16 @@ export function AppSidebar() {
   // Determine which section should be open based on the current path
   useEffect(() => {
     if (pathname?.includes("/analytics")) {
-      setOpenSections((prev) => ({ ...prev, analytics: true }))
+      setOpenSections((prev: typeof openSections) => ({ ...prev, analytics: true }))
     } else if (pathname?.includes("/cloud")) {
-      setOpenSections((prev) => ({ ...prev, cloudStatus: true }))
+      setOpenSections((prev: typeof openSections) => ({ ...prev, cloudStatus: true }))
     } else if (pathname?.includes("/management")) {
-      setOpenSections((prev) => ({ ...prev, management: true }))
+      setOpenSections((prev: typeof openSections) => ({ ...prev, management: true }))
     }
   }, [pathname])
 
   const toggleSection = (section: "analytics" | "cloudStatus" | "management") => {
-    setOpenSections((prev) => ({
+    setOpenSections((prev: typeof openSections) => ({
       ...prev,
       [section]: !prev[section],
     }))

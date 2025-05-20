@@ -131,6 +131,7 @@ interface Condition {
   column: string
   operator: string
   value: string
+  logic?: 'AND' | 'OR'
 }
 
 interface Aggregation {
@@ -204,6 +205,40 @@ LIMIT 20;
   },
 ];
 
+// Map 'domain' to the correct column for domain searches
+function mapDomainColumn(column: string) {
+  if (column === 'domain') return 'tlsdetails.clientprovidedhostheader';
+  return column;
+}
+
+// Helper to parse WHERE clause conditions with AND/OR logic
+function parseWhereConditions(whereClause: string): Condition[] {
+  const conditionRegex = /"([^"]+)"\s*([=<>!]+|IS|LIKE|IN)\s*('[^']*'|"[^"]*"|[^\s]+)(?=\s+(AND|OR)\s+|$)/gi;
+  const logicRegex = /\s+(AND|OR)\s+/gi;
+  const conditions: Condition[] = [];
+  let match;
+  let lastLogic: 'AND' | 'OR' | undefined = undefined;
+  while ((match = conditionRegex.exec(whereClause)) !== null) {
+    const column = match[1];
+    const operator = match[2];
+    let value = match[3];
+    value = value.replace(/^['"]|['"]$/g, '');
+    logicRegex.lastIndex = conditionRegex.lastIndex;
+    const logicMatch = logicRegex.exec(whereClause);
+    const logic = logicMatch ? logicMatch[1].toUpperCase() as 'AND' | 'OR' : undefined;
+    conditions.push({
+      type: 'WHERE',
+      column,
+      operator,
+      value: value.trim(),
+      logic: lastLogic,
+    });
+    lastLogic = logic;
+  }
+  if (conditions.length > 0) conditions[0].logic = undefined;
+  return conditions;
+}
+
 export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, builderSyncState }: QueryBuilderProps) {
   // Get tables from state
   const { tables, loadingTables, fetchDatabases } = useLogsState()
@@ -249,14 +284,11 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
 
       if (typeof builderSyncState.distinct === 'boolean') setUseDistinct(builderSyncState.distinct);
       if (builderSyncState.aggregates) setAggregations(builderSyncState.aggregates);
-      if (builderSyncState.where) setConditions(
-        builderSyncState.where.map((cond: string) => ({
-          type: "WHERE",
-          column: cond.split(' ')[0].replace(/"/g, ''),
-          operator: cond.split(' ')[1],
-          value: cond.split(' ').slice(2).join(' ').replace(/['"]/g, '')
-        }))
-      );
+      if (builderSyncState.where) {
+        // Join the where array into a string and parse with the helper
+        const whereClause = builderSyncState.where.join(' ');
+        setConditions(parseWhereConditions(whereClause));
+      }
       if (builderSyncState.limit) setConditions((prev: any) => [
         ...prev.filter((c: any) => c.type !== 'LIMIT'),
         { type: 'LIMIT', column: '', operator: '', value: builderSyncState.limit }
@@ -274,10 +306,11 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
     setConditions([
       ...conditions,
       {
-        type: "-",
-        column: "-",
-        operator: "-",
-        value: "",
+        type: '-',
+        column: '-',
+        operator: '-',
+        value: '',
+        logic: 'AND',
       },
     ])
   }
@@ -348,60 +381,70 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
 
   // Generate SQL query
   const generateSQL = () => {
-    if (!selectedTable) return ""
-
-    // Start building the query
-    let query = "SELECT "
-
-    // Add DISTINCT if enabled
+    if (!selectedTable) return ''
+    let query = 'SELECT '
     if (useDistinct) {
-      query += "DISTINCT "
+      query += 'DISTINCT '
     }
-
-    // Add columns or aggregations
     if (aggregations.length > 0) {
       const aggParts = aggregations.map((agg) => {
-        let part = `${agg.function}(${agg.column === "*" ? "*" : `\"${agg.column}\"`})`
+        let part = `${agg.function}(${agg.column === '*' ? '*' : `"${agg.column}"`})`
         if (agg.alias) {
-          part += ` AS \"${agg.alias}\"`
+          part += ` AS "${agg.alias}"`
         }
         return part
       })
-
-      if (selectedColumns.length > 0 && !(selectedColumns.length === 1 && selectedColumns[0] === "*")) {
-        const colParts = selectedColumns.map((col) => (col === "*" ? "*" : `\"${col}\"`))
-        query += [...colParts, ...aggParts].join(", ")
+      if (selectedColumns.length > 0 && !(selectedColumns.length === 1 && selectedColumns[0] === '*')) {
+        const colParts = selectedColumns.map((col) => (col === '*' ? '*' : `"${col}"`))
+        query += [...colParts, ...aggParts].join(', ')
       } else {
-        query += aggParts.join(", ")
+        query += aggParts.join(', ')
       }
     } else {
-      query += selectedColumns.map((col) => (col === "*" ? "*" : `\"${col}\"`)).join(", ")
+      query += selectedColumns.map((col) => (col === '*' ? '*' : `"${col}"`)).join(', ')
     }
-
-    // Add FROM clause
-    query += ` FROM \"${selectedTable}\"`
-
+    query += ` FROM "${selectedTable}"`
     // Filter out incomplete/empty conditions
     const validConditions = conditions.filter(
-      (cond) => cond.type !== "-" && cond.column !== "-" && cond.operator !== "-" && cond.type !== "LIMIT"
+      (cond) => cond.type !== '-' && cond.column !== '-' && cond.operator !== '-' && cond.type !== 'LIMIT'
     )
-
-    // Add WHERE conditions
-    if (validConditions.length > 0) {
-      query += " WHERE "
-      const whereParts = validConditions.map((cond) => {
-        const quotedColumn = `\"${cond.column}\"`
-        if (cond.operator === "IS NULL" || cond.operator === "IS NOT NULL") {
-          return `${quotedColumn} ${cond.operator}`
-        } else if (cond.operator === "IN" || cond.operator === "NOT IN") {
-          return `${quotedColumn} ${cond.operator} (${sanitizeSqlValue(cond.value)})`
-        } else {
-          return `${quotedColumn} ${cond.operator} '${sanitizeSqlValue(cond.value)}'`
-        }
-      })
-      query += whereParts.join(" AND ")
+    // Deduplicate values for each field
+    const dedupedConditions: Condition[] = []
+    const seen: Record<string, Set<string>> = {}
+    for (const cond of validConditions) {
+      const key = `${cond.column}|${cond.operator}`
+      if (!seen[key]) seen[key] = new Set()
+      if (!seen[key].has(cond.value)) {
+        seen[key].add(cond.value)
+        dedupedConditions.push(cond)
+      }
     }
-
+    // Add WHERE conditions
+    if (dedupedConditions.length > 0) {
+      query += ' WHERE '
+      dedupedConditions.forEach((cond, idx) => {
+        const mappedColumn = mapDomainColumn(cond.column)
+        const quotedColumn = `"${mappedColumn}"`
+        let clause = ''
+        if (cond.operator === 'IS NULL' || cond.operator === 'IS NOT NULL') {
+          clause = `${quotedColumn} ${cond.operator}`
+        } else if (cond.operator === 'IN' || cond.operator === 'NOT IN') {
+          clause = `${quotedColumn} ${cond.operator} (${sanitizeSqlValue(cond.value)})`
+        } else if (cond.operator === 'LIKE') {
+          let likeValue = cond.value.trim()
+          if (!likeValue.startsWith('%')) likeValue = '%' + likeValue
+          if (!likeValue.endsWith('%')) likeValue = likeValue + '%'
+          clause = `${quotedColumn} LIKE '${sanitizeSqlValue(likeValue)}'`
+        } else {
+          clause = `${quotedColumn} ${cond.operator} '${sanitizeSqlValue(cond.value)}'`
+        }
+        if (idx > 0) {
+          // Use the logic from the previous condition
+          query += ` ${dedupedConditions[idx - 1].logic || 'AND'} `
+        }
+        query += clause
+      })
+    }
     // Add date/time filter if enabled
     if (showDateTimeFilter && dateTimeFilter.startDate && dateTimeFilter.endDate) {
       const startDateTime = formatDateTimeForSQL(dateTimeFilter.startDate, dateTimeFilter.startTime)
@@ -413,25 +456,21 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
         query += ` WHERE timestamp BETWEEN '${startDateTime}' AND '${endDateTime}'`
       }
     }
-
     // Add GROUP BY if there are aggregations
     if (
       aggregations.length > 0 &&
       selectedColumns.length > 0 &&
       !(selectedColumns.length === 1 && selectedColumns[0] === "*")
     ) {
-      query += " GROUP BY " + selectedColumns.map((col) => `\"${col}\"`).join(", ")
+      query += " GROUP BY " + selectedColumns.map((col) => `"${col}"`).join(", ")
     }
-
     // Add LIMIT clause if present
     const limitCondition = conditions.find((cond) => cond.type === "LIMIT" && cond.value)
     if (limitCondition) {
       query += ` LIMIT ${limitCondition.value}`
     }
-
     // End the query
     query += ";"
-
     return query
   }
 
@@ -485,30 +524,16 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
 
   // Parse example query
   const parseExampleQuery = (query: string) => {
-    
     // Extract table name
     const fromMatch = query.match(/FROM\s+"([^"]+)"/i);
     if (fromMatch) {
       setSelectedTable(fromMatch[1]);
     }
 
-    // Extract WHERE conditions
-    const whereMatch = query.match(/WHERE\s+(.+?)(?=(GROUP BY|ORDER BY|LIMIT|$))/i);
+    // Extract WHERE conditions with AND/OR
+    const whereMatch = query.match(/WHERE\s+([\s\S]+?)(?=(GROUP BY|ORDER BY|LIMIT|$))/i);
     if (whereMatch) {
-      const conditions = whereMatch[1].split(/\s+AND\s+/i).map(condition => {
-        const parts = condition.match(/"([^"]+)"\s*([=<>!]+|IS|LIKE|IN)\s*(.+)/i);
-        if (parts) {
-          return {
-            type: "WHERE",
-            column: parts[1],
-            operator: parts[2],
-            value: parts[3].replace(/['"]/g, '')
-          };
-        }
-        return null;
-      }).filter(Boolean);
-      
-      setConditions(conditions as Condition[]);
+      setConditions(parseWhereConditions(whereMatch[1]));
     }
 
     // Extract GROUP BY columns
@@ -532,7 +557,6 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
         }
         return null;
       }).filter(Boolean);
-      
       setAggregations(aggregates as Aggregation[]);
     }
   };
@@ -820,6 +844,21 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
                           className="bg-[#0f1d24] border-orange-600/20 text-white flex-1"
                           placeholder="Value"
                         />
+                      )}
+                      {/* AND/OR dropdown, except for last clause */}
+                      {index < conditions.length - 1 && (
+                        <Select
+                          value={condition.logic || 'AND'}
+                          onValueChange={(value: string) => updateCondition(index, 'logic', value)}
+                        >
+                          <SelectTrigger className="bg-[#0f1d24] border-orange-600/20 text-orange-500 w-20">
+                            {condition.logic || 'AND'}
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#0f1d24] border-orange-600/20">
+                            <SelectItem value="AND" className="text-white">AND</SelectItem>
+                            <SelectItem value="OR" className="text-white">OR</SelectItem>
+                          </SelectContent>
+                        </Select>
                       )}
                     </>
                   ) : (
