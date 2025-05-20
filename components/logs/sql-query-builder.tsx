@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import useLogsState from "@/lib/state/logs/logsState"
-import { validateSqlQuery } from "@/lib/utils/sql-validator"
+import { validateSqlQuery, sanitizeSqlValue } from "@/lib/utils/sql-validator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
@@ -394,9 +394,9 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
         if (cond.operator === "IS NULL" || cond.operator === "IS NOT NULL") {
           return `${quotedColumn} ${cond.operator}`
         } else if (cond.operator === "IN" || cond.operator === "NOT IN") {
-          return `${quotedColumn} ${cond.operator} (${cond.value})`
+          return `${quotedColumn} ${cond.operator} (${sanitizeSqlValue(cond.value)})`
         } else {
-          return `${quotedColumn} ${cond.operator} '${cond.value}'`
+          return `${quotedColumn} ${cond.operator} '${sanitizeSqlValue(cond.value)}'`
         }
       })
       query += whereParts.join(" AND ")
@@ -770,14 +770,14 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
           {/* Conditions */}
           {conditions.length > 0 && (
             <div className="space-y-4 border-t border-b border-orange-600/10 py-4">
-              {conditions.map((condition, index) => (
+              {conditions.map((condition: any, index: any) => (
                 <div key={index} className="flex items-center gap-2">
-                  <Select value={condition.type} onValueChange={(value) => updateCondition(index, "type", value)}>
+                  <Select value={condition.type} onValueChange={(value: string) => updateCondition(index, "type", value)}>
                     <SelectTrigger className="bg-[#0f1d24] border-orange-600/20 text-orange-500 w-32">
                       {condition.type}
                     </SelectTrigger>
                     <SelectContent className="bg-[#0f1d24] border-orange-600/20">
-                      {CLAUSE_TYPES.map((type) => (
+                      {CLAUSE_TYPES.map((type: any) => (
                         <SelectItem key={type} value={type} className="text-white">
                           {type}
                         </SelectItem>
@@ -786,12 +786,12 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
                   </Select>
                   {condition.type !== "LIMIT" ? (
                     <>
-                      <Select value={condition.column} onValueChange={(value) => updateCondition(index, "column", value)}>
+                      <Select value={condition.column} onValueChange={(value: string) => updateCondition(index, "column", value)}>
                         <SelectTrigger className="bg-[#0f1d24] border-orange-600/20 text-orange-500 flex-1">
                           {condition.column}
                         </SelectTrigger>
                         <SelectContent className="bg-[#0f1d24] border-orange-600/20">
-                          {getTableColumns().map((col) => (
+                          {getTableColumns().map((col: any) => (
                             <SelectItem key={col} value={col} className="text-white">
                               {col}
                             </SelectItem>
@@ -800,13 +800,13 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
                       </Select>
                       <Select
                         value={condition.operator}
-                        onValueChange={(value) => updateCondition(index, "operator", value)}
+                        onValueChange={(value: string) => updateCondition(index, "operator", value)}
                       >
                         <SelectTrigger className="bg-[#0f1d24] border-orange-600/20 text-orange-500 w-32">
                           {condition.operator}
                         </SelectTrigger>
                         <SelectContent className="bg-[#0f1d24] border-orange-600/20">
-                          {OPERATORS.map((op) => (
+                          {OPERATORS.map((op: any) => (
                             <SelectItem key={op} value={op} className="text-white">
                               {op}
                             </SelectItem>
@@ -850,14 +850,14 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
           {/* Aggregations */}
           {aggregations.length > 0 && (
             <div className="space-y-4 border-t border-b border-orange-600/10 py-4">
-              {aggregations.map((agg, index) => (
+              {aggregations.map((agg: any, index: any) => (
                 <div key={index} className="flex items-center gap-2">
-                  <Select value={agg.function} onValueChange={(value) => updateAggregation(index, "function", value)}>
+                  <Select value={agg.function} onValueChange={(value: string) => updateAggregation(index, "function", value)}>
                     <SelectTrigger className="bg-[#0f1d24] border-orange-600/20 text-orange-500 w-32">
                       {agg.function}
                     </SelectTrigger>
                     <SelectContent className="bg-[#0f1d24] border-orange-600/20">
-                      {AGGREGATIONS.map((func) => (
+                      {AGGREGATIONS.map((func: any) => (
                         <SelectItem key={func} value={func} className="text-white">
                           {func}
                         </SelectItem>
@@ -865,7 +865,7 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
                     </SelectContent>
                   </Select>
 
-                  <Select value={agg.column} onValueChange={(value) => updateAggregation(index, "column", value)}>
+                  <Select value={agg.column} onValueChange={(value: string) => updateAggregation(index, "column", value)}>
                     <SelectTrigger className="bg-[#0f1d24] border-orange-600/20 text-orange-500 flex-1">
                       {agg.column}
                     </SelectTrigger>
@@ -873,7 +873,7 @@ export function SQLQueryBuilder({ isOpen, onClose, onApply, onLoadExample, build
                       <SelectItem value="*" className="text-white">
                         *
                       </SelectItem>
-                      {getTableColumns().map((col) => (
+                      {getTableColumns().map((col: any) => (
                         <SelectItem key={col} value={col} className="text-white">
                           {col}
                         </SelectItem>

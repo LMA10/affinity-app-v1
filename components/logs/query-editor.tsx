@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import * as JSX from "react/jsx-runtime"
 
 import { useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from "react"
 import { Plus, X, MoreVertical, Play, AlertCircle, CheckCircle, Wand2, AlignLeft, Pencil } from "lucide-react"
@@ -27,7 +28,7 @@ export interface QueryTab {
   error: string | null
 }
 
-interface QueryEditorProps {
+export interface QueryEditorProps {
   onRunQuery?: (query: string) => void
 }
 
@@ -58,13 +59,13 @@ export interface QueryEditorHandle {
   setSqlForActiveTab: (sql: string) => void;
 }
 
-export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(function QueryEditor({ onRunQuery }, ref) {
+export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(function QueryEditor({ onRunQuery }: QueryEditorProps, ref: React.Ref<QueryEditorHandle>) {
   const hasLoadedTabs = useRef(false)
   const [tabs, setTabs] = useState<QueryTab[]>([])
   const [activeTab, setActiveTab] = useState<string>("")
   const [isQueryBuilderOpen, setIsQueryBuilderOpen] = useState(false)
   const [editingTabId, setEditingTabId] = useState<string | null>(null)
-  const [editingTabName, setEditingTabName] = useState("")
+  const [editingTabName, setEditingTabName] = useState<string>("")
   const editInputRef = useRef<HTMLInputElement>(null)
   const { fetchLogs, loading, error, logs } = useLogsState()
   const { resolvedTheme } = useTheme()
@@ -132,8 +133,8 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
       errorProcessedRef.current = true
       setDismissedError(false)
 
-      setTabs((prevTabs) =>
-        prevTabs.map((tab) => (tab.id === activeTab ? { ...tab, status: "error", error: error } : tab)),
+      setTabs((prevTabs: QueryTab[]) =>
+        prevTabs.map((tab: QueryTab) => (tab.id === activeTab ? { ...tab, status: "error", error: error } : tab)),
       )
     } else if (!error && !loading) {
       // Reset the flag when there's no error
@@ -158,11 +159,9 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
 
   // Close a tab
   const closeTab = useCallback(
-    (tabId: string, event?: React.MouseEvent) => {
+    (tabId: string, event?: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
       event?.stopPropagation()
-
       if (tabs.length === 1) {
-        // Don't close the last tab, reset it instead
         setTabs([
           {
             id: "query-1",
@@ -175,11 +174,8 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
         setActiveTab("query-1")
         return
       }
-
-      const newTabs = tabs.filter((tab) => tab.id !== tabId)
+      const newTabs = tabs.filter((tab: QueryTab) => tab.id !== tabId)
       setTabs(newTabs)
-
-      // If we're closing the active tab, set a new active tab
       if (activeTab === tabId) {
         setActiveTab(newTabs[newTabs.length - 1].id)
       }
@@ -189,9 +185,9 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
 
   // Start editing a tab name
   const startEditingTab = useCallback(
-    (tabId: string, event?: React.MouseEvent) => {
+    (tabId: string, event?: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
       event?.stopPropagation()
-      const tab = tabs.find((t) => t.id === tabId)
+      const tab = tabs.find((t: QueryTab) => t.id === tabId)
       if (tab) {
         setEditingTabId(tabId)
         setEditingTabName(tab.name)
@@ -204,7 +200,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
   const saveTabName = useCallback(() => {
     if (editingTabId) {
       setTabs(
-        tabs.map((tab) =>
+        tabs.map((tab: QueryTab) =>
           tab.id === editingTabId
             ? {
                 ...tab,
@@ -219,7 +215,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
 
   // Handle key press in the edit input
   const handleEditKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
         saveTabName()
       } else if (e.key === "Escape") {
@@ -257,7 +253,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
           parsedBuilderState = null;
         }
       }
-      setTabs(tabs.map((tab) =>
+      setTabs(tabs.map((tab: QueryTab) =>
         tab.id === tabId
           ? {
               ...tab,
@@ -274,7 +270,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
 
   // When the active tab SQL changes, update builderSyncState
   useEffect(() => {
-    const tab = tabs.find((t) => t.id === activeTab);
+    const tab = tabs.find((t: QueryTab) => t.id === activeTab);
     if (tab && tab.sql) {
       try {
         const parsed = parseSqlToBuilderState(tab.sql);
@@ -285,7 +281,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
 
   // Format SQL in the active tab
   const formatSqlInActiveTab = useCallback(() => {
-    const activeTabData = tabs.find((tab) => tab.id === activeTab)
+    const activeTabData = tabs.find((tab: QueryTab) => tab.id === activeTab)
     if (activeTabData) {
       const formattedSql = formatSql(activeTabData.sql)
       updateSql(activeTab, formattedSql)
@@ -294,7 +290,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
 
   // Run a query
   const runQuery = useCallback(async () => {
-    const tab = tabs.find((t) => t.id === activeTab)
+    const tab = tabs.find((t: QueryTab) => t.id === activeTab)
     if (!tab) return
 
     // Reset error processed flag
@@ -304,7 +300,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
     const validationResult = validateSqlQuery(tab.sql);
     if (!validationResult.isValid) {
       setTabs(
-        tabs.map((t) =>
+        tabs.map((t: QueryTab) =>
           t.id === activeTab
             ? {
                 ...t,
@@ -318,14 +314,14 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
     }
 
     // Update tab status to running
-    setTabs(tabs.map((t) => (t.id === activeTab ? { ...t, status: "running", error: null } : t)))
+    setTabs(tabs.map((t: QueryTab) => (t.id === activeTab ? { ...t, status: "running", error: null } : t)))
 
     try {
       await fetchLogs(tab.sql)
 
       // Only update to success if there's no error
       if (!useLogsState.getState().error) {
-        setTabs(tabs.map((t) => (t.id === activeTab ? { ...t, status: "success", error: null } : t)))
+        setTabs(tabs.map((t: QueryTab) => (t.id === activeTab ? { ...t, status: "success", error: null } : t)))
       }
 
       // Call the onRunQuery callback if provided
@@ -336,7 +332,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
       //console.error("Error running query:", error)
       // Update tab with error
       setTabs(
-        tabs.map((t) =>
+        tabs.map((t: QueryTab) =>
           t.id === activeTab
             ? {
                 ...t,
@@ -353,7 +349,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
   const clearActiveTab = useCallback(() => {
     setDismissedError(false)
     setTabs(
-      tabs.map((tab) =>
+      tabs.map((tab: QueryTab) =>
         tab.id === activeTab
           ? {
               ...tab,
@@ -387,7 +383,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
   }
 
   // Get the active tab data
-  const activeTabData = tabs.find((tab) => tab.id === activeTab) || tabs[0] || {};
+  const activeTabData = tabs.find((tab: QueryTab) => tab.id === activeTab) || tabs[0] || {}
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -405,17 +401,17 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
   // Add a useEffect to check for stored queries when the component mounts
   // Add this after the existing useEffect hooks
   useEffect(() => {
-    const storedQuery = getStoredQuery()
+    // Only run if tabs and activeTab are ready
+    if (!activeTab || tabs.length === 0) return;
+    const storedQuery = getStoredQuery();
     if (storedQuery) {
-      updateSql(activeTab, storedQuery)
-      // Clear the stored query to prevent it from being loaded again
-      clearStoredQuery()
-
-      // Optional: Auto-run the query
-      // Uncomment the next line if you want the query to run automatically
-      // runQuery();
+      updateSql(activeTab, storedQuery);
+      clearStoredQuery();
+      // Optionally: runQuery();
     }
-  }, [activeTab, updateSql, runQuery])
+    // Only run once after tabs/activeTab are set
+    // eslint-disable-next-line
+  }, [tabs, activeTab]);
 
   useImperativeHandle(ref, () => ({
     setSqlForActiveTab: (sql: string) => {
@@ -434,7 +430,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
         <div className="flex-1 min-w-0 overflow-x-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className={`h-10 p-0 w-full flex items-center overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-orange-600/30 scrollbar-track-transparent min-w-0 max-h-12 ${isDarkTheme ? "bg-transparent" : "bg-gray-50"}`} style={{ WebkitOverflowScrolling: 'touch' }}>
-              {tabs.map((tab) => (
+              {tabs.map((tab: QueryTab) => (
                 <TabsTrigger
                   key={tab.id}
                   value={tab.id}
@@ -443,7 +439,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
                       ? `border-orange-600/20 data-[state=active]:bg-[#0a1419] data-[state=active]:text-orange-500 text-gray-300`
                       : `border-gray-200 data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm text-gray-700`
                   } group`}
-                  onDoubleClick={(e) => startEditingTab(tab.id, e)}
+                  onDoubleClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => startEditingTab(tab.id, e)}
                 >
                   <div className="flex items-center gap-2">
                     {tab.status === "running" && <Play className="h-3 w-3 text-blue-500 animate-pulse" />}
@@ -454,7 +450,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
                         ref={editInputRef}
                         type="text"
                         value={editingTabName}
-                        onChange={(e) => setEditingTabName(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingTabName(e.target.value)}
                         onKeyDown={handleEditKeyDown}
                         onBlur={saveTabName}
                         className={`w-24 border rounded px-1 focus:outline-none focus:ring-1 focus:ring-orange-500 ${
@@ -462,7 +458,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
                             ? "bg-[#0f1d24] text-white border-orange-600/20"
                             : "bg-white text-gray-800 border-gray-300"
                         }`}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) => e.stopPropagation()}
                       />
                     ) : (
                       <TooltipProvider>
@@ -475,7 +471,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
                       </TooltipProvider>
                     )}
                     <span
-                      onClick={(e) => { e.stopPropagation(); startEditingTab(tab.id, e); }}
+                      onClick={(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) => { e.stopPropagation(); startEditingTab(tab.id, e); }}
                       className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                       role="button"
                       tabIndex={0}
@@ -483,7 +479,7 @@ export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(funct
                       <Pencil className={`h-3 w-3 ${isDarkTheme ? "text-orange-500" : "text-orange-600"}`} />
                     </span>
                     <span
-                      onClick={(e) => { e.stopPropagation(); closeTab(tab.id, e); }}
+                      onClick={(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) => { e.stopPropagation(); closeTab(tab.id, e); }}
                       className={`ml-2 rounded-full p-0.5 ${isDarkTheme ? "hover:bg-gray-700" : "hover:bg-gray-200"} cursor-pointer`}
                       role="button"
                       tabIndex={0}

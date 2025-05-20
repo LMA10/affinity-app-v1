@@ -426,7 +426,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         variant="outline"
                         size="sm"
                         className="mt-2 bg-orange-600/10 hover:bg-orange-600/20 text-orange-500 border-orange-600/20"
-                        onClick={() => {
+                        onClick={async () => {
                           // Copy query to clipboard
                           navigator.clipboard.writeText(alert.event.query)
 
@@ -440,7 +440,8 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                             duration: 2000,
                           })
 
-                          // Redirect to logs page
+                          // Add a small delay to ensure the query is saved before redirect
+                          await new Promise((resolve) => setTimeout(resolve, 100))
                           router.push("/logs")
                         }}
                       >

@@ -344,4 +344,14 @@ export function parseSqlToBuilderState(sql: string) {
   }
 
   return builderState;
+}
+
+/**
+ * Sanitizes a SQL value by escaping single quotes.
+ * Use this when inserting user-provided values into SQL queries.
+ */
+export function sanitizeSqlValue(value: string): string {
+  if (typeof value !== 'string') return value;
+  // Escape single quotes by doubling them
+  return value.replace(/'/g, "''");
 } 

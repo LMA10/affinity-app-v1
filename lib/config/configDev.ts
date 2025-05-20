@@ -5,12 +5,11 @@ interface Config {
 }
 
 const getConfig = (): Config => {
-  // Get the current hostname
-  const hostname = typeof window !== 'undefined' 
-    ? window.location.hostname 
+  const hostname = typeof window !== 'undefined'
+    ? window.location.hostname
     : process.env.NEXT_PUBLIC_HOSTNAME || 'localhost';
 
-  // Development environment
+  // Local dev
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return {
       urlAPI: "https://api.dev.soli.solidaritylabs.io/api/v1",
@@ -19,11 +18,28 @@ const getConfig = (): Config => {
     };
   }
 
-  // Production environment - dynamically construct API URL based on current domain
-  // Extract the subdomain from the hostname (e.g., 'poincenot' from 'poincenot.solidaritylabs.io')
-  const subdomain = hostname.split('.')[0];
-  const apiUrl = `https://api.${subdomain}.solidaritylabs.io/api/v1`;
-  
+  // Split hostname into parts
+  const parts = hostname.split('.');
+  // e.g., dev.soli.solidaritylabs.io → ['dev', 'soli', 'solidaritylabs', 'io']
+  // e.g., soli.solidaritylabs.io → ['soli', 'solidaritylabs', 'io']
+  // e.g., solidaritylabs.io → ['solidaritylabs', 'io']
+
+  let apiUrl;
+  if (parts.length > 3) {
+    // Has environment and project: dev.soli.solidaritylabs.io
+    const [env, project, ...rest] = parts;
+    const baseDomain = rest.join('.');
+    apiUrl = `https://api.${env}.${project}.${baseDomain}/api/v1`;
+  } else if (parts.length === 3) {
+    // Has project: soli.solidaritylabs.io
+    const [project, ...rest] = parts;
+    const baseDomain = rest.join('.');
+    apiUrl = `https://api.${project}.${baseDomain}/api/v1`;
+  } else {
+    // Default fallback
+    apiUrl = `https://api.${hostname}/api/v1`;
+  }
+
   return {
     urlAPI: apiUrl,
     environment: 'production',
