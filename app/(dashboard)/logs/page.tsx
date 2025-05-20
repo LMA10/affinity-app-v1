@@ -39,6 +39,15 @@ import useLogsState from "@/lib/state/logs/logsState"
 import config from "@/lib/config/configDev"
 import sessionState from "@/lib/state/sessionState/sessionState"
 import pako from "pako"
+import { useWorkbench } from "../workbench-context"
+
+function useWorkbenchSafe() {
+  try {
+    return useWorkbench();
+  } catch {
+    return null;
+  }
+}
 
 export default function LogsPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -70,6 +79,9 @@ export default function LogsPage() {
   } = useLogsState()
   const [hasRunQuery, setHasRunQuery] = useState(false)
   const queryEditorRef = useRef<QueryEditorHandle>(null)
+  const workbench = useWorkbenchSafe()
+  const queryString = workbench?.queryString || ""
+  const [editorQuery, setEditorQuery] = useState("")
 
   // Fetch databases when the component mounts
   useEffect(() => {
@@ -407,6 +419,19 @@ export default function LogsPage() {
     setViewMode('query')
   }
 
+  useEffect(() => {
+    if (queryString) {
+      // Clear localStorage for query tabs to avoid restoring old queries
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("affinity-query-tabs");
+      }
+      setEditorQuery(queryString)
+      setViewMode("query")
+      setHasRunQuery(false)
+      setCurrentPage(1)
+    }
+  }, [queryString, setCurrentPage])
+
   return (
     <div className="flex flex-col h-full">
       <PageHeader title="Security Logs" description="View and analyze security event logs across your infrastructure" />
@@ -520,7 +545,7 @@ export default function LogsPage() {
 
         {viewMode === "query" && (
           <div className="mb-6">
-            <QueryEditor ref={queryEditorRef} onRunQuery={handleQueryRun} />
+            <QueryEditor ref={queryEditorRef} onRunQuery={handleQueryRun} value={editorQuery} />
           </div>
         )}
 

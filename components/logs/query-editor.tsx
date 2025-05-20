@@ -30,6 +30,7 @@ export interface QueryTab {
 
 export interface QueryEditorProps {
   onRunQuery?: (query: string) => void
+  value?: string
 }
 
 const LOCAL_STORAGE_KEY = "affinity-query-tabs"
@@ -59,10 +60,18 @@ export interface QueryEditorHandle {
   setSqlForActiveTab: (sql: string) => void;
 }
 
-export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(function QueryEditor({ onRunQuery }: QueryEditorProps, ref: React.Ref<QueryEditorHandle>) {
+export const QueryEditor = forwardRef<QueryEditorHandle, QueryEditorProps>(function QueryEditor({ onRunQuery, value }: QueryEditorProps, ref: React.Ref<QueryEditorHandle>) {
   const hasLoadedTabs = useRef(false)
-  const [tabs, setTabs] = useState<QueryTab[]>([])
-  const [activeTab, setActiveTab] = useState<string>("")
+  const [tabs, setTabs] = useState<QueryTab[]>([
+    {
+      id: "query-1",
+      name: "Query 1",
+      sql: value ?? 'SELECT * FROM "cloudtrail" LIMIT 10;',
+      status: "idle",
+      error: null,
+    },
+  ])
+  const [activeTab, setActiveTab] = useState<string>("query-1")
   const [isQueryBuilderOpen, setIsQueryBuilderOpen] = useState(false)
   const [editingTabId, setEditingTabId] = useState<string | null>(null)
   const [editingTabName, setEditingTabName] = useState<string>("")

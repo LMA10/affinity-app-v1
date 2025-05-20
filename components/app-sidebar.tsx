@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { AlertTriangle, BarChart3, BookOpen, Cloud, Cog, FileText, LogOut, ChevronDown, Settings } from "lucide-react"
+import { AlertTriangle, BarChart3, BookOpen, Cloud, Cog, FileText, LogOut, ChevronDown, Settings, Search, Code } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -164,6 +164,19 @@ export function AppSidebar() {
             </SidebarMenuItem>
           )}
 
+          {/* INCIDENT RESPONSE Section */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === "/incident-response"}
+              className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
+            >
+              <Link href="/incident-response" className="text-orange-500 flex items-center w-full">
+                <Search className={menuIconStyles} />
+                <span>INCIDENT RESPONSE</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
 
           {/* LEGAL Section */}
           {/* {isPageVisible("/legal") && (
