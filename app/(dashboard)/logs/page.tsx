@@ -11,7 +11,7 @@ import { Loading } from "@/components/loading"
 import {
   Download,
   Code,
-  List,
+  Filter,
   ChevronDown,
   ChevronRight,
   FileDown,
@@ -423,7 +423,7 @@ export default function LogsPage() {
                   `}
                   onClick={() => setViewMode('table')}
                 >
-                  <List className="h-4 w-4 mr-2" />
+                  <Filter className="h-4 w-4 mr-2" />
                   Table view
                 </button>
                 <button
@@ -461,7 +461,7 @@ export default function LogsPage() {
               <Popover open={isColumnSelectorOpen} onOpenChange={setIsColumnSelectorOpen}>
                 <PopoverTrigger asChild>
                   <button className="h-10 w-10 flex items-center justify-center bg-[#CAD0D2] dark:bg-[#0D1315] border border-[#64828E] rounded-[8px] text-[#64828E] hover:bg-[#e0e4e5] dark:hover:bg-[#182325] transition">
-                    <List className="h-5 w-5 text-[#64828E]" />
+                    <Filter className="h-5 w-5 text-[#64828E]" />
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80">

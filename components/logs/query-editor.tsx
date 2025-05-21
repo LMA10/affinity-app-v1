@@ -463,19 +463,6 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
               Query Builder
             </Button>
             <div className="flex gap-2">
-              <Button
-                variant="default"
-                size="icon"
-                className="h-8 w-8 bg-orange-600 hover:bg-orange-700 text-white"
-                onClick={runQuery}
-                disabled={loading || activeTabData.status === "running"}
-              >
-                {loading || activeTabData.status === "running" ? (
-                  <Play className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Play className="h-4 w-4" />
-                )}
-              </Button>
               <Button 
                 variant="outline" 
                 size="icon" 
@@ -488,13 +475,34 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
           </div>
         </div>
 
-        <div className="flex-1 w-full overflow-x-auto p-2 md:p-4">
+        <div className="flex-1 w-full overflow-x-auto p-2 md:p-4 relative">
           <SqlEditor
             value={activeTabData.sql}
             onChange={(value) => updateSql(activeTab, value)}
             status={activeTabData.status}
             error={activeTabData.error || error}
           />
+          <div className="absolute bottom-[10px] right-[10px]">
+            <Button
+              variant="default"
+              size="icon"
+              className={`h-8 w-8 ${
+                activeTabData.sql.trim() 
+                  ? "bg-[#EA651A] hover:bg-[#EA651A]/90 text-white" 
+                  : isDarkTheme 
+                    ? "bg-[#0D1315] text-[#506C77] border border-[#506C77]" 
+                    : "bg-[#AFBABE] text-[#506C77] border border-[#506C77]"
+              }`}
+              onClick={runQuery}
+              disabled={loading || activeTabData.status === "running" || !activeTabData.sql.trim()}
+            >
+              {loading || activeTabData.status === "running" ? (
+                <Play className="h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
