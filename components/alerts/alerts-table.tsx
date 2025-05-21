@@ -9,9 +9,13 @@ import { formatDistanceToNow } from "date-fns"
 interface AlertsTableProps {
   alerts: any[]
   onValueClick?: (field: string, value: string) => void
+  sortBy?: string
+  sortDirection?: 'asc' | 'desc'
+  onSort?: (column: string) => void
+  visibleColumns?: string[]
 }
 
-export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
+export function AlertsTable({ alerts, onValueClick, sortBy, sortDirection, onSort, visibleColumns }: AlertsTableProps) {
   const { setSelectedAlert, setIsOpen, selectedAlert, isOpen } = useAlertDetails()
 
   const handleViewDetails = (alert: any) => {
@@ -25,7 +29,7 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
   }
 
   const getSeverityBadgeColor = (severity: string) => {
-    switch (severity) {
+    switch (severity?.toLowerCase()) {
       case "critical":
         return "bg-red-500/20 text-red-500"
       case "high":
@@ -49,6 +53,31 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
     }
   }
 
+  // Define all possible columns
+  const allColumns = [
+    { key: 'timestamp', label: 'Timestamp' },
+    { key: 'severity', label: 'Severity' },
+    { key: 'alert', label: 'Alert' },
+    { key: 'source', label: 'Source' },
+    { key: 'status', label: 'Status' },
+    { key: 'owner', label: 'Owner' },
+    { key: 'resolved_by', label: 'Resolved By' },
+    { key: 'is_false_positive', label: 'False Positive' },
+    { key: 'last_updated', label: 'Last Updated' },
+    { key: 'actions', label: 'Actions' },
+  ]
+
+  // Determine which columns to show
+  const columnsToShow = visibleColumns
+    ? allColumns.filter(col => visibleColumns.includes(col.key))
+    : allColumns
+
+  // Helper to render sort indicator
+  const renderSortIndicator = (column: string) => {
+    if (sortBy !== column) return null
+    return sortDirection === 'asc' ? ' ▲' : ' ▼'
+  }
+
   return (
     <div className="rounded-md border border-orange-600/20 bg-[#0f1d24] relative">
       {/* Desktop Table */}
@@ -56,18 +85,22 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-orange-600/20">
-              <TableHead className="w-[180px]">Timestamp</TableHead>
-              <TableHead className="w-[100px]">Severity</TableHead>
-              <TableHead>Alert</TableHead>
-              <TableHead className="w-[100px]">Source</TableHead>
-              <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[100px] text-right">Actions</TableHead>
+              {columnsToShow.map(col => (
+                <TableHead
+                  key={col.key}
+                  className={col.key === 'actions' ? 'w-[100px] text-right' : col.key === 'timestamp' ? 'w-[180px]' : col.key === 'severity' ? 'w-[100px]' : 'w-[100px]'}
+                  onClick={() => col.key !== 'actions' && onSort && onSort(col.key)}
+                  style={{ cursor: col.key !== 'actions' ? 'pointer' : undefined }}
+                >
+                  {col.label}{renderSortIndicator(col.key)}
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {alerts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={columnsToShow.length} className="text-center py-8 text-muted-foreground">
                   No alerts found
                 </TableCell>
               </TableRow>
@@ -78,27 +111,57 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
                   className="border-b border-orange-600/10 cursor-pointer hover:bg-orange-600/10 transition"
                   onClick={() => handleViewDetails(alert)}
                 >
-                  <TableCell className="font-mono text-xs">
-                    {alert.event?.time
-                      ? new Date(alert.event.time).toISOString().replace("T", "\n").substring(0, 19)
-                      : "-"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={getSeverityBadgeColor(alert.security_detection?.severity || "unknown")}
-                    >
-                      {alert.security_detection?.severity || "unknown"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-medium">{alert.metadata?.rule_name || "-"}</TableCell>
-                  <TableCell>{alert.client}</TableCell>
-                  <TableCell>{alert.alert_management?.status || "-"}</TableCell>
-                  <TableCell className="text-right" onClick={e => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm" onClick={() => handleViewDetails(alert)}>
-                      Details
-                    </Button>
-                  </TableCell>
+                  {columnsToShow.map(col => {
+                    switch (col.key) {
+                      case 'timestamp':
+                        return (
+                          <TableCell key="timestamp" className="font-mono text-xs">
+                            {alert.event?.time
+                              ? new Date(alert.event.time).toISOString().replace("T", "\n").substring(0, 19)
+                              : "-"}
+                          </TableCell>
+                        )
+                      case 'severity':
+                        return (
+                          <TableCell key="severity">
+                            <Badge
+                              variant="outline"
+                              className={getSeverityBadgeColor(alert.security_detection?.severity || "unknown")}
+                            >
+                              {alert.security_detection?.severity
+                                ? alert.security_detection.severity.charAt(0).toUpperCase() + alert.security_detection.severity.slice(1).toLowerCase()
+                                : "Unknown"}
+                            </Badge>
+                          </TableCell>
+                        )
+                      case 'alert':
+                        return (
+                          <TableCell key="alert" className="font-medium">{alert.metadata?.rule_name || "-"}</TableCell>
+                        )
+                      case 'source':
+                        return <TableCell key="source">{alert.client}</TableCell>
+                      case 'status':
+                        return <TableCell key="status">{alert.alert_management?.status || "-"}</TableCell>
+                      case 'owner':
+                        return <TableCell key="owner">{alert.alert_management?.owner || "-"}</TableCell>
+                      case 'resolved_by':
+                        return <TableCell key="resolved_by">{alert.alert_management?.resolved_by || "-"}</TableCell>
+                      case 'is_false_positive':
+                        return <TableCell key="is_false_positive">{alert.alert_management?.is_false_positive ? "Yes" : "No"}</TableCell>
+                      case 'last_updated':
+                        return <TableCell key="last_updated">{alert.alert_management?.timestamp ? new Date(alert.alert_management.timestamp).toLocaleString() : "-"}</TableCell>
+                      case 'actions':
+                        return (
+                          <TableCell key="actions" className="text-right" onClick={e => e.stopPropagation()}>
+                            <Button variant="ghost" size="sm" onClick={() => handleViewDetails(alert)}>
+                              Details
+                            </Button>
+                          </TableCell>
+                        )
+                      default:
+                        return null
+                    }
+                  })}
                 </TableRow>
               ))
             )}
@@ -127,7 +190,9 @@ export function AlertsTable({ alerts, onValueClick }: AlertsTableProps) {
                     variant="outline"
                     className={getSeverityBadgeColor(alert.security_detection?.severity || "unknown")}
                   >
-                    {alert.security_detection?.severity || "unknown"}
+                    {alert.security_detection?.severity
+                      ? alert.security_detection.severity.charAt(0).toUpperCase() + alert.security_detection.severity.slice(1).toLowerCase()
+                      : "Unknown"}
                   </Badge>
                 </div>
                 <div className="font-medium text-base truncate">{alert.metadata?.rule_name || "-"}</div>

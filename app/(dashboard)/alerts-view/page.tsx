@@ -15,6 +15,10 @@ import { Download, Filter, RefreshCw, Search } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Shield } from "lucide-react"
 import useAlertsState from "@/lib/state/alerts/alertsState"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { List } from "lucide-react"
 
 export default function AlertsViewPage() {
   const { alerts, loading, error, fetchAlerts } = useAlertsState()
@@ -24,6 +28,10 @@ export default function AlertsViewPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const itemsPerPage = 10
+  const [sortBy, setSortBy] = useState<string>("timestamp")
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>("desc")
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(["timestamp", "severity", "alert", "source", "status", "owner", "resolved_by", "is_false_positive", "last_updated", "actions"])
+  const [isColumnSelectorOpen, setIsColumnSelectorOpen] = useState(false)
 
   useEffect(() => {
     fetchAlerts()
@@ -47,12 +55,102 @@ export default function AlertsViewPage() {
         alert.security_detection.description.toLowerCase().includes(debouncedSearch.toLowerCase()))
 
     const matchesSeverity =
-      severity === "all" || (alert.security_detection && alert.security_detection.severity === severity)
+      severity === "all" ||
+      (alert.security_detection && alert.security_detection.severity && alert.security_detection.severity.toLowerCase() === severity.toLowerCase())
 
-    const matchesStatus = status === "all" || (alert.alert_management && alert.alert_management.status === status)
+    // Normalize status for comparison, handle 'False Positive' special case
+    const normalizedStatus = (alert.alert_management?.status || "").toLowerCase()
+    const normalizedFilter = status.toLowerCase()
+    const matchesStatus =
+      status === "all" ||
+      (normalizedFilter === "false positive"
+        ? normalizedStatus === "false_positive"
+        : normalizedStatus === normalizedFilter)
 
     return matchesSearch && matchesSeverity && matchesStatus
   })
+
+  // Sorting logic
+  const sortedAlerts = [...filteredAlerts].sort((a, b) => {
+    let aValue, bValue
+    switch (sortBy) {
+      case "timestamp":
+        aValue = a.event?.time || ""
+        bValue = b.event?.time || ""
+        break
+      case "severity":
+        aValue = a.security_detection?.severity || ""
+        bValue = b.security_detection?.severity || ""
+        break
+      case "alert":
+        aValue = a.metadata?.rule_name || ""
+        bValue = b.metadata?.rule_name || ""
+        break
+      case "source":
+        aValue = a.client || ""
+        bValue = b.client || ""
+        break
+      case "status":
+        aValue = a.alert_management?.status || ""
+        bValue = b.alert_management?.status || ""
+        break
+      case "owner":
+        aValue = a.alert_management?.owner || ""
+        bValue = b.alert_management?.owner || ""
+        break
+      case "resolved_by":
+        aValue = a.alert_management?.resolved_by || ""
+        bValue = b.alert_management?.resolved_by || ""
+        break
+      case "is_false_positive":
+        aValue = a.alert_management?.is_false_positive ? 1 : 0
+        bValue = b.alert_management?.is_false_positive ? 1 : 0
+        break
+      case "last_updated":
+        aValue = a.alert_management?.timestamp || ""
+        bValue = b.alert_management?.timestamp || ""
+        break
+      default:
+        aValue = ""
+        bValue = ""
+    }
+    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1
+    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1
+    return 0
+  })
+
+  const paginatedAlerts = sortedAlerts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
+  // Column selector logic
+  const allColumns = [
+    { key: 'timestamp', label: 'Timestamp' },
+    { key: 'severity', label: 'Severity' },
+    { key: 'alert', label: 'Alert' },
+    { key: 'source', label: 'Source' },
+    { key: 'status', label: 'Status' },
+    { key: 'owner', label: 'Owner' },
+    { key: 'resolved_by', label: 'Resolved By' },
+    { key: 'is_false_positive', label: 'False Positive' },
+    { key: 'last_updated', label: 'Last Updated' },
+    { key: 'actions', label: 'Actions' },
+  ]
+  const toggleColumnVisibility = (column: string) => {
+    if (visibleColumns.includes(column)) {
+      if (visibleColumns.length > 1) {
+        setVisibleColumns(visibleColumns.filter((col) => col !== column))
+      }
+    } else {
+      setVisibleColumns([...visibleColumns, column])
+    }
+  }
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+    } else {
+      setSortBy(column)
+      setSortDirection("asc")
+    }
+  }
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
@@ -64,15 +162,34 @@ export default function AlertsViewPage() {
   }
 
   const totalPages = Math.ceil(filteredAlerts.length / itemsPerPage)
-  const paginatedAlerts = filteredAlerts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   // Count alerts by severity
   const alertCounts = {
-    critical: alerts.filter((alert) => alert.security_detection?.severity === "critical").length,
-    high: alerts.filter((alert) => alert.security_detection?.severity === "high").length,
-    medium: alerts.filter((alert) => alert.security_detection?.severity === "medium").length,
-    low: alerts.filter((alert) => alert.security_detection?.severity === "low").length,
+    critical: alerts.filter((alert) => alert.security_detection?.severity?.toLowerCase() === "critical").length,
+    high: alerts.filter((alert) => alert.security_detection?.severity?.toLowerCase() === "high").length,
+    medium: alerts.filter((alert) => alert.security_detection?.severity?.toLowerCase() === "medium").length,
+    low: alerts.filter((alert) => alert.security_detection?.severity?.toLowerCase() === "low").length,
   }
+
+  // Load visible columns from localStorage on mount
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('alerts_visible_columns') : null
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed)) {
+          setVisibleColumns(parsed)
+        }
+      } catch {}
+    }
+  }, [])
+
+  // Save visible columns to localStorage when they change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('alerts_visible_columns', JSON.stringify(visibleColumns))
+    }
+  }, [visibleColumns])
 
   return (
     <AlertDetailsProvider>
@@ -168,13 +285,32 @@ export default function AlertsViewPage() {
             </Select>
 
             <div className="flex gap-2">
-              {/* Hide Refresh and Filter buttons */}
-              {/* <Button variant="outline" size="icon" onClick={handleRefresh}>
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button> */}
+              {/* Column Selector */}
+              <Popover open={isColumnSelectorOpen} onOpenChange={setIsColumnSelectorOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <List className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Visible Columns</h4>
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                      {allColumns.map((col) => (
+                        <div key={col.key} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`column-${col.key}`}
+                            checked={visibleColumns.includes(col.key)}
+                            onCheckedChange={() => toggleColumnVisibility(col.key)}
+                            disabled={visibleColumns.length === 1 && visibleColumns.includes(col.key)}
+                          />
+                          <Label htmlFor={`column-${col.key}`}>{col.label}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Button
                 variant="outline"
                 size="icon"
@@ -201,7 +337,13 @@ export default function AlertsViewPage() {
             <div className="flex justify-center items-center h-64 text-red-500">{error}</div>
           ) : (
             <>
-              <AlertsTable alerts={paginatedAlerts} />
+              <AlertsTable
+                alerts={paginatedAlerts}
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                visibleColumns={visibleColumns}
+              />
               <div className="flex items-center justify-end mt-4">
                 <Paginator
                   currentPage={currentPage}

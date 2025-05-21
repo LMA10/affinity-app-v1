@@ -470,27 +470,33 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         {alert.security_detection.severity.toUpperCase()}
                       </Badge>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Description</p>
-                      <p>{alert.security_detection.description}</p>
-                    </div>
+                    {alert.security_detection.description && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Description</p>
+                        <p>{alert.security_detection.description}</p>
+                      </div>
+                    )}
                     {alert.security_detection.important_data && (
                       <div>
                         <p className="text-sm text-muted-foreground">Important Data</p>
                         <div className="grid grid-cols-1 gap-2">
-                          {Object.entries(alert.security_detection.important_data).map(([key, value]) => (
-                            <div key={key} className="bg-muted p-2 rounded-md">
-                              <p className="text-xs text-muted-foreground">{key}</p>
-                              <p className="text-sm">{typeof value === 'string' ? value : JSON.stringify(value) || "-"}</p>
-                            </div>
-                          ))}
+                          {Object.entries(alert.security_detection.important_data)
+                            .filter(([_, value]) => value && typeof value === 'string' ? value.trim().toLowerCase() !== 'n/a' : value)
+                            .map(([key, value]) => (
+                              <div key={key} className="bg-muted p-2 rounded-md">
+                                <p className="text-xs text-muted-foreground">{key}</p>
+                                <p className="text-sm">{typeof value === 'string' ? value : JSON.stringify(value)}</p>
+                              </div>
+                            ))}
                         </div>
                       </div>
                     )}
-                    <div>
-                      <p className="text-sm text-muted-foreground">Resolution</p>
-                      <p>{alert.security_detection.resolution}</p>
-                    </div>
+                    {alert.security_detection.resolution && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Resolution</p>
+                        <p>{alert.security_detection.resolution}</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
