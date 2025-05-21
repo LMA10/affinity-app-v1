@@ -31,15 +31,15 @@ export function AlertsTable({ alerts, onValueClick, sortBy, sortDirection, onSor
   const getSeverityBadgeColor = (severity: string) => {
     switch (severity?.toLowerCase()) {
       case "critical":
-        return "bg-red-500/20 text-red-500"
+        return "bg-[#ff7d2d]/20 text-[#ff7d2d] border-[#ff7d2d]/20"
       case "high":
-        return "bg-orange-500/20 text-orange-500"
+        return "bg-[#ffb37d]/20 text-[#ffb37d] border-[#ffb37d]/20"
       case "medium":
-        return "bg-yellow-500/20 text-yellow-500"
+        return "bg-[#ffd6b3]/20 text-[#ffd6b3] border-[#ffd6b3]/20"
       case "low":
-        return "bg-green-500/20 text-green-500"
+        return "bg-[#ffffff]/20 text-[#ffffff] border-[#ffffff]/20"
       default:
-        return "bg-gray-500/20 text-gray-500"
+        return "bg-gray-500/20 text-gray-500 border-gray-500/20"
     }
   }
 

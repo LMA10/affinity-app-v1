@@ -30,8 +30,34 @@ export default function AlertsViewPage() {
   const itemsPerPage = 10
   const [sortBy, setSortBy] = useState<string>("timestamp")
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>("desc")
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(["timestamp", "severity", "alert", "source", "status", "owner", "resolved_by", "is_false_positive", "last_updated", "actions"])
   const [isColumnSelectorOpen, setIsColumnSelectorOpen] = useState(false)
+
+  // Helper to get initial visible columns from localStorage or default
+  const getInitialVisibleColumns = () => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('alerts_visible_columns');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) return parsed;
+        } catch {}
+      }
+    }
+    return [
+      "timestamp",
+      "severity",
+      "alert",
+      "source",
+      "status",
+      "owner",
+      "resolved_by",
+      "is_false_positive",
+      "last_updated",
+      "actions"
+    ];
+  };
+
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(getInitialVisibleColumns)
 
   useEffect(() => {
     fetchAlerts()
@@ -171,25 +197,35 @@ export default function AlertsViewPage() {
     low: alerts.filter((alert) => alert.security_detection?.severity?.toLowerCase() === "low").length,
   }
 
-  // Load visible columns from localStorage on mount
-  useEffect(() => {
-    const stored = typeof window !== 'undefined' ? localStorage.getItem('alerts_visible_columns') : null
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        if (Array.isArray(parsed)) {
-          setVisibleColumns(parsed)
-        }
-      } catch {}
+  const cardColors = {
+    critical: {
+      bg: "bg-[#1a2327] border-[#ff7d2d]",
+      text: "text-[#ff7d2d]",
+      icon: "text-[#ff7d2d]"
+    },
+    high: {
+      bg: "bg-[#1a2327] border-[#ffb37d]",
+      text: "text-[#ffb37d]",
+      icon: "text-[#ffb37d]"
+    },
+    medium: {
+      bg: "bg-[#1a2327] border-[#ffd6b3]",
+      text: "text-[#ffd6b3]",
+      icon: "text-[#ffd6b3]"
+    },
+    low: {
+      bg: "bg-[#1a2327] border-[#ffffff]",
+      text: "text-[#ffffff]",
+      icon: "text-[#ffffff]"
     }
-  }, [])
+  }
 
-  // Save visible columns to localStorage when they change
+  // Keep the effect that saves to localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('alerts_visible_columns', JSON.stringify(visibleColumns))
+      localStorage.setItem('alerts_visible_columns', JSON.stringify(visibleColumns));
     }
-  }, [visibleColumns])
+  }, [visibleColumns]);
 
   return (
     <AlertDetailsProvider>
@@ -202,50 +238,50 @@ export default function AlertsViewPage() {
         <div className="p-6 space-y-6">
           {/* Severity Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-[#0f1d24] border border-orange-600/20">
+            <Card className={`bg-[#1a2327] border ${cardColors.critical.bg}`}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-red-500">Critical Alerts</CardTitle>
+                <CardTitle className={cardColors.critical.text}>Crit. Alerts</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <span className="text-4xl font-bold text-red-500">{alertCounts.critical}</span>
-                  <Shield className="h-8 w-8 text-red-500" />
+                  <span className={`text-4xl font-bold ${cardColors.critical.text}`}>{alertCounts.critical.toString().padStart(2, '0')}</span>
+                  <Shield className={`h-8 w-8 ${cardColors.critical.icon}`} />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-[#0f1d24] border border-orange-600/20">
+            <Card className={`bg-[#1a2327] border ${cardColors.high.bg}`}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-orange-500">High Alerts</CardTitle>
+                <CardTitle className={cardColors.high.text}>High Alerts</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <span className="text-4xl font-bold text-orange-500">{alertCounts.high}</span>
-                  <Shield className="h-8 w-8 text-orange-500" />
+                  <span className={`text-4xl font-bold ${cardColors.high.text}`}>{alertCounts.high.toString().padStart(2, '0')}</span>
+                  <Shield className={`h-8 w-8 ${cardColors.high.icon}`} />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-[#0f1d24] border border-orange-600/20">
+            <Card className={`bg-[#1a2327] border ${cardColors.medium.bg}`}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-yellow-500">Medium Alerts</CardTitle>
+                <CardTitle className={cardColors.medium.text}>Med. Alerts</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <span className="text-4xl font-bold text-yellow-500">{alertCounts.medium}</span>
-                  <Shield className="h-8 w-8 text-yellow-500" />
+                  <span className={`text-4xl font-bold ${cardColors.medium.text}`}>{alertCounts.medium.toString().padStart(2, '0')}</span>
+                  <Shield className={`h-8 w-8 ${cardColors.medium.icon}`} />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-[#0f1d24] border border-orange-600/20">
+            <Card className={`bg-[#1a2327] border ${cardColors.low.bg}`}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-green-500">Low Alerts</CardTitle>
+                <CardTitle className={cardColors.low.text}>Low Alerts</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <span className="text-4xl font-bold text-green-500">{alertCounts.low}</span>
-                  <Shield className="h-8 w-8 text-green-500" />
+                  <span className={`text-4xl font-bold ${cardColors.low.text}`}>{alertCounts.low.toString().padStart(2, '0')}</span>
+                  <Shield className={`h-8 w-8 ${cardColors.low.icon}`} />
                 </div>
               </CardContent>
             </Card>

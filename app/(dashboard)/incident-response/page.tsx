@@ -777,7 +777,7 @@ function IncidentResponsePageInner() {
                     </Button>*/}
                     <Button 
                         onClick={() => setDetectiveMode((v) => !v)}
-                        className={detectiveMode ? "bg-orange-700 hover:bg-orange-800 text-white font-semibold px-4 py-2 rounded flex items-center gap-2" : "bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded flex items-center gap-2"}
+                        className={detectiveMode ? "bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold px-4 py-2 rounded flex items-center gap-2" : "bg-[#3b82f6] hover:bg-[#60a5fa] text-white font-semibold px-4 py-2 rounded flex items-center gap-2"}
                     >
                         <FileText className="w-4 h-4" /> {detectiveMode ? "Exit Triage Mode" : "Triage Mode"}
                     </Button>
@@ -821,27 +821,27 @@ function IncidentResponsePageInner() {
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                {formError && <div className="text-red-500 text-sm font-semibold">{formError}</div>}
+                                {formError && <div className="text-[#ff7d2d] text-sm font-semibold">{formError}</div>}
                                 <div className="flex justify-end gap-2 pt-2">
                                     <Button type="button" variant="outline" onClick={() => setShowIocModal(false)}>Cancel</Button>
-                                    <Button type="submit" className="bg-orange-600 hover:bg-orange-700 text-white">Add IOC</Button>
+                                    <Button type="submit" className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white">Add IOC</Button>
                                 </div>
                             </form>
                         </Modal>
                         {/* Hero Header */}
                         <div className="flex items-center gap-3 mb-8">
-                            <ShieldCheck className="w-10 h-10 text-orange-500 animate-pulse" />
+                            <ShieldCheck className="w-10 h-10 text-[#ff7d2d] animate-pulse" />
                             <div>
-                                <h1 className="text-3xl font-extrabold text-orange-400 tracking-tight">INCIDENT RESPONSE</h1>
+                                <h1 className="text-3xl font-extrabold text-[#ff7d2d] tracking-tight">INCIDENT RESPONSE</h1>
                                 <p className="text-muted-foreground text-base">Paste, upload, or drop logs. Instantly extract, enrich, and hunt IOCs.</p>
                             </div>
                         </div>
                         {/* Tabbed Input */}
                         <div className="bg-[#20262b] border border-orange-900/40 rounded-lg p-6 mb-8 shadow-sm">
                             <div className="flex gap-4 mb-6">
-                                <button onClick={() => setInputTab('text')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'text' ? 'bg-orange-500 text-white' : 'bg-[#23282e] text-orange-200 hover:bg-orange-600/20'}`}><ClipboardList className="w-5 h-5" />Text</button>
-                                <button onClick={() => setInputTab('upload')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'upload' ? 'bg-orange-500 text-white' : 'bg-[#23282e] text-orange-200 hover:bg-orange-600/20'}`}><UploadCloud className="w-5 h-5" />Upload</button>
-                                <button onClick={() => setInputTab('history')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'history' ? 'bg-orange-500 text-white' : 'bg-[#23282e] text-orange-200 hover:bg-orange-600/20'}`}><History className="w-5 h-5" />History</button>
+                                <button onClick={() => setInputTab('text')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'text' ? 'bg-[#ff7d2d] text-white' : 'bg-[#23282e] text-[#ff7d2d] hover:bg-[#ffb37d]/20'}`}><ClipboardList className="w-5 h-5" />Text</button>
+                                <button onClick={() => setInputTab('upload')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'upload' ? 'bg-[#ff7d2d] text-white' : 'bg-[#23282e] text-[#ff7d2d] hover:bg-[#ffb37d]/20'}`}><UploadCloud className="w-5 h-5" />Upload</button>
+                                <button onClick={() => setInputTab('history')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'history' ? 'bg-[#ff7d2d] text-white' : 'bg-[#23282e] text-[#ff7d2d] hover:bg-[#ffb37d]/20'}`}><History className="w-5 h-5" />History</button>
                             </div>
                             {inputTab === 'text' && (
                                 <>
@@ -854,7 +854,7 @@ function IncidentResponsePageInner() {
                                         onChange={e => setRawText(e.target.value)}
                                         placeholder="Paste or type your log data here..."
                                     />
-                                    <Button onClick={() => { openIocSelectModal(); }} className="w-full max-w-xs mx-auto block bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base py-2 rounded-md">
+                                    <Button onClick={() => { openIocSelectModal(); }} className="w-full max-w-xs mx-auto block bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold text-base py-2 rounded-md">
                                         Start
                                     </Button>
                                 </>
@@ -862,7 +862,7 @@ function IncidentResponsePageInner() {
                             {inputTab === 'upload' && (
                                 <div className="flex flex-col items-center gap-4">
                                     <div
-                                        className="border-2 border-dashed border-orange-400/60 rounded-xl p-8 bg-[#23282e] hover:bg-orange-950/10 transition cursor-pointer text-center flex flex-col items-center justify-center min-h-[120px] animate-pulse"
+                                        className="border-2 border-dashed border-orange-400/60 rounded-xl p-8 bg-[#23282e] hover:bg-[#ff7d2d]/10 transition cursor-pointer text-center flex flex-col items-center justify-center min-h-[120px] animate-pulse"
                                         onDrop={handleDrop}
                                         onDragOver={e => e.preventDefault()}
                                         onClick={() => fileInputRef.current?.click()}
@@ -875,14 +875,14 @@ function IncidentResponsePageInner() {
                                             style={{ display: "none" }}
                                             onChange={handleFileChange}
                                         />
-                                        <UploadCloud className="w-10 h-10 text-orange-400 mb-2 animate-bounce" />
+                                        <UploadCloud className="w-10 h-10 text-[#ff7d2d] mb-2 animate-bounce" />
                                         <span className="text-base font-semibold text-orange-300">Drag & drop a log file here, or click to select</span>
                                         <span className="block text-xs text-muted-foreground mt-1">Supported: .txt, .log, .json, .csv</span>
                                     </div>
                                     {uploading && (
                                         <div className="w-full mt-4">
                                             <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                                                <div className="h-2 bg-orange-500 transition-all" style={{ width: `${uploadProgress}%` }} />
+                                                <div className="h-2 bg-[#ff7d2d] transition-all" style={{ width: `${uploadProgress}%` }} />
                                             </div>
                                             <div className="text-xs text-orange-300 mt-1 text-center">Uploading... {uploadProgress}%</div>
                                         </div>
@@ -916,11 +916,11 @@ function IncidentResponsePageInner() {
                                 </div>
                                 {/* Actions */}
                                 <div className="flex gap-2 mb-4">
-                                    <Button onClick={() => copyAllIocs(iocResults)} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Copy all IOCs to clipboard">Copy All</Button>
-                                    <Button onClick={() => { handleReset(); setStep(1); }} className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-105">Reset</Button>
-                                    <Button onClick={() => exportIOCs('csv')} className="bg-orange-700 hover:bg-orange-800 text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export CSV</Button>
-                                    <Button onClick={() => exportIOCs('json')} className="bg-orange-700 hover:bg-orange-800 text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export JSON</Button>
-                                    <Button onClick={handleQueryInLogs} className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Query selected IOCs in Logs">Query in Logs</Button>
+                                    <Button onClick={() => copyAllIocs(iocResults)} className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Copy all IOCs to clipboard">Copy All</Button>
+                                    <Button onClick={() => { handleReset(); setStep(1); }} className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-105">Reset</Button>
+                                    <Button onClick={() => exportIOCs('csv')} className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export CSV</Button>
+                                    <Button onClick={() => exportIOCs('json')} className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export JSON</Button>
+                                    <Button onClick={handleQueryInLogs} className="bg-[#10b981] hover:bg-[#34d399] text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Query selected IOCs in Logs">Query in Logs</Button>
                                 </div>
                                 {/* IOC Results */}
                                 <div className="space-y-4">
@@ -959,31 +959,31 @@ function IncidentResponsePageInner() {
                                                 {iocType === 'ipv4' && (
                                                     <div className="mb-2">
                                                         <div className="flex gap-2 mb-2 items-center">
-                                                            <button onClick={() => setIpv4WhitelistFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
-                                                            <button onClick={() => setIpv4WhitelistFilter('whitelist')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'whitelist' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Whitelisted</button>
-                                                            <button onClick={() => setIpv4WhitelistFilter('unmatched')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'unmatched' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Non-Whitelisted</button>
-                                                            {showIpv4Spinner && <Loader2 className="animate-spin w-4 h-4 text-orange-400 ml-2" aria-label="Whitelisting..." />}
+                                                            <button onClick={() => setIpv4WhitelistFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'all' ? 'bg-[#3b82f6] text-white border-[#3b82f6]' : 'bg-[#23282e] text-[#ff7d2d] border-[#ff7d2d]'} transition`}>All</button>
+                                                            <button onClick={() => setIpv4WhitelistFilter('whitelist')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'whitelist' ? 'bg-[#ff7d2d] text-white border-[#ff7d2d]' : 'bg-[#23282e] text-[#ff7d2d] border-[#ff7d2d]'} transition`}>Whitelisted</button>
+                                                            <button onClick={() => setIpv4WhitelistFilter('unmatched')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'unmatched' ? 'bg-[#ff7d2d] text-white border-[#ff7d2d]' : 'bg-[#23282e] text-[#ff7d2d] border-[#ff7d2d]'} transition`}>Non-Whitelisted</button>
+                                                            {showIpv4Spinner && <Loader2 className="animate-spin w-4 h-4 text-[#ff7d2d] ml-2" aria-label="Whitelisting..." />}
                                                         </div>
                                                         <div className="flex gap-2 mb-2">
-                                                            <button onClick={() => setIpv4PubPrivFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
-                                                            <button onClick={() => setIpv4PubPrivFilter('public')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'public' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Public</button>
-                                                            <button onClick={() => setIpv4PubPrivFilter('private')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'private' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Private</button>
+                                                            <button onClick={() => setIpv4PubPrivFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'all' ? 'bg-[#3b82f6] text-white border-[#3b82f6]' : 'bg-[#23282e] text-[#ff7d2d] border-[#ff7d2d]'} transition`}>All</button>
+                                                            <button onClick={() => setIpv4PubPrivFilter('public')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'public' ? 'bg-[#ff7d2d] text-white border-[#ff7d2d]' : 'bg-[#23282e] text-[#ff7d2d] border-[#ff7d2d]'} transition`}>Public</button>
+                                                            <button onClick={() => setIpv4PubPrivFilter('private')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'private' ? 'bg-[#ff7d2d] text-white border-[#ff7d2d]' : 'bg-[#23282e] text-[#ff7d2d] border-[#ff7d2d]'} transition`}>Private</button>
                                                         </div>
                                                         <div className="flex gap-2 mb-2">
-                                                            <Button onClick={() => resolvePTRs(displayValues)} className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded-full text-xs font-semibold" disabled={ptrLoading}>
+                                                            <Button onClick={() => resolvePTRs(displayValues)} className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white px-3 py-1 rounded-full text-xs font-semibold" disabled={ptrLoading}>
                                                                 {ptrLoading ? 'Resolving DNS...' : 'Resolve DNS'}
                                                             </Button>
-                                                            {ptrError && <span className="text-red-500 ml-2 text-xs">{ptrError}</span>}
+                                                            {ptrError && <span className="text-[#ff7d2d] ml-2 text-xs">{ptrError}</span>}
                                                         </div>
                                                     </div>
                                                 )}
                                                 {iocType === 'domain' && (
                                                     <div className="flex gap-2 mb-2 items-center">
-                                                        <button onClick={() => setDomainWhitelistFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
-                                                        <button onClick={() => setDomainWhitelistFilter('whitelist')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'whitelist' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Whitelist</button>
-                                                        <button onClick={() => setDomainWhitelistFilter('unmatched')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'unmatched' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Unmatched</button>
-                                                        {domainLoading && <span className="text-orange-400 ml-4">Resolving domains...</span>}
-                                                        {domainError && <span className="text-red-500 ml-4">Error: {domainError}</span>}
+                                                        <button onClick={() => setDomainWhitelistFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'all' ? 'bg-[#3b82f6] text-white border-[#3b82f6]' : 'bg-[#23282e] text-[#ff7d2d] border-[#ff7d2d]'} transition`}>All</button>
+                                                        <button onClick={() => setDomainWhitelistFilter('whitelist')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'whitelist' ? 'bg-[#ff7d2d] text-white border-[#ff7d2d]' : 'bg-[#23282e] text-[#ff7d2d] border-[#ff7d2d]'} transition`}>Whitelist</button>
+                                                        <button onClick={() => setDomainWhitelistFilter('unmatched')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'unmatched' ? 'bg-[#ff7d2d] text-white border-[#ff7d2d]' : 'bg-[#23282e] text-[#ff7d2d] border-[#ff7d2d]'} transition`}>Unmatched</button>
+                                                        {domainLoading && <span className="text-[#ff7d2d] ml-4">Resolving domains...</span>}
+                                                        {domainError && <span className="text-[#ff7d2d] ml-4">Error: {domainError}</span>}
                                                     </div>
                                                 )}
                                                 <IOCTypeTable
@@ -1022,9 +1022,9 @@ function IncidentResponsePageInner() {
             {(analyzing || whitelisting) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="flex flex-col items-center gap-2 p-8 bg-[#23282e] rounded-lg shadow-lg border border-orange-700/40">
-                        <Loader2 className="animate-spin w-8 h-8 text-orange-500" />
-                        {analyzing && <span className="text-orange-300 font-semibold mt-2">Analyzing...</span>}
-                        {whitelisting && <span className="text-orange-300 font-semibold mt-2">Whitelisting...</span>}
+                        <Loader2 className="animate-spin w-8 h-8 text-[#ff7d2d]" />
+                        {analyzing && <span className="text-[#ff7d2d] font-semibold mt-2">Analyzing...</span>}
+                        {whitelisting && <span className="text-[#ff7d2d] font-semibold mt-2">Whitelisting...</span>}
                     </div>
                 </div>
             )}
@@ -1033,14 +1033,14 @@ function IncidentResponsePageInner() {
                 <div className="fixed inset-0 z-50 bg-black/40 flex justify-end animate-fade-in">
                     <div className="w-80 h-full bg-[#23282e] border-l border-orange-900/40 shadow-2xl flex flex-col">
                         <div className="flex items-center justify-between p-4 border-b border-orange-900/30">
-                            <span className="font-bold text-orange-400 text-lg">Session History</span>
-                            <button onClick={() => setShowHistory(false)} className="p-2 rounded hover:bg-orange-700/20"><X className="w-5 h-5 text-orange-400" /></button>
+                            <span className="font-bold text-[#ff7d2d] text-lg">Session History</span>
+                            <button onClick={() => setShowHistory(false)} className="p-2 rounded hover:bg-orange-700/20"><X className="w-5 h-5 text-[#ff7d2d]" /></button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
                             {mockSessions.map(session => (
                                 <div key={session.id} className="bg-[#181f22] border border-orange-900/30 rounded-lg p-3 flex flex-col gap-1 shadow-sm hover:bg-orange-900/10 transition">
                                     <div className="flex items-center justify-between">
-                                        <span className="font-semibold text-orange-300">{session.name}</span>
+                                        <span className="font-semibold text-[#ff7d2d]">{session.name}</span>
                                         <span className="text-xs text-muted-foreground">{session.date}</span>
                                     </div>
                                     <span className="text-xs text-orange-200">IOCs: {session.iocCount}</span>
@@ -1059,7 +1059,7 @@ function IncidentResponsePageInner() {
                     <DrawerHeader>
                         <DrawerTitle>Security Logs</DrawerTitle>
                         <DrawerClose asChild>
-                            <button onClick={() => setIsDrawerOpen(false)} className="absolute right-4 top-4 text-orange-400 hover:text-orange-600 text-2xl">×</button>
+                            <button onClick={() => setIsDrawerOpen(false)} className="absolute right-4 top-4 text-[#ff7d2d] hover:text-[#ffb37d] text-2xl">×</button>
                         </DrawerClose>
                     </DrawerHeader>
                     <div className="p-0 overflow-y-auto h-[calc(100vh-60px)]">
@@ -1077,9 +1077,9 @@ function IncidentResponsePageInner() {
                                     type="checkbox"
                                     checked={selectedIocTypes.includes(ioc.key)}
                                     onChange={() => toggleIocType(ioc.key)}
-                                    className="accent-orange-500 w-4 h-4"
+                                    className="accent-[#ff7d2d] w-4 h-4"
                                 />
-                                <span className="font-semibold text-orange-300">{IOC_TYPE_META[ioc.key]?.label || ioc.name}</span>
+                                <span className="font-semibold text-[#ff7d2d]">{IOC_TYPE_META[ioc.key]?.label || ioc.name}</span>
                             </label>
                         ))}
                     </div>
@@ -1089,7 +1089,7 @@ function IncidentResponsePageInner() {
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
                         <Button type="button" variant="outline" onClick={() => setShowIocSelectModal(false)}>Cancel</Button>
-                        <Button type="button" className="bg-orange-600 hover:bg-orange-700 text-white" onClick={handleAnalyzeSelected} disabled={selectedIocTypes.length === 0}>Analyze Selected</Button>
+                        <Button type="button" className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white" onClick={handleAnalyzeSelected} disabled={selectedIocTypes.length === 0}>Analyze Selected</Button>
                     </div>
                 </div>
             </Modal>
