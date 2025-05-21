@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { Plus, X, MoreVertical, Play, AlertCircle, CheckCircle, Wand2, AlignLeft, Pencil } from "lucide-react"
+import { Plus, X, MoreVertical, Play, AlertCircle, CheckCircle, Wrench, AlignLeft, Pencil, Trash2, File } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -348,88 +348,99 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
       className={`flex flex-col h-full border rounded-md ${isDarkTheme ? "bg-[#0a1419] border-orange-600/20" : "bg-white border-gray-200"}`}
     >
       <div
-        className={`flex items-center justify-between border-b ${isDarkTheme ? "border-orange-600/20 bg-[#0f1d24]" : "border-gray-200 bg-gray-50"}`}
+        className={`flex items-center justify-end border-b ${isDarkTheme ? "border-orange-600/20 bg-[#0f1d24]" : "border-gray-200 bg-gray-50"}`}
       >
-        <div className="flex-1 min-w-0 overflow-x-auto">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`h-10 p-0 w-full flex items-center overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-orange-600/30 scrollbar-track-transparent min-w-0 max-h-12 ${isDarkTheme ? "bg-transparent" : "bg-gray-50"}`} style={{ WebkitOverflowScrolling: 'touch' }}>
-              {tabs.map((tab) => (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className={`relative h-10 px-4 rounded-none border-r min-w-[120px] max-w-[180px] truncate text-sm md:text-base whitespace-nowrap ${
-                    isDarkTheme
-                      ? `border-orange-600/20 data-[state=active]:bg-[#0a1419] data-[state=active]:text-orange-500 text-gray-300`
-                      : `border-gray-200 data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm text-gray-700`
-                  } group`}
-                  onDoubleClick={(e) => startEditingTab(tab.id, e)}
+        <div className="flex items-center gap-2 ml-auto">
+          <div className="flex-1 min-w-0 overflow-x-auto">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className={`h-10 p-0 flex items-center overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-orange-600/30 scrollbar-track-transparent min-w-0 max-h-12 ${isDarkTheme ? "bg-transparent" : "bg-gray-50"}`} style={{ WebkitOverflowScrolling: 'touch' }}>
+                {tabs.map((tab) => (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className={`relative h-10 px-4 min-w-[120px] max-w-[180px] truncate text-xs whitespace-nowrap font-['Helvetica','Arial',sans-serif] font-normal ${
+                      isDarkTheme
+                        ? `data-[state=active]:bg-[#506C77] data-[state=active]:text-white bg-[#0D1315] text-[#849DA6]`
+                        : `data-[state=active]:bg-[#506C77] data-[state=active]:text-white bg-[#CAD0D2] text-[#506C77]`
+                    } group`}
+                    onDoubleClick={(e) => startEditingTab(tab.id, e)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {tab.status === "running" && <Play className="h-3 w-3 text-blue-500 animate-pulse" />}
+                      {tab.status === "error" && <AlertCircle className="h-3 w-3 text-red-500" />}
+                      {tab.status === "success" && <CheckCircle className="h-3 w-3 text-green-500" />}
+                      {editingTabId === tab.id ? (
+                        <input
+                          ref={editInputRef}
+                          type="text"
+                          value={editingTabName}
+                          onChange={(e) => setEditingTabName(e.target.value)}
+                          onKeyDown={handleEditKeyDown}
+                          onBlur={saveTabName}
+                          className={`w-24 border rounded px-1 focus:outline-none focus:ring-1 focus:ring-orange-500 ${
+                            isDarkTheme
+                              ? "bg-[#0f1d24] text-white border-orange-600/20"
+                              : "bg-white text-gray-800 border-gray-300"
+                          }`}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      ) : (
+                        <>
+                          <span>{tab.name}</span>
+                          <span
+                            onClick={(e) => { e.stopPropagation(); startEditingTab(tab.id, e); }}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            role="button"
+                            tabIndex={0}
+                          >
+                            <Pencil className={`h-3 w-3 ${isDarkTheme ? "text-orange-500" : "text-orange-600"}`} />
+                          </span>
+                        </>
+                      )}
+                      <span
+                        onClick={(e) => { e.stopPropagation(); closeTab(tab.id, e); }}
+                        className={`ml-4 rounded-full p-0.5 ${isDarkTheme ? "hover:bg-gray-700" : "hover:bg-gray-200"} cursor-pointer`}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        <X className="h-3 w-3" />
+                      </span>
+                    </div>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+          <div className="flex gap-2 items-center h-10">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-8 w-8 !bg-[#CAD0D2] dark:!bg-[#0D1315] !border !border-[#506C77] flex items-center justify-center"
+              onClick={createNewTab}
+            >
+              <Plus className="h-5 w-5 text-[#506C77]" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-8 w-8 !bg-[#CAD0D2] dark:!bg-[#0D1315] !border !border-[#506C77] flex items-center justify-center"
                 >
-                  <div className="flex items-center gap-2">
-                    {tab.status === "running" && <Play className="h-3 w-3 text-blue-500 animate-pulse" />}
-                    {tab.status === "error" && <AlertCircle className="h-3 w-3 text-red-500" />}
-                    {tab.status === "success" && <CheckCircle className="h-3 w-3 text-green-500" />}
-                    {editingTabId === tab.id ? (
-                      <input
-                        ref={editInputRef}
-                        type="text"
-                        value={editingTabName}
-                        onChange={(e) => setEditingTabName(e.target.value)}
-                        onKeyDown={handleEditKeyDown}
-                        onBlur={saveTabName}
-                        className={`w-24 border rounded px-1 focus:outline-none focus:ring-1 focus:ring-orange-500 ${
-                          isDarkTheme
-                            ? "bg-[#0f1d24] text-white border-orange-600/20"
-                            : "bg-white text-gray-800 border-gray-300"
-                        }`}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    ) : (
-                      <>
-                        <span>{tab.name}</span>
-                        <span
-                          onClick={(e) => { e.stopPropagation(); startEditingTab(tab.id, e); }}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                          role="button"
-                          tabIndex={0}
-                        >
-                          <Pencil className={`h-3 w-3 ${isDarkTheme ? "text-orange-500" : "text-orange-600"}`} />
-                        </span>
-                      </>
-                    )}
-                    <span
-                      onClick={(e) => { e.stopPropagation(); closeTab(tab.id, e); }}
-                      className={`ml-2 rounded-full p-0.5 ${isDarkTheme ? "hover:bg-gray-700" : "hover:bg-gray-200"} cursor-pointer`}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <X className="h-3 w-3" />
-                    </span>
-                  </div>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </div>
-        <div className="flex items-center">
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-none" onClick={createNewTab}>
-            <Plus className="h-4 w-4" />
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-none">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={closeAllTabs}>Close all tabs</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <MoreVertical className="h-5 w-5 text-[#506C77]" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={closeAllTabs}>Close all tabs</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col mt-4">
         <div
-          className={`p-2 border-b flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-0 ${
+          className={`p-0 border-b flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-0 ${
             isDarkTheme ? "bg-[#0f1d24] border-orange-600/20" : "bg-gray-50 border-gray-200"
           }`}
         >
@@ -448,32 +459,32 @@ export function QueryEditor({ onRunQuery }: QueryEditorProps) {
               className={`w-full md:w-auto ${isDarkTheme ? "border-orange-600/20 text-orange-500" : "border-orange-200 text-orange-600"}`}
               onClick={() => setIsQueryBuilderOpen(true)}
             >
-              <Wand2 className="mr-2 h-4 w-4" />
+              <Wrench className="mr-2 h-4 w-4" />
               Query Builder
             </Button>
-            <Button
-              variant="default"
-              size="sm"
-              className="w-full md:w-auto bg-orange-600 hover:bg-orange-700 text-white"
-              onClick={runQuery}
-              disabled={loading || activeTabData.status === "running"}
-            >
-              {loading || activeTabData.status === "running" ? (
-                <>
-                  <Play className="mr-2 h-4 w-4 animate-spin" />
-                  Running...
-                </>
-              ) : (
-                <>
-                  <Play className="mr-2 h-4 w-4" />
-                  Run Query
-                </>
-              )}
-            </Button>
-            <Button variant="outline" size="sm" className="w-full md:w-auto" onClick={clearActiveTab}>
-              <X className="mr-2 h-4 w-4" />
-              Clear
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                size="icon"
+                className="h-8 w-8 bg-orange-600 hover:bg-orange-700 text-white"
+                onClick={runQuery}
+                disabled={loading || activeTabData.status === "running"}
+              >
+                {loading || activeTabData.status === "running" ? (
+                  <Play className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                onClick={clearActiveTab}
+              >
+                <File className="h-4 w-4 text-white" />
+              </Button>
+            </div>
           </div>
         </div>
 
