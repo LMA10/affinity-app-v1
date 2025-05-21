@@ -26,27 +26,31 @@ async function geoipLookup(ip: string) {
   return { ip, country: "US", city: "MockCity" };
 }
 
-export async function extractIOCs(text: string): Promise<{
+export async function extractIOCs(text: string, selectedTypes?: string[]): Promise<{
   iocResults: Record<string, string[]>;
   enriched: Record<string, any>;
 }> {
   const config = await loadIOCConfig();
+  const filteredConfig = selectedTypes && selectedTypes.length > 0
+    ? config.filter((ioc: any) => selectedTypes.includes(ioc.key))
+    : config;
   const results: Record<string, string[]> = {};
-  for (const ioc of config) {
-    results[ioc.key] = [];
-    const regex = new RegExp(ioc.regex, 'g');
+  for (const ioc of filteredConfig as any[]) {
+    const iocAny: any = ioc;
+    results[iocAny.key] = [];
+    const regex = new RegExp(iocAny.regex, 'g');
     let match;
     while ((match = regex.exec(text)) !== null) {
       let value = deobfuscateIOC(match[0]);
       // Validation and noise reduction
-      if (ioc.key === "ipv4") {
+      if (iocAny.key === "ipv4") {
         if (!isValidIPv4(value)) continue;
       }
-      if (ioc.key === "ipv6" && !isValidIPv6(value)) continue;
-      if ((ioc.key === "domain" || ioc.key === "fqdn")) {
+      if (iocAny.key === "ipv6" && !isValidIPv6(value)) continue;
+      if ((iocAny.key === "domain" || iocAny.key === "fqdn")) {
         if (!isValidDomain(value) || DOMAIN_WHITELIST.includes(value.toLowerCase())) continue;
       }
-      results[ioc.key].push(value);
+      results[iocAny.key].push(value);
     }
   }
   // Only return IOC types with at least one result

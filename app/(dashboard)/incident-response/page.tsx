@@ -17,6 +17,32 @@ import { useUmbrellaState } from "@/lib/state/umbrellaState";
 import { crossReferenceIPs } from "@/lib/services/umbrellaService";
 import { storeQuery } from '@/lib/utils/query-storage';
 import { useRouter } from 'next/navigation';
+import { DetectiveMode } from "@/components/incident-response/DetectiveMode"
+
+// Add Case interface and utility functions
+interface Case {
+  id: string;
+  title: string;
+  notes: string[];
+}
+
+const CASES_KEY = 'triage_cases_v1';
+
+function loadCases(): Case[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(CASES_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+function saveCases(cases: Case[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(CASES_KEY, JSON.stringify(cases));
+}
 
 const IOC_COLORS: Record<string, string> = {
     ipv4: "bg-blue-700",
@@ -262,6 +288,7 @@ function IncidentResponsePageInner() {
         iocConfig,
         loadConfig,
         addIocType,
+        setIocResults,
     } = useIncidentResponseState();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [searchTerms, setSearchTerms] = useState<Record<string, string>>({});
@@ -681,238 +708,310 @@ function IncidentResponsePageInner() {
     const [uploading, setUploading] = useState(false);
     const router = useRouter();
 
+    // Add detectiveMode state
+    const [detectiveMode, setDetectiveMode] = useState(false);
+
+    // Add case management to the incident response page
+    const [activeCaseId, setActiveCaseId] = useState<string | null>(null);
+    const [cases, setCases] = useState<Case[]>(loadCases());
+
+    const createCase = () => {
+        const newCase: Case = { id: Date.now().toString(), title: 'New Case', notes: [] };
+        setCases([newCase, ...cases]);
+        setActiveCaseId(newCase.id);
+    };
+
+    const addNoteToCase = (noteId: string) => {
+        if (!activeCaseId) return;
+        setCases(cases => cases.map(c => c.id === activeCaseId ? { ...c, notes: [...c.notes, noteId] } : c));
+    };
+
+    useEffect(() => {
+        saveCases(cases);
+    }, [cases]);
+
+    // Add state for IOC selection modal and selected types
+    const [showIocSelectModal, setShowIocSelectModal] = useState(false);
+    const [selectedIocTypes, setSelectedIocTypes] = useState<string[]>([]);
+
+    // Helper to open modal with all types selected by default
+    const openIocSelectModal = () => {
+        setSelectedIocTypes(iocConfig.map(i => i.key));
+        setShowIocSelectModal(true);
+    };
+
+    // Handler for toggling a type
+    const toggleIocType = (key: string) => {
+        setSelectedIocTypes(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+    };
+
+    // Handler for select all
+    const selectAllIocTypes = () => setSelectedIocTypes(iocConfig.map(i => i.key));
+    const deselectAllIocTypes = () => setSelectedIocTypes([]);
+
+    // Handler for Analyze Selected
+    const handleAnalyzeSelected = async () => {
+        setShowIocSelectModal(false);
+        setAnalyzing(true);
+        setWhitelisting(false);
+        setShouldLoadWhitelist(false);
+        await runExtraction(selectedIocTypes);
+        setExtracted(true);
+        setStep(2);
+        let needsWhitelist = (iocResults?.ipv4 || []).length > 0 || (iocResults?.domain || []).length > 0;
+        if (needsWhitelist) {
+            setWhitelisting(true);
+            setShouldLoadWhitelist(true);
+        } else {
+            setAnalyzing(false);
+        }
+    };
+
     return (
         <div className="min-h-screen flex flex-col items-center bg-[#181c20] p-0">
             <div className="w-full max-w-5xl mt-10">
-                {/* IOC Add Button */}
-                <div className="flex justify-end mb-2">
-                    <Button onClick={() => setShowIocModal(true)} className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded flex items-center gap-2">
+                {/* IOC Add Button and Triage Mode Toggle Button aligned */}
+                <div className="flex justify-end mb-2 gap-2">
+                    {/*  <Button onClick={() => setShowIocModal(true)} className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded flex items-center gap-2">
                         <FileText className="w-4 h-4" /> Add IOC
+                    </Button>*/}
+                    <Button 
+                        onClick={() => setDetectiveMode((v) => !v)}
+                        className={detectiveMode ? "bg-orange-700 hover:bg-orange-800 text-white font-semibold px-4 py-2 rounded flex items-center gap-2" : "bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded flex items-center gap-2"}
+                    >
+                        <FileText className="w-4 h-4" /> {detectiveMode ? "Exit Triage Mode" : "Triage Mode"}
                     </Button>
                 </div>
-                {/* IOC Modal */}
-                <Modal isOpen={showIocModal} onClose={() => setShowIocModal(false)} title="Add New IOC Type">
-                    <form onSubmit={handleAddIoc} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-semibold mb-1">Name</label>
-                            <Input value={newIoc.name} onChange={e => setNewIoc({ ...newIoc, name: e.target.value })} placeholder="e.g. Bitcoin Address" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold mb-1">Key</label>
-                            <Input value={newIoc.key} onChange={e => setNewIoc({ ...newIoc, key: e.target.value })} placeholder="e.g. bitcoin" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold mb-1">Regex</label>
-                            <Input value={newIoc.regex} onChange={e => setNewIoc({ ...newIoc, regex: e.target.value })} placeholder="e.g. [13][a-km-zA-HJ-NP-Z1-9]{25,34}" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold mb-1">Color</label>
-                            <input type="color" value={newIoc.color} onChange={e => setNewIoc({ ...newIoc, color: e.target.value })} className="w-12 h-8 p-0 border-none bg-transparent" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold mb-1">Icon</label>
-                            <Select value={newIoc.icon} onValueChange={icon => setNewIoc({ ...newIoc, icon })}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {ICON_OPTIONS.map(opt => (
-                                        <SelectItem key={opt.value} value={opt.value} className="flex items-center gap-2">
-                                            <opt.icon className="w-4 h-4 mr-2 inline-block" /> {opt.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        {formError && <div className="text-red-500 text-sm font-semibold">{formError}</div>}
-                        <div className="flex justify-end gap-2 pt-2">
-                            <Button type="button" variant="outline" onClick={() => setShowIocModal(false)}>Cancel</Button>
-                            <Button type="submit" className="bg-orange-600 hover:bg-orange-700 text-white">Add IOC</Button>
-                        </div>
-                    </form>
-                </Modal>
-                {/* Hero Header */}
-                <div className="flex items-center gap-3 mb-8">
-                    <ShieldCheck className="w-10 h-10 text-orange-500 animate-pulse" />
-                    <div>
-                        <h1 className="text-3xl font-extrabold text-orange-400 tracking-tight">INCIDENT RESPONSE</h1>
-                        <p className="text-muted-foreground text-base">Paste, upload, or drop logs. Instantly extract, enrich, and hunt IOCs.</p>
-                    </div>
-                </div>
-                {/* Tabbed Input */}
-                <div className="bg-[#20262b] border border-orange-900/40 rounded-lg p-6 mb-8 shadow-sm">
-                    <div className="flex gap-4 mb-6">
-                        <button onClick={() => setInputTab('text')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'text' ? 'bg-orange-500 text-white' : 'bg-[#23282e] text-orange-200 hover:bg-orange-600/20'}`}><ClipboardList className="w-5 h-5" />Text</button>
-                        <button onClick={() => setInputTab('upload')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'upload' ? 'bg-orange-500 text-white' : 'bg-[#23282e] text-orange-200 hover:bg-orange-600/20'}`}><UploadCloud className="w-5 h-5" />Upload</button>
-                        <button onClick={() => setInputTab('history')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'history' ? 'bg-orange-500 text-white' : 'bg-[#23282e] text-orange-200 hover:bg-orange-600/20'}`}><History className="w-5 h-5" />History</button>
-                    </div>
-                    {inputTab === 'text' && (
-                        <>
-                            <div className="flex gap-2 mb-4">
-                                <Button onClick={() => { setRawText(exampleLog); }} variant="outline" size="sm" className="flex gap-2 items-center" title="Try a sample log!"><ClipboardList className="w-4 h-4 animate-bounce" />Paste Example</Button>
+                {/* Render DetectiveMode or Classic UI */}
+                {detectiveMode ? (
+                    <DetectiveMode addNoteToCase={addNoteToCase} />
+                ) : (
+                    <>
+                        {/* IOC Modal */}
+                        <Modal isOpen={showIocModal} onClose={() => setShowIocModal(false)} title="Add New IOC Type">
+                            <form onSubmit={handleAddIoc} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold mb-1">Name</label>
+                                    <Input value={newIoc.name} onChange={e => setNewIoc({ ...newIoc, name: e.target.value })} placeholder="e.g. Bitcoin Address" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold mb-1">Key</label>
+                                    <Input value={newIoc.key} onChange={e => setNewIoc({ ...newIoc, key: e.target.value })} placeholder="e.g. bitcoin" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold mb-1">Regex</label>
+                                    <Input value={newIoc.regex} onChange={e => setNewIoc({ ...newIoc, regex: e.target.value })} placeholder="e.g. [13][a-km-zA-HJ-NP-Z1-9]{25,34}" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold mb-1">Color</label>
+                                    <input type="color" value={newIoc.color} onChange={e => setNewIoc({ ...newIoc, color: e.target.value })} className="w-12 h-8 p-0 border-none bg-transparent" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold mb-1">Icon</label>
+                                    <Select value={newIoc.icon} onValueChange={icon => setNewIoc({ ...newIoc, icon })}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {ICON_OPTIONS.map(opt => (
+                                                <SelectItem key={opt.value} value={opt.value} className="flex items-center gap-2">
+                                                    <opt.icon className="w-4 h-4 mr-2 inline-block" /> {opt.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                {formError && <div className="text-red-500 text-sm font-semibold">{formError}</div>}
+                                <div className="flex justify-end gap-2 pt-2">
+                                    <Button type="button" variant="outline" onClick={() => setShowIocModal(false)}>Cancel</Button>
+                                    <Button type="submit" className="bg-orange-600 hover:bg-orange-700 text-white">Add IOC</Button>
+                                </div>
+                            </form>
+                        </Modal>
+                        {/* Hero Header */}
+                        <div className="flex items-center gap-3 mb-8">
+                            <ShieldCheck className="w-10 h-10 text-orange-500 animate-pulse" />
+                            <div>
+                                <h1 className="text-3xl font-extrabold text-orange-400 tracking-tight">INCIDENT RESPONSE</h1>
+                                <p className="text-muted-foreground text-base">Paste, upload, or drop logs. Instantly extract, enrich, and hunt IOCs.</p>
                             </div>
-                            <Textarea
-                                className="w-full min-h-[100px] border-orange-400/40 focus:border-orange-500 rounded-md mb-4"
-                                value={rawText}
-                                onChange={e => setRawText(e.target.value)}
-                                placeholder="Paste or type your log data here..."
-                            />
-                            <Button onClick={async () => { await handleGrep(); setStep(2); }} className="w-full max-w-xs mx-auto block bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base py-2 rounded-md">
-                                Analyze
-                            </Button>
-                        </>
-                    )}
-                    {inputTab === 'upload' && (
-                        <div className="flex flex-col items-center gap-4">
-                            <div
-                                className="border-2 border-dashed border-orange-400/60 rounded-xl p-8 bg-[#23282e] hover:bg-orange-950/10 transition cursor-pointer text-center flex flex-col items-center justify-center min-h-[120px] animate-pulse"
-                                onDrop={handleDrop}
-                                onDragOver={e => e.preventDefault()}
-                                onClick={() => fileInputRef.current?.click()}
-                                title="Drag & drop a log file or click to select"
-                            >
-                                <input
-                                    type="file"
-                                    accept=".txt,.log,.json,.csv"
-                                    ref={fileInputRef}
-                                    style={{ display: "none" }}
-                                    onChange={handleFileChange}
-                                />
-                                <UploadCloud className="w-10 h-10 text-orange-400 mb-2 animate-bounce" />
-                                <span className="text-base font-semibold text-orange-300">Drag & drop a log file here, or click to select</span>
-                                <span className="block text-xs text-muted-foreground mt-1">Supported: .txt, .log, .json, .csv</span>
+                        </div>
+                        {/* Tabbed Input */}
+                        <div className="bg-[#20262b] border border-orange-900/40 rounded-lg p-6 mb-8 shadow-sm">
+                            <div className="flex gap-4 mb-6">
+                                <button onClick={() => setInputTab('text')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'text' ? 'bg-orange-500 text-white' : 'bg-[#23282e] text-orange-200 hover:bg-orange-600/20'}`}><ClipboardList className="w-5 h-5" />Text</button>
+                                <button onClick={() => setInputTab('upload')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'upload' ? 'bg-orange-500 text-white' : 'bg-[#23282e] text-orange-200 hover:bg-orange-600/20'}`}><UploadCloud className="w-5 h-5" />Upload</button>
+                                <button onClick={() => setInputTab('history')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'history' ? 'bg-orange-500 text-white' : 'bg-[#23282e] text-orange-200 hover:bg-orange-600/20'}`}><History className="w-5 h-5" />History</button>
                             </div>
-                            {uploading && (
-                                <div className="w-full mt-4">
-                                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                                        <div className="h-2 bg-orange-500 transition-all" style={{ width: `${uploadProgress}%` }} />
+                            {inputTab === 'text' && (
+                                <>
+                                    <div className="flex gap-2 mb-4">
+                                        <Button onClick={() => { setRawText(exampleLog); }} variant="outline" size="sm" className="flex gap-2 items-center" title="Try a sample log!"><ClipboardList className="w-4 h-4 animate-bounce" />Paste Example</Button>
                                     </div>
-                                    <div className="text-xs text-orange-300 mt-1 text-center">Uploading... {uploadProgress}%</div>
+                                    <Textarea
+                                        className="w-full min-h-[100px] border-orange-400/40 focus:border-orange-500 rounded-md mb-4"
+                                        value={rawText}
+                                        onChange={e => setRawText(e.target.value)}
+                                        placeholder="Paste or type your log data here..."
+                                    />
+                                    <Button onClick={() => { openIocSelectModal(); }} className="w-full max-w-xs mx-auto block bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base py-2 rounded-md">
+                                        Start
+                                    </Button>
+                                </>
+                            )}
+                            {inputTab === 'upload' && (
+                                <div className="flex flex-col items-center gap-4">
+                                    <div
+                                        className="border-2 border-dashed border-orange-400/60 rounded-xl p-8 bg-[#23282e] hover:bg-orange-950/10 transition cursor-pointer text-center flex flex-col items-center justify-center min-h-[120px] animate-pulse"
+                                        onDrop={handleDrop}
+                                        onDragOver={e => e.preventDefault()}
+                                        onClick={() => fileInputRef.current?.click()}
+                                        title="Drag & drop a log file or click to select"
+                                    >
+                                        <input
+                                            type="file"
+                                            accept=".txt,.log,.json,.csv"
+                                            ref={fileInputRef}
+                                            style={{ display: "none" }}
+                                            onChange={handleFileChange}
+                                        />
+                                        <UploadCloud className="w-10 h-10 text-orange-400 mb-2 animate-bounce" />
+                                        <span className="text-base font-semibold text-orange-300">Drag & drop a log file here, or click to select</span>
+                                        <span className="block text-xs text-muted-foreground mt-1">Supported: .txt, .log, .json, .csv</span>
+                                    </div>
+                                    {uploading && (
+                                        <div className="w-full mt-4">
+                                            <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                                <div className="h-2 bg-orange-500 transition-all" style={{ width: `${uploadProgress}%` }} />
+                                            </div>
+                                            <div className="text-xs text-orange-300 mt-1 text-center">Uploading... {uploadProgress}%</div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
+                            {inputTab === 'history' && (
+                                <div className="text-orange-200 text-center py-8 opacity-60">Session history coming soon...</div>
+                            )}
                         </div>
-                    )}
-                    {inputTab === 'history' && (
-                        <div className="text-orange-200 text-center py-8 opacity-60">Session history coming soon...</div>
-                    )}
-                </div>
-                {/* Results Card */}
-                {step === 2 && !analyzing && !whitelisting && (
-                    <div className="bg-[#181f22] border border-orange-900/40 rounded-lg p-6 shadow-sm">
-                        {/* Animated Summary Bar & Heatmap */}
-                        <div className="flex flex-wrap items-center gap-2 mb-4">
-                            {iocSummary.map(({ type, count }) => {
-                                const meta = IOC_TYPE_META[type] || { icon: FileText, color: 'text-gray-400', label: type };
-                                const Icon = meta.icon;
-                                return (
-                                    <span key={type} className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-bold border border-orange-700 ${meta.color} bg-[#151c1f]`}> <Icon className="w-4 h-4" />{meta.label}: <AnimatedCount end={count} /></span>
-                                );
-                            })}
-                            <span className="ml-2 text-sm font-semibold text-orange-300">Total: <AnimatedCount end={totalIocs} /></span>
-                            <IOCHeatmap iocResults={iocResults} />
-                            <Input
-                                className="ml-auto max-w-xs h-8 text-sm"
-                                placeholder="Global search..."
-                                value={globalSearch}
-                                onChange={e => setGlobalSearch(e.target.value)}
-                            />
-                        </div>
-                        {/* Actions */}
-                        <div className="flex gap-2 mb-4">
-                            <Button onClick={() => copyAllIocs(iocResults)} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Copy all IOCs to clipboard">Copy All</Button>
-                            <Button onClick={() => { handleReset(); setStep(1); }} className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-105">Reset</Button>
-                            <Button onClick={() => exportIOCs('csv')} className="bg-orange-700 hover:bg-orange-800 text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export CSV</Button>
-                            <Button onClick={() => exportIOCs('json')} className="bg-orange-700 hover:bg-orange-800 text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export JSON</Button>
-                            <Button onClick={handleQueryInLogs} className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Query selected IOCs in Logs">Query in Logs</Button>
-                        </div>
-                        {/* IOC Results */}
-                        <div className="space-y-4">
-                            {Object.entries(filteredIocResults).map(([iocType, values]) => {
-                                if (!values.length) return null;
-                                const meta = IOC_TYPE_META[iocType] || { icon: FileText, color: 'text-gray-400', label: iocType };
-                                // IPv4 filter controls and whitelist logic
-                                let displayValues = values;
-                                let showIpv4Spinner = false;
-                                if (iocType === 'ipv4') {
-                                    let whitelisted: string[] = [];
-                                    let unmatched: string[] = [];
-                                    if (whitelist && whitelist.size > 0) {
-                                        const result = crossReferenceIPs(values, whitelist, new Set());
-                                        whitelisted = result.whitelisted;
-                                        unmatched = result.unmatched;
-                                    }
-                                    if (ipv4WhitelistFilter === 'whitelist') displayValues = whitelisted;
-                                    else if (ipv4WhitelistFilter === 'unmatched') displayValues = unmatched;
-                                    // Public/Private filter
-                                    if (ipv4PubPrivFilter === 'public') displayValues = displayValues.filter(ip => !isPrivateIPv4(ip));
-                                    else if (ipv4PubPrivFilter === 'private') displayValues = displayValues.filter(ip => isPrivateIPv4(ip));
-                                    showIpv4Spinner = whitelisting || whitelistLoading;
-                                }
-                                // Domain filter controls and whitelist logic
-                                if (iocType === 'domain') {
-                                    let whitelisted: string[] = [];
-                                    let unmatched: string[] = [];
-                                    if (domainWhitelist && domainWhitelist.length > 0) whitelisted = domainWhitelist;
-                                    if (domainUnmatched && domainUnmatched.length > 0) unmatched = domainUnmatched;
-                                    if (domainWhitelistFilter === 'whitelist') displayValues = whitelisted;
-                                    else if (domainWhitelistFilter === 'unmatched') displayValues = unmatched;
-                                }
-                                return (
-                                    <div key={iocType}>
-                                        {iocType === 'ipv4' && (
-                                            <div className="mb-2">
-                                                <div className="flex gap-2 mb-2 items-center">
-                                                    <button onClick={() => setIpv4WhitelistFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
-                                                    <button onClick={() => setIpv4WhitelistFilter('whitelist')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'whitelist' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Whitelisted</button>
-                                                    <button onClick={() => setIpv4WhitelistFilter('unmatched')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'unmatched' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Non-Whitelisted</button>
-                                                    {showIpv4Spinner && <Loader2 className="animate-spin w-4 h-4 text-orange-400 ml-2" aria-label="Whitelisting..." />}
-                                                </div>
-                                                <div className="flex gap-2 mb-2">
-                                                    <button onClick={() => setIpv4PubPrivFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
-                                                    <button onClick={() => setIpv4PubPrivFilter('public')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'public' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Public</button>
-                                                    <button onClick={() => setIpv4PubPrivFilter('private')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'private' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Private</button>
-                                                </div>
-                                                <div className="flex gap-2 mb-2">
-                                                    <Button onClick={() => resolvePTRs(displayValues)} className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded-full text-xs font-semibold" disabled={ptrLoading}>
-                                                        {ptrLoading ? 'Resolving DNS...' : 'Resolve DNS'}
-                                                    </Button>
-                                                    {ptrError && <span className="text-red-500 ml-2 text-xs">{ptrError}</span>}
-                                                </div>
+                        {/* Results Card */}
+                        {step === 2 && !analyzing && !whitelisting && (
+                            <div className="bg-[#181f22] border border-orange-900/40 rounded-lg p-6 shadow-sm">
+                                {/* Animated Summary Bar & Heatmap */}
+                                <div className="flex flex-wrap items-center gap-2 mb-4">
+                                    {iocSummary.map(({ type, count }) => {
+                                        const meta = IOC_TYPE_META[type] || { icon: FileText, color: 'text-gray-400', label: type };
+                                        const Icon = meta.icon;
+                                        return (
+                                            <span key={type} className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-bold border border-orange-700 ${meta.color} bg-[#151c1f]`}> <Icon className="w-4 h-4" />{meta.label}: <AnimatedCount end={count} /></span>
+                                        );
+                                    })}
+                                    <span className="ml-2 text-sm font-semibold text-orange-300">Total: <AnimatedCount end={totalIocs} /></span>
+                                    <IOCHeatmap iocResults={iocResults} />
+                                    <Input
+                                        className="ml-auto max-w-xs h-8 text-sm"
+                                        placeholder="Global search..."
+                                        value={globalSearch}
+                                        onChange={e => setGlobalSearch(e.target.value)}
+                                    />
+                                </div>
+                                {/* Actions */}
+                                <div className="flex gap-2 mb-4">
+                                    <Button onClick={() => copyAllIocs(iocResults)} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Copy all IOCs to clipboard">Copy All</Button>
+                                    <Button onClick={() => { handleReset(); setStep(1); }} className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-105">Reset</Button>
+                                    <Button onClick={() => exportIOCs('csv')} className="bg-orange-700 hover:bg-orange-800 text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export CSV</Button>
+                                    <Button onClick={() => exportIOCs('json')} className="bg-orange-700 hover:bg-orange-800 text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export JSON</Button>
+                                    <Button onClick={handleQueryInLogs} className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Query selected IOCs in Logs">Query in Logs</Button>
+                                </div>
+                                {/* IOC Results */}
+                                <div className="space-y-4">
+                                    {Object.entries(filteredIocResults).map(([iocType, values]) => {
+                                        if (!values.length) return null;
+                                        const meta = IOC_TYPE_META[iocType] || { icon: FileText, color: 'text-gray-400', label: iocType };
+                                        // IPv4 filter controls and whitelist logic
+                                        let displayValues = values;
+                                        let showIpv4Spinner = false;
+                                        if (iocType === 'ipv4') {
+                                            let whitelisted: string[] = [];
+                                            let unmatched: string[] = [];
+                                            if (whitelist && whitelist.size > 0) {
+                                                const result = crossReferenceIPs(values, whitelist, new Set());
+                                                whitelisted = result.whitelisted;
+                                                unmatched = result.unmatched;
+                                            }
+                                            if (ipv4WhitelistFilter === 'whitelist') displayValues = whitelisted;
+                                            else if (ipv4WhitelistFilter === 'unmatched') displayValues = unmatched;
+                                            // Public/Private filter
+                                            if (ipv4PubPrivFilter === 'public') displayValues = displayValues.filter(ip => !isPrivateIPv4(ip));
+                                            else if (ipv4PubPrivFilter === 'private') displayValues = displayValues.filter(ip => isPrivateIPv4(ip));
+                                            showIpv4Spinner = whitelisting || whitelistLoading;
+                                        }
+                                        // Domain filter controls and whitelist logic
+                                        if (iocType === 'domain') {
+                                            let whitelisted: string[] = [];
+                                            let unmatched: string[] = [];
+                                            if (domainWhitelist && domainWhitelist.length > 0) whitelisted = domainWhitelist;
+                                            if (domainUnmatched && domainUnmatched.length > 0) unmatched = domainUnmatched;
+                                            if (domainWhitelistFilter === 'whitelist') displayValues = whitelisted;
+                                            else if (domainWhitelistFilter === 'unmatched') displayValues = unmatched;
+                                        }
+                                        return (
+                                            <div key={iocType}>
+                                                {iocType === 'ipv4' && (
+                                                    <div className="mb-2">
+                                                        <div className="flex gap-2 mb-2 items-center">
+                                                            <button onClick={() => setIpv4WhitelistFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
+                                                            <button onClick={() => setIpv4WhitelistFilter('whitelist')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'whitelist' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Whitelisted</button>
+                                                            <button onClick={() => setIpv4WhitelistFilter('unmatched')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4WhitelistFilter === 'unmatched' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Non-Whitelisted</button>
+                                                            {showIpv4Spinner && <Loader2 className="animate-spin w-4 h-4 text-orange-400 ml-2" aria-label="Whitelisting..." />}
+                                                        </div>
+                                                        <div className="flex gap-2 mb-2">
+                                                            <button onClick={() => setIpv4PubPrivFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
+                                                            <button onClick={() => setIpv4PubPrivFilter('public')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'public' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Public</button>
+                                                            <button onClick={() => setIpv4PubPrivFilter('private')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${ipv4PubPrivFilter === 'private' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Private</button>
+                                                        </div>
+                                                        <div className="flex gap-2 mb-2">
+                                                            <Button onClick={() => resolvePTRs(displayValues)} className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded-full text-xs font-semibold" disabled={ptrLoading}>
+                                                                {ptrLoading ? 'Resolving DNS...' : 'Resolve DNS'}
+                                                            </Button>
+                                                            {ptrError && <span className="text-red-500 ml-2 text-xs">{ptrError}</span>}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {iocType === 'domain' && (
+                                                    <div className="flex gap-2 mb-2 items-center">
+                                                        <button onClick={() => setDomainWhitelistFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
+                                                        <button onClick={() => setDomainWhitelistFilter('whitelist')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'whitelist' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Whitelist</button>
+                                                        <button onClick={() => setDomainWhitelistFilter('unmatched')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'unmatched' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Unmatched</button>
+                                                        {domainLoading && <span className="text-orange-400 ml-4">Resolving domains...</span>}
+                                                        {domainError && <span className="text-red-500 ml-4">Error: {domainError}</span>}
+                                                    </div>
+                                                )}
+                                                <IOCTypeTable
+                                                    iocType={iocType}
+                                                    values={displayValues}
+                                                    meta={meta}
+                                                    collapsed={collapsed}
+                                                    toggleCollapse={toggleCollapse}
+                                                    searchTerm={searchTerms[iocType] || ''}
+                                                    handleSearchChange={handleSearchChange}
+                                                    openInVT={openInVT}
+                                                    openInAbuseIPDB={openInAbuseIPDB}
+                                                    copyToClipboard={copyToClipboard}
+                                                    enriched={enriched}
+                                                    iocViewMode={iocViewMode}
+                                                    setIocViewMode={setIocViewMode}
+                                                    checked={checked}
+                                                    handleCheck={handleCheck}
+                                                    resolvedIPs={iocType === 'domain' ? resolvedDomains : undefined}
+                                                    resolvedPTRs={iocType === 'ipv4' ? resolvedPTRs : undefined}
+                                                />
                                             </div>
-                                        )}
-                                        {iocType === 'domain' && (
-                                            <div className="flex gap-2 mb-2 items-center">
-                                                <button onClick={() => setDomainWhitelistFilter('all')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'all' ? 'bg-blue-700 text-white border-blue-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>All</button>
-                                                <button onClick={() => setDomainWhitelistFilter('whitelist')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'whitelist' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Whitelist</button>
-                                                <button onClick={() => setDomainWhitelistFilter('unmatched')} className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainWhitelistFilter === 'unmatched' ? 'bg-orange-700 text-white border-orange-700' : 'bg-gray-700 text-gray-200 border-gray-700'} transition`}>Unmatched</button>
-                                                {domainLoading && <span className="text-orange-400 ml-4">Resolving domains...</span>}
-                                                {domainError && <span className="text-red-500 ml-4">Error: {domainError}</span>}
-                                            </div>
-                                        )}
-                                        <IOCTypeTable
-                                            iocType={iocType}
-                                            values={displayValues}
-                                            meta={meta}
-                                            collapsed={collapsed}
-                                            toggleCollapse={toggleCollapse}
-                                            searchTerm={searchTerms[iocType] || ''}
-                                            handleSearchChange={handleSearchChange}
-                                            openInVT={openInVT}
-                                            openInAbuseIPDB={openInAbuseIPDB}
-                                            copyToClipboard={copyToClipboard}
-                                            enriched={enriched}
-                                            iocViewMode={iocViewMode}
-                                            setIocViewMode={setIocViewMode}
-                                            checked={checked}
-                                            handleCheck={handleCheck}
-                                            resolvedIPs={iocType === 'domain' ? resolvedDomains : undefined}
-                                            resolvedPTRs={iocType === 'ipv4' ? resolvedPTRs : undefined}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
             {/* Character counter below the card, aligned left */}
@@ -968,6 +1067,32 @@ function IncidentResponsePageInner() {
                     </div>
                 </DrawerContent>
             </Drawer>
+            {/* IOC Selection Modal */}
+            <Modal isOpen={showIocSelectModal} onClose={() => setShowIocSelectModal(false)} title="Select IOC Types to Analyze">
+                <div className="space-y-4">
+                    <div className="flex flex-col gap-2">
+                        {iocConfig.map(ioc => (
+                            <label key={ioc.key} className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedIocTypes.includes(ioc.key)}
+                                    onChange={() => toggleIocType(ioc.key)}
+                                    className="accent-orange-500 w-4 h-4"
+                                />
+                                <span className="font-semibold text-orange-300">{IOC_TYPE_META[ioc.key]?.label || ioc.name}</span>
+                            </label>
+                        ))}
+                    </div>
+                    <div className="flex gap-2">
+                        <Button type="button" variant="outline" onClick={selectAllIocTypes}>Select All</Button>
+                        <Button type="button" variant="outline" onClick={deselectAllIocTypes}>Deselect All</Button>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <Button type="button" variant="outline" onClick={() => setShowIocSelectModal(false)}>Cancel</Button>
+                        <Button type="button" className="bg-orange-600 hover:bg-orange-700 text-white" onClick={handleAnalyzeSelected} disabled={selectedIocTypes.length === 0}>Analyze Selected</Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

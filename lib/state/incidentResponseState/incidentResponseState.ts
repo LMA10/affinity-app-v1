@@ -31,8 +31,8 @@ export function useIncidentResponseState() {
     setIocConfig(config);
   };
 
-  const runExtraction = async () => {
-    const { iocResults, enriched } = await extractIOCs(rawText);
+  const runExtraction = async (selectedTypes?: string[]) => {
+    const { iocResults, enriched } = await extractIOCs(rawText, selectedTypes);
     setIocResults(iocResults);
     setEnriched(enriched);
     setRawText(""); // Clear textarea after extraction
