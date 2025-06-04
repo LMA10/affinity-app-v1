@@ -194,49 +194,64 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
   }
 
   return (
-    <div className="bg-card h-full w-full p-2 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto">
+    <div className="bg-card h-full w-full p-3 md:p-6 rounded-none md:rounded-lg overflow-y-auto max-h-[90vh] md:max-h-full overflow-x-auto">
       <div className="relative mb-4 w-full">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 w-full">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 w-full">
           <div className="flex items-center gap-2">
             <h3 className="text-orange-500 font-medium text-lg md:text-xl">Alert Details</h3>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="self-start md:self-center ml-auto md:ml-0 h-10 w-10 md:h-8 md:w-8">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose} 
+            className="self-end md:self-center ml-auto md:ml-0 h-10 w-10 md:h-8 md:w-8 touch-manipulation"
+          >
             <X className="h-6 w-6 md:h-4 md:w-4" />
           </Button>
         </div>
-        <div className="flex flex-wrap items-center gap-2 mt-2">
+        <div className="flex flex-wrap items-center gap-2 mt-3">
           <Badge
             variant="outline"
-            className={
+            className={`${
               alert.security_detection?.severity
                 ? getSeverityBadgeColor(alert.security_detection.severity)
                 : "bg-gray-500/20 text-gray-500"
-            }
+            } text-xs px-2 py-1`}
           >
             {alert.security_detection?.severity || "Unknown"} Severity
           </Badge>
           {status && (
-            <Badge variant="outline" className={getStatusBadgeColor(status)}>
+            <Badge variant="outline" className={`${getStatusBadgeColor(status)} text-xs px-2 py-1`}>
               {status}
             </Badge>
           )}
         </div>
         <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
-          <Button variant="outline" size="sm" onClick={copyFullAlert} className="h-10 px-2 w-full sm:w-auto">
-            <Copy className="h-4 w-4 mr-1" />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={copyFullAlert} 
+            className="h-11 px-4 w-full sm:w-auto touch-manipulation"
+          >
+            <Copy className="h-4 w-4 mr-2" />
             Copy
           </Button>
-          <Button variant="outline" size="sm" onClick={exportAlertToJson} className="h-10 px-2 w-full sm:w-auto">
-            <FileDown className="h-4 w-4 mr-1" />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={exportAlertToJson} 
+            className="h-11 px-4 w-full sm:w-auto touch-manipulation"
+          >
+            <FileDown className="h-4 w-4 mr-2" />
             Export
           </Button>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4 w-full">
-        <TabsList className="bg-card flex flex-wrap w-full">
-          <TabsTrigger value="formatted">Formatted View</TabsTrigger>
-          <TabsTrigger value="raw">Raw JSON</TabsTrigger>
+        <TabsList className="bg-card flex flex-wrap w-full p-1">
+          <TabsTrigger value="formatted" className="flex-1 text-sm py-2.5">Formatted View</TabsTrigger>
+          <TabsTrigger value="raw" className="flex-1 text-sm py-2.5">Raw JSON</TabsTrigger>
         </TabsList>
 
         <TabsContent value="formatted">
@@ -245,7 +260,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
               {/* Alert Management */}
               <Card className="bg-card border border-orange-600/20">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg text-base md:text-xl">Alert Management</CardTitle>
+                  <CardTitle className="text-base md:text-xl">Alert Management</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 p-3 md:p-6">
                   <div className="grid grid-cols-1 gap-4">
@@ -254,7 +269,7 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                         Status
                       </Label>
                       <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger id="status" className="mt-1">
+                        <SelectTrigger id="status" className="mt-1 h-11">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -417,38 +432,41 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                       <p className="text-sm text-muted-foreground">Iteration</p>
                       <p>{alert.event.iteration}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Query</p>
-                      <pre className="font-mono text-xs bg-muted p-2 rounded-md overflow-x-auto">
-                        {alert.event.query}
-                      </pre>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-2 bg-orange-600/10 hover:bg-orange-600/20 text-orange-500 border-orange-600/20"
-                        onClick={async () => {
-                          // Copy query to clipboard
-                          navigator.clipboard.writeText(alert.event.query)
+                    {/* Hide Query block if query is 'ALERT FROM GUARDDUTY' */}
+                    {!(typeof alert.event.query === 'string' && alert.event.query.trim().toUpperCase() === 'ALERT FROM GUARDDUTY') && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Query</p>
+                        <pre className="font-mono text-xs bg-muted p-2 rounded-md overflow-x-auto">
+                          {alert.event.query}
+                        </pre>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2 bg-orange-600/10 hover:bg-orange-600/20 text-orange-500 border-orange-600/20"
+                          onClick={async () => {
+                            // Copy query to clipboard
+                            navigator.clipboard.writeText(alert.event.query)
 
-                          // Store query for the logs page
-                          storeQuery(alert.event.query)
+                            // Store query for the logs page
+                            storeQuery(alert.event.query)
 
-                          // Show toast notification
-                          toast({
-                            title: "Query copied",
-                            description: "Redirecting to logs page...",
-                            duration: 2000,
-                          })
+                            // Show toast notification
+                            toast({
+                              title: "Query copied",
+                              description: "Redirecting to logs page...",
+                              duration: 2000,
+                            })
 
-                          // Add a small delay to ensure the query is saved before redirect
-                          await new Promise((resolve) => setTimeout(resolve, 100))
-                          router.push("/logs")
-                        }}
-                      >
-                        <PlayCircle className="h-4 w-4 mr-2" />
-                        Execute Query
-                      </Button>
-                    </div>
+                            // Add a small delay to ensure the query is saved before redirect
+                            await new Promise((resolve) => setTimeout(resolve, 100))
+                            router.push("/logs")
+                          }}
+                        >
+                          <PlayCircle className="h-4 w-4 mr-2" />
+                          Execute Query
+                        </Button>
+                      </div>
+                    )}
                     <div>
                       <p className="text-sm text-muted-foreground">Time</p>
                       <p>{formatTimestamp(alert.event.time)}</p>
@@ -485,7 +503,9 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                             .map(([key, value]) => (
                               <div key={key} className="bg-muted p-2 rounded-md">
                                 <p className="text-xs text-muted-foreground">{key}</p>
-                                <p className="text-sm">{typeof value === 'string' ? value : JSON.stringify(value)}</p>
+                                <div className="text-sm break-all overflow-x-auto whitespace-pre-wrap">
+                                  {typeof value === 'string' ? value : JSON.stringify(value)}
+                                </div>
                               </div>
                             ))}
                         </div>
@@ -494,7 +514,18 @@ export function AlertDetailsView({ alert, onClose, onValueClick }: AlertDetailsV
                     {alert.security_detection.resolution && (
                       <div>
                         <p className="text-sm text-muted-foreground">Resolution</p>
-                        <p>{alert.security_detection.resolution}</p>
+                        {/^https?:\/\//.test(alert.security_detection.resolution) ? (
+                          <a
+                            href={alert.security_detection.resolution}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 underline break-all inline-block max-w-full"
+                          >
+                            {alert.security_detection.resolution}
+                          </a>
+                        ) : (
+                          <p className="break-all">{alert.security_detection.resolution}</p>
+                        )}
                       </div>
                     )}
                   </CardContent>

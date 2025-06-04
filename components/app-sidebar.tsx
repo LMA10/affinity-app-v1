@@ -17,6 +17,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { useToast } from "@/hooks/use-toast"
 import userService from "@/lib/services/userService"
@@ -35,6 +36,7 @@ export function AppSidebar() {
     management: false,
   })
   const { logout } = useAuth()
+  const { isMobile, setOpenMobile } = useSidebar();
 
   // Determine which section should be open based on the current path
   useEffect(() => {
@@ -110,6 +112,11 @@ export function AppSidebar() {
     } catch { }
   }
 
+  // Handler para cerrar sidebar en mobile
+  const handleMenuClick = () => {
+    if (isMobile) setOpenMobile(false);
+  };
+
   return (
     <Sidebar className="border-r border-orange-600/20 bg-[#0a1419]">
       <div className="absolute right-0 top-4 translate-x-1/2 z-20 bg-sidebar rounded-full p-1 shadow-md border border-sidebar-border hidden group-data-[state=collapsed]:flex">
@@ -139,6 +146,7 @@ export function AppSidebar() {
                 asChild
                 isActive={pathname === "/logs"}
                 className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
+                onClick={handleMenuClick}
               >
                 <Link href="/logs" className="text-orange-500 flex items-center w-full">
                   <FileText className={menuIconStyles} />
@@ -155,6 +163,7 @@ export function AppSidebar() {
                 asChild
                 isActive={pathname === "/alerts"}
                 className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
+                onClick={handleMenuClick}
               >
                 <Link href="/alerts-view" className="text-orange-500 flex items-center w-full">
                   <AlertTriangle className={menuIconStyles} />
@@ -170,6 +179,7 @@ export function AppSidebar() {
               asChild
               isActive={pathname === "/incident-response"}
               className={`flex items-center py-2.5 px-4 ${menuItemStyles}`}
+              onClick={handleMenuClick}
             >
               <Link href="/incident-response" className="text-orange-500 flex items-center w-full">
                 <Search className={menuIconStyles} />
@@ -219,6 +229,7 @@ export function AppSidebar() {
                     asChild
                     isActive={pathname === "/management/integrations"}
                     className={`py-2 ${subMenuItemStyles}`}
+                    onClick={handleMenuClick}
                   >
                     <Link href="/management/integrations">INTEGRATIONS</Link>
                   </SidebarMenuSubButton>
@@ -231,6 +242,7 @@ export function AppSidebar() {
                     asChild
                     isActive={pathname === "/management/notifications"}
                     className={`py-2 ${subMenuItemStyles}`}
+                    onClick={handleMenuClick}
                   >
                     <Link href="/management/notifications">NOTIFICATIONS</Link>
                   </SidebarMenuSubButton>
@@ -243,6 +255,7 @@ export function AppSidebar() {
                     asChild
                     isActive={pathname === "/management/users"}
                     className={`py-2 ${subMenuItemStyles}`}
+                    onClick={handleMenuClick}
                   >
                     <Link href="/management/users">USERS</Link>
                   </SidebarMenuSubButton>

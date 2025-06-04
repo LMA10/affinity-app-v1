@@ -34,6 +34,8 @@ import { useToast } from "@/hooks/use-toast"
 import type { ChangeEvent } from "react"
 import { Paginator } from "@/components/ui/paginator"
 import useLogsState from "@/lib/state/logs/logsState"
+import { useSnapshot } from 'valtio'
+import { logsVisibleColumnsState, getVisibleColumns, setVisibleColumns } from '@/lib/state/logs/logsVisibleColumns'
 
 export function LogsPanel({ queryString = "", onClose }: { queryString?: string, onClose?: () => void }) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -43,7 +45,7 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
   const [viewMode, setViewMode] = useState<"table" | "query">("table")
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null)
   const [activeFilters, setActiveFilters] = useState<{ field: string; value: string }[]>([])
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([])
+  const [visibleColumnsState, setVisibleColumnsState] = useState<string[]>([])
   const [isColumnSelectorOpen, setIsColumnSelectorOpen] = useState(false)
   const [filteredLogs, setFilteredLogs] = useState<any[]>([])
   const { toast } = useToast()
@@ -61,10 +63,12 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
     fetchPreviousPage,
     fetchDatabases,
     setCurrentPage,
+    lastQuery,
   } = useLogsState()
   const [hasRunQuery, setHasRunQuery] = useState(false)
   const queryEditorRef = useRef<any>(null)
   const [pendingQuery, setPendingQuery] = useState<string | null>(null)
+  const snap = useSnapshot(logsVisibleColumnsState)
 
   useEffect(() => {
     fetchDatabases()
@@ -77,12 +81,26 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
     return () => clearTimeout(timer)
   }, [searchQuery])
 
+  function extractTableName(query: string | null): string | null {
+    if (!query) return null
+    const match = query.match(/FROM\s+\"([^\"]+)\"/i)
+    return match ? match[1] : null
+  }
+  const tableName = extractTableName(lastQuery) || 'default'
+
   useEffect(() => {
-    if (headers.length > 0) {
-      const firstFiveColumns = headers.slice(0, 5)
-      setVisibleColumns(firstFiveColumns)
+    if (headers.length > 0 && tableName) {
+      const persisted = getVisibleColumns(tableName, headers.slice(0, 5))
+      setVisibleColumns(tableName, persisted)
+      setVisibleColumnsState(persisted)
     }
-  }, [headers])
+  }, [headers.join(','), tableName])
+
+  useEffect(() => {
+    if (tableName) {
+      setVisibleColumnsState(getVisibleColumns(tableName, headers.slice(0, 5)))
+    }
+  }, [snap.visibleColumnsByTable[tableName]?.join(','), tableName, headers.join(',')])
 
   function normalizeFieldName(name: string) {
     return name.replace(/\s+/g, '').toLowerCase();
@@ -187,9 +205,9 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
       return
     }
     const logsToExport = filteredLogs
-    const csvHeader = visibleColumns.join(",")
+    const csvHeader = visibleColumnsState.join(",")
     const csvRows = logsToExport.map((log) => {
-      return visibleColumns
+      return visibleColumnsState
         .map((column) => {
           const value = log[column] === null ? "" : String(log[column])
           return `"${value.replace(/"/g, '""')}"`
@@ -241,13 +259,18 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
   }
 
   const toggleColumnVisibility = (column: string) => {
-    if (visibleColumns.includes(column)) {
-      if (visibleColumns.length > 1) {
-        setVisibleColumns(visibleColumns.filter((col) => col !== column))
+    let updated: string[]
+    if (visibleColumnsState.includes(column)) {
+      if (visibleColumnsState.length > 1) {
+        updated = visibleColumnsState.filter((col) => col !== column)
+      } else {
+        return
       }
     } else {
-      setVisibleColumns([...visibleColumns, column])
+      updated = [...visibleColumnsState, column]
     }
+    setVisibleColumns(tableName, updated)
+    setVisibleColumnsState(updated)
   }
 
   const getStatusBadgeColor = (status: string) => {
@@ -318,9 +341,9 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
                     <div key={header} className="flex items-center space-x-2">
                       <Checkbox
                         id={`column-${header}`}
-                        checked={visibleColumns.includes(header)}
+                        checked={visibleColumnsState.includes(header)}
                         onCheckedChange={() => toggleColumnVisibility(header)}
-                        disabled={visibleColumns.length === 1 && visibleColumns.includes(header)}
+                        disabled={visibleColumnsState.length === 1 && visibleColumnsState.includes(header)}
                       />
                       <Label htmlFor={`column-${header}`}>{header}</Label>
                     </div>
@@ -453,7 +476,7 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
                     </DropdownMenu>
                   </div>
                   <div className="grid grid-cols-1 gap-y-1 gap-x-4 text-sm">
-                    {visibleColumns.slice(0, 5).map((column) => (
+                    {visibleColumnsState.slice(0, 5).map((column) => (
                       <div key={column} className="flex gap-2 items-center">
                         <span className="text-muted-foreground font-medium">{column}:</span>
                         <span className="font-mono text-xs break-all max-w-full">
@@ -492,7 +515,7 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px]"></TableHead>
-                  {visibleColumns.map((column) => (
+                  {visibleColumnsState.map((column) => (
                     <TableHead key={column}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableHead>
                   ))}
                   <TableHead className="w-[80px]">Actions</TableHead>
@@ -519,7 +542,7 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
                             )}
                           </Button>
                         </TableCell>
-                        {visibleColumns.map((column) => (
+                        {visibleColumnsState.map((column) => (
                           <TableCell
                             key={column}
                             className="font-mono text-xs cursor-pointer hover:bg-orange-500/10"
@@ -576,7 +599,7 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
                       </TableRow>
                       {expandedLogId === String(index) && (
                         <TableRow>
-                          <TableCell colSpan={visibleColumns.length + 2} className="p-0 border-0">
+                          <TableCell colSpan={visibleColumnsState.length + 2} className="p-0 border-0">
                             <LogDetailsView
                               log={log}
                               headers={headers}
@@ -590,7 +613,7 @@ export function LogsPanel({ queryString = "", onClose }: { queryString?: string,
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={visibleColumns.length + 2} className="h-24 text-center">
+                    <TableCell colSpan={visibleColumnsState.length + 2} className="h-24 text-center">
                       {loading || logsLoading ? "Loading logs..." : "No logs found matching your criteria"}
                     </TableCell>
                   </TableRow>

@@ -173,32 +173,57 @@ export function AlertsTable({ alerts, onValueClick, sortBy, sortDirection, onSor
         {alerts.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">No alerts found</div>
         ) : (
-          <div className="flex flex-col gap-4 p-2">
+          <div className="flex flex-col gap-3 p-3">
             {alerts.map((alert) => (
               <div
                 key={alert.alert_id}
-                className="rounded-lg border border-orange-600/20 bg-card p-4 flex flex-col gap-2 shadow-sm"
+                className="rounded-lg border border-orange-600/20 bg-card p-4 flex flex-col gap-3 shadow-sm active:bg-orange-600/5 transition-colors"
                 onClick={() => handleViewDetails(alert)}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs">
-                    {alert.event?.time
-                      ? new Date(alert.event.time).toISOString().replace("T", " ").substring(0, 19)
-                      : "-"}
-                  </span>
                   <Badge
                     variant="outline"
-                    className={getSeverityBadgeColor(alert.security_detection?.severity || "unknown")}
+                    className={`${getSeverityBadgeColor(alert.security_detection?.severity || "unknown")} text-xs px-2 py-1`}
                   >
                     {alert.security_detection?.severity
                       ? alert.security_detection.severity.charAt(0).toUpperCase() + alert.security_detection.severity.slice(1).toLowerCase()
                       : "Unknown"}
                   </Badge>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {alert.event?.time
+                      ? formatDistanceToNow(new Date(alert.event.time), { addSuffix: true })
+                      : "-"}
+                  </span>
                 </div>
-                <div className="font-medium text-base truncate">{alert.metadata?.rule_name || "-"}</div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Status: {alert.alert_management?.status || "-"}</span>
-                  <Button variant="ghost" size="sm" onClick={e => { e.stopPropagation(); handleViewDetails(alert); }}>
+                <div className="space-y-2">
+                  <div className="font-medium text-base line-clamp-2">{alert.metadata?.rule_name || "-"}</div>
+                  <div className="text-sm text-muted-foreground line-clamp-2">
+                    {alert.security_detection?.description || "-"}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                      alert.alert_management?.status === "open" ? "bg-blue-500/20 text-blue-500" :
+                      alert.alert_management?.status === "investigating" ? "bg-purple-500/20 text-purple-500" :
+                      alert.alert_management?.status === "resolved" ? "bg-green-500/20 text-green-500" :
+                      alert.alert_management?.status === "false_positive" ? "bg-gray-500/20 text-gray-500" :
+                      "bg-gray-500/20 text-gray-500"
+                    }`}>
+                      {alert.alert_management?.status || "Open"}
+                    </span>
+                    {alert.alert_management?.owner && (
+                      <span className="text-xs text-muted-foreground">
+                        {alert.alert_management.owner}
+                      </span>
+                    )}
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={e => { e.stopPropagation(); handleViewDetails(alert); }}
+                    className="h-8 px-3 text-xs font-medium"
+                  >
                     Details
                   </Button>
                 </div>

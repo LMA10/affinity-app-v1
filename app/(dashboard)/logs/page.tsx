@@ -40,6 +40,8 @@ import config from "@/lib/config/configDev"
 import sessionState from "@/lib/state/sessionState/sessionState"
 import pako from "pako"
 import { useWorkbench } from "../workbench-context"
+import { useSnapshot } from 'valtio'
+import { logsVisibleColumnsState, getVisibleColumns, setVisibleColumns } from '@/lib/state/logs/logsVisibleColumns'
 
 function useWorkbenchSafe() {
   try {
@@ -58,7 +60,7 @@ export default function LogsPage() {
   const [viewMode, setViewMode] = useState<"table" | "query">("table")
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null)
   const [activeFilters, setActiveFilters] = useState<{ field: string; value: string }[]>([])
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([])
+  const [visibleColumnsState, setVisibleColumnsState] = useState<string[]>([])
   const [isColumnSelectorOpen, setIsColumnSelectorOpen] = useState(false)
   const [filteredLogs, setFilteredLogs] = useState<any[]>([])
   const { toast } = useToast()
@@ -82,6 +84,15 @@ export default function LogsPage() {
   const workbench = useWorkbenchSafe()
   const queryString = workbench?.queryString || ""
   const [editorQuery, setEditorQuery] = useState("")
+  const snap = useSnapshot(logsVisibleColumnsState)
+
+  // Helper to extract table name from SQL
+  function extractTableName(query: string | null): string | null {
+    if (!query) return null
+    const match = query.match(/FROM\s+\"([^\"]+)\"/i)
+    return match ? match[1] : null
+  }
+  const tableName = extractTableName(editorQuery) || 'default'
 
   // Fetch databases when the component mounts
   useEffect(() => {
@@ -103,14 +114,29 @@ export default function LogsPage() {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // Update visible columns when logs or headers change
+  // Update the effect that runs on headers/tableName change
   useEffect(() => {
-    if (headers.length > 0) {
-      // Get the first 5 columns or all if less than 5
-      const firstFiveColumns = headers.slice(0, 5)
-      setVisibleColumns(firstFiveColumns)
+    if (headers.length > 0 && tableName) {
+      // Get persisted columns for this table
+      let persisted = getVisibleColumns(tableName, [])
+      // Only keep columns that exist in the new headers
+      persisted = persisted.filter(col => headers.includes(col))
+      // If no valid persisted columns, use the first 5 columns as default
+      if (persisted.length === 0) {
+        persisted = headers.slice(0, 5)
+        setVisibleColumns(tableName, persisted)
+        setVisibleColumnsState(persisted)
+      }
     }
-  }, [headers])
+    // eslint-disable-next-line
+  }, [headers.join(','), tableName])
+
+  // When valtio changes for this table, update local state
+  useEffect(() => {
+    if (tableName) {
+      setVisibleColumnsState(getVisibleColumns(tableName, headers.slice(0, 5)))
+    }
+  }, [snap.visibleColumnsByTable[tableName]?.join(','), tableName, headers.join(',')])
 
   // Utility to normalize field names (case-insensitive, remove spaces, etc.)
   function normalizeFieldName(name: string) {
@@ -323,9 +349,9 @@ export default function LogsPage() {
       return;
     }
     const logsToExport = filteredLogs;
-    const csvHeader = visibleColumns.join(",");
+    const csvHeader = visibleColumnsState.join(",");
     const csvRows = logsToExport.map((log) => {
-      return visibleColumns
+      return visibleColumnsState
         .map((column) => {
           const value = log[column] === null ? "" : String(log[column]);
           return `"${value.replace(/"/g, '""')}"`;
@@ -379,16 +405,20 @@ export default function LogsPage() {
     })
   }
 
-  // Toggle column visibility
+  // Update valtio and local state on column toggle
   const toggleColumnVisibility = (column: string) => {
-    if (visibleColumns.includes(column)) {
-      // Don't remove if it's the last visible column
-      if (visibleColumns.length > 1) {
-        setVisibleColumns(visibleColumns.filter((col) => col !== column))
+    let updated: string[]
+    if (visibleColumnsState.includes(column)) {
+      if (visibleColumnsState.length > 1) {
+        updated = visibleColumnsState.filter((col) => col !== column)
+      } else {
+        return
       }
     } else {
-      setVisibleColumns([...visibleColumns, column])
+      updated = [...visibleColumnsState, column]
     }
+    setVisibleColumns(tableName, updated)
+    setVisibleColumnsState(updated)
   }
 
   // Get status badge color
@@ -403,18 +433,20 @@ export default function LogsPage() {
 
   // Handle query run
   const handleQueryRun = (query: string) => {
-    // Reset pagination when a new query is run
     setCurrentPage(1)
     setHasRunQuery(true)
+    setEditorQuery(query)
   }
 
   // Generate SQL from filters
   const handleGenerateSqlFromFilters = () => {
     if (activeFilters.length === 0) return
+    // Extract table name from the last query
+    const lastTable = extractTableName(editorQuery) || 'cloudtrail'
     const whereClause = activeFilters
       .map(f => `"${f.field}" = '${f.value.replace(/'/g, "''")}'`)
       .join(' AND ')
-    const sql = `SELECT * FROM "cloudtrail"${whereClause ? ` WHERE ${whereClause}` : ''} LIMIT 1000;`
+    const sql = `SELECT * FROM "${lastTable}"${whereClause ? ` WHERE ${whereClause}` : ''} LIMIT 1000;`
     queryEditorRef.current?.setSqlForActiveTab(sql)
     setViewMode('query')
   }
@@ -481,9 +513,9 @@ export default function LogsPage() {
                       <div key={header} className="flex items-center space-x-2">
                         <Checkbox
                           id={`column-${header}`}
-                          checked={visibleColumns.includes(header)}
+                          checked={visibleColumnsState.includes(header)}
                           onCheckedChange={() => toggleColumnVisibility(header)}
-                          disabled={visibleColumns.length === 1 && visibleColumns.includes(header)}
+                          disabled={visibleColumnsState.length === 1 && visibleColumnsState.includes(header)}
                         />
                         <Label htmlFor={`column-${header}`}>{header}</Label>
                       </div>
@@ -632,7 +664,7 @@ export default function LogsPage() {
                         </div>
                         {/* Show up to 5 fields as summary in a grid */}
                         <div className="grid grid-cols-1 gap-y-1 gap-x-4 text-sm">
-                          {visibleColumns.slice(0, 5).map((column) => (
+                          {visibleColumnsState.slice(0, 5).map((column) => (
                             <div key={column} className="flex gap-2 items-center">
                               <span className="text-muted-foreground font-medium">{column}:</span>
                               <span className="font-mono text-xs break-all max-w-full">
@@ -670,115 +702,121 @@ export default function LogsPage() {
                 </div>
                 {/* Desktop: Table layout */}
                 <div className="hidden md:block">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[40px]"></TableHead>
-                        {visibleColumns.map((column) => (
-                          <TableHead key={column}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableHead>
-                        ))}
-                        <TableHead className="w-[80px]">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredLogs.length > 0 ? (
-                        filteredLogs.map((log, index) => (
-                          <React.Fragment key={index}>
-                            <TableRow
-                              className={`hover:bg-[#0a1419] transition-colors ${expandedLogId === String(index) ? "bg-[#0a1419]" : ""}`}
-                            >
-                              <TableCell className="p-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6"
-                                  onClick={() => toggleRowExpansion(index)}
-                                >
-                                  {expandedLogId === String(index) ? (
-                                    <ChevronDown className="h-4 w-4 text-orange-500" />
-                                  ) : (
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                  )}
-                                </Button>
-                              </TableCell>
-                              {visibleColumns.map((column) => (
-                                <TableCell
-                                  key={column}
-                                  className="font-mono text-xs cursor-pointer hover:bg-orange-500/10"
-                                  onClick={() => {
-                                    if (log[column] !== null) {
-                                      handleValueClick(column, String(log[column]))
-                                    }
-                                  }}
-                                >
-                                  {column === "albstatuscode" ? (
-                                    <Badge variant="outline" className={getStatusBadgeColor(String(log[column]))}>
-                                      {log[column] !== null ? String(log[column]) : "-"}
-                                    </Badge>
-                                  ) : log[column] !== null ? (
-                                    String(log[column])
-                                  ) : (
-                                    "-"
-                                  )}
+                  <div className="overflow-x-auto w-full">
+                    <Table className="min-w-full">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[40px]"></TableHead>
+                          {visibleColumnsState.map((column) => (
+                            <TableHead key={column} className="break-words whitespace-pre-line px-2 py-2 text-xs md:text-sm">{column.charAt(0).toUpperCase() + column.slice(1)}</TableHead>
+                          ))}
+                          <TableHead className="w-[80px]">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredLogs.length > 0 ? (
+                          filteredLogs.map((log, index) => (
+                            <React.Fragment key={index}>
+                              <TableRow
+                                className={`hover:bg-[#0a1419] transition-colors ${expandedLogId === String(index) ? "bg-[#0a1419]" : ""}`}
+                              >
+                                <TableCell className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6"
+                                    onClick={() => toggleRowExpansion(index)}
+                                  >
+                                    {expandedLogId === String(index) ? (
+                                      <ChevronDown className="h-4 w-4 text-orange-500" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                  </Button>
                                 </TableCell>
-                              ))}
-                              <TableCell>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7">
-                                      <ChevronDown className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => copyLogToClipboard(log)}>
-                                      <Copy className="h-4 w-4 mr-2" />
-                                      Copy to clipboard
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => exportLogToJSON(log)}>
-                                      <FileDown className="h-4 w-4 mr-2" />
-                                      Export as JSON
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => toggleRowExpansion(index)}>
-                                      {expandedLogId === String(index) ? (
-                                        <>
-                                          <ChevronUp className="h-4 w-4 mr-2" />
-                                          Collapse details
-                                        </>
-                                      ) : (
-                                        <>
-                                          <ChevronDown className="h-4 w-4 mr-2" />
-                                          View details
-                                        </>
-                                      )}
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </TableCell>
-                            </TableRow>
-                            {expandedLogId === String(index) && (
-                              <TableRow>
-                                <TableCell colSpan={visibleColumns.length + 2} className="p-0 border-0">
-                                  <LogDetailsView
-                                    log={log}
-                                    headers={headers}
-                                    onClose={() => setExpandedLogId(null)}
-                                    onValueClick={(field, value) => handleValueClick(field, value)}
-                                  />
+                                {visibleColumnsState.map((column) => (
+                                  <TableCell
+                                    key={column}
+                                    className="font-mono text-xs md:text-sm break-words whitespace-pre-line px-2 py-2 max-w-xs md:max-w-sm cursor-pointer hover:bg-orange-500/10 overflow-hidden text-ellipsis"
+                                    style={{ wordBreak: 'break-word', whiteSpace: 'pre-line' }}
+                                    title={log[column] !== null ? String(log[column]) : ""}
+                                    onClick={() => {
+                                      if (log[column] !== null) {
+                                        handleValueClick(column, String(log[column]))
+                                      }
+                                    }}
+                                  >
+                                    {column === "albstatuscode" ? (
+                                      <Badge variant="outline" className={getStatusBadgeColor(String(log[column]))}>
+                                        {log[column] !== null ? String(log[column]) : "-"}
+                                      </Badge>
+                                    ) : log[column] !== null ? (
+                                      <span style={{ display: 'inline-block', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140, verticalAlign: 'bottom' }}>
+                                        {String(log[column])}
+                                      </span>
+                                    ) : (
+                                      "-"
+                                    )}
+                                  </TableCell>
+                                ))}
+                                <TableCell>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-7 w-7">
+                                        <ChevronDown className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => copyLogToClipboard(log)}>
+                                        <Copy className="h-4 w-4 mr-2" />
+                                        Copy to clipboard
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => exportLogToJSON(log)}>
+                                        <FileDown className="h-4 w-4 mr-2" />
+                                        Export as JSON
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => toggleRowExpansion(index)}>
+                                        {expandedLogId === String(index) ? (
+                                          <>
+                                            <ChevronUp className="h-4 w-4 mr-2" />
+                                            Collapse details
+                                          </>
+                                        ) : (
+                                          <>
+                                            <ChevronDown className="h-4 w-4 mr-2" />
+                                            View details
+                                          </>
+                                        )}
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </TableCell>
                               </TableRow>
-                            )}
-                          </React.Fragment>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={visibleColumns.length + 2} className="h-24 text-center">
-                            No rows match your filter
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                              {expandedLogId === String(index) && (
+                                <TableRow>
+                                  <TableCell colSpan={visibleColumnsState.length + 2} className="p-0 border-0">
+                                    <LogDetailsView
+                                      log={log}
+                                      headers={headers}
+                                      onClose={() => setExpandedLogId(null)}
+                                      onValueClick={(field, value) => handleValueClick(field, value)}
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </React.Fragment>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={visibleColumnsState.length + 2} className="h-24 text-center">
+                              No rows match your filter
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </>
             ) : null}

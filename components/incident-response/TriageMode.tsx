@@ -81,8 +81,8 @@ function saveNotes(notes: Note[]) {
   localStorage.setItem(NOTES_KEY, encryptNotes(notes));
 }
 
-// Add prop types for DetectiveMode
-interface DetectiveModeProps {
+// Add prop types for TriageMode
+interface TriageModeProps {
   addNoteToCase: (noteId: string) => void;
 }
 
@@ -159,7 +159,7 @@ function highlightText(text: string, term: string) {
   );
 }
 
-export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
+export function TriageMode({ addNoteToCase }: TriageModeProps) {
   const {
     cases,
     notes,
@@ -186,7 +186,7 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
   const [showArchived, setShowArchived] = useState(false);
   const { setIocResults: setGlobalIocResults } = useIncidentResponseState();
   const [tagInput, setTagInput] = useState('');
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [toastMsg, setToastMsg] = useState<React.ReactNode | null>(null);
   const [editingCaseId, setEditingCaseId] = useState<string | null>(null);
   const [editingCaseTitle, setEditingCaseTitle] = useState('');
   const editorRef = useRef<HTMLDivElement>(null);
@@ -194,6 +194,21 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [commandPaletteSearch, setCommandPaletteSearch] = useState('');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+
+  // Add state for templates and UI config INSIDE the component
+  const [templateConfig, setTemplateConfig] = useState<{ templates: any[]; ui: any }>({ templates: [], ui: {} });
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+
+  // Add undo state for destructive actions
+  const [pendingAction, setPendingAction] = useState<null | { type: string; payload?: any }>(null);
+
+  useEffect(() => {
+    import('@/lib/config/triageTemplates.json').then(mod => {
+      setTemplateConfig(mod.default || mod);
+      setLoadingTemplates(false);
+    });
+  }, []);
 
   // Load cases on mount
   useEffect(() => { loadCases(); }, []);
@@ -210,6 +225,11 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
       setTitleValue('');
     }
   }, [activeNoteId, notes]);
+
+  // When a note is selected, reset template selection
+  useEffect(() => {
+    setSelectedTemplate(null);
+  }, [activeNoteId]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -559,9 +579,13 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
 
   // Add delete button for cases
   const handleDeleteCase = async (caseId: string) => {
-    if (window.confirm('Are you sure you want to delete this case and all its notes?')) {
-      await deleteCase(caseId);
-    }
+    showUndoToast(
+      'Are you sure you want to delete this case and all its notes?',
+      () => {}, // Undo does nothing (just cancels)
+      async () => {
+        await deleteCase(caseId);
+      }
+    );
   };
 
   // Add image delete handler
@@ -579,6 +603,96 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
   // After filteredNotes and searchResults
   const activeNote = notes.find(n => n.id === activeNoteId);
 
+  // Helper to show toast with undo
+  function showUndoToast(message: string, onUndo: () => void, onConfirm: () => void) {
+    setToastMsg(
+      <span>
+        {message}
+        <button
+          onClick={() => {
+            setToastMsg(null);
+            setPendingAction(null);
+            onUndo();
+          }}
+          style={{ marginLeft: 16, color: '#fff', background: '#ff9800', border: 'none', borderRadius: 4, padding: '2px 8px', fontWeight: 'bold', cursor: 'pointer' }}
+        >Undo</button>
+      </span>
+    );
+    setTimeout(() => {
+      setToastMsg(null);
+      setPendingAction(null);
+      onConfirm();
+    }, 3500);
+  }
+
+  // Update handleClearTemplate to use toast
+  function handleClearTemplate() {
+    showUndoToast(
+      templateConfig.ui.clearTemplateConfirm || 'Remove template content from this note?',
+      () => {}, // Undo does nothing (just cancels)
+      () => {
+        setEditorValue('');
+        setSelectedTemplate(null);
+      }
+    );
+  }
+
+  // Update handleInsertTemplate to use toast for replace
+  function handleInsertTemplate(templateName: string) {
+    const template = templateConfig.templates.find(t => t.name === templateName);
+    if (!template) return;
+    if (!editorValue.trim()) {
+      setEditorValue(template.content);
+      setSelectedTemplate(templateName);
+      return;
+    }
+    showUndoToast(
+      templateConfig.ui.replaceTemplateConfirm || 'Replace current note content with the selected template?',
+      () => {}, // Undo does nothing (just cancels)
+      () => {
+        setEditorValue(template.content);
+        setSelectedTemplate(templateName);
+      }
+    );
+  }
+
+  useEffect(() => {
+    if (!loadingTemplates) {
+      if (cases.length === 0) {
+        // No cases: create a new case and note with Standard Triage template
+        (async () => {
+          await createCase('New Case');
+          await loadCases();
+          const stdTemplate = templateConfig.templates.find(t => t.name === 'Standard Triage');
+          const noteContent = stdTemplate ? stdTemplate.content : '';
+          const id = Date.now().toString();
+          const newNote = {
+            id,
+            title: 'Note 1',
+            content: noteContent,
+            created: Date.now(),
+            updated: Date.now(),
+            meta: { tags: [], color: '#ff9800', favorite: false, archived: false },
+            images: []
+          };
+          await createNote(newNote);
+          // After loading cases, select the first case
+          if (cases[0]) selectCase(cases[0].id);
+          selectNote(id);
+          setSelectedTemplate('Standard Triage');
+        })();
+      } else {
+        // Cases exist: select first case and its first note
+        if (!activeCaseId && cases[0]) selectCase(cases[0].id);
+        const firstCase = cases[0];
+        if (firstCase && firstCase.notes.length > 0 && !activeNoteId) {
+          selectNote(firstCase.notes[0]);
+        }
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadingTemplates, cases.length]);
+
   return (
     <div className="w-full h-full flex flex-col md:flex-row">
       {/* Mobile menu button */}
@@ -586,7 +700,7 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
         <button onClick={() => setMobileSidebarOpen(v => !v)} className="p-2 rounded bg-orange-700 text-white">
           <Menu className="w-6 h-6" />
         </button>
-        <span className="font-bold text-orange-400 text-lg">Detective Mode</span>
+        <span className="font-bold text-orange-400 text-lg">Triage Mode</span>
       </div>
       {/* Sidebar (Cases & Notes) */}
       <div className={`fixed inset-0 z-40 bg-black/60 transition-opacity md:static md:bg-transparent md:z-auto ${mobileSidebarOpen ? 'block' : 'hidden'} md:block`} onClick={() => setMobileSidebarOpen(false)} />
@@ -717,6 +831,34 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
       </div>
       {/* Main Editor Panel */}
       <div className="flex-1 flex flex-col bg-[#181f22] min-h-0 w-full md:w-[85vw]">
+        {/* Templates Dropdown */}
+        {!loadingTemplates && activeCaseId && activeNoteId && (
+          <div className="flex items-center gap-2 p-2 md:p-4 border-b border-orange-900/30">
+            <label className="text-orange-300 font-semibold">{templateConfig.ui.templateLabel || 'Template:'}</label>
+            <select
+              className="bg-[#23272e] text-orange-200 rounded px-2 py-1 border border-orange-700"
+              onChange={e => handleInsertTemplate(e.target.value)}
+              value={selectedTemplate || ''}
+            >
+              <option value="" disabled>{templateConfig.ui.selectTemplate || 'Select a template...'}</option>
+              {templateConfig.templates.map(t => (
+                <option key={t.name} value={t.name}>{t.name}</option>
+              ))}
+            </select>
+            {selectedTemplate && (
+              <>
+                <button
+                  className="ml-2 px-2 py-1 rounded bg-orange-700 text-white text-xs font-semibold hover:bg-orange-800"
+                  onClick={handleClearTemplate}
+                  type="button"
+                >
+                  {templateConfig.ui.clearTemplate || 'Clear Template'}
+                </button>
+                <span className="ml-2 text-xs text-orange-400">({selectedTemplate})</span>
+              </>
+            )}
+          </div>
+        )}
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 p-2 md:p-4 border-b border-orange-900/30">
           <FileText className="w-5 h-5 text-orange-400 hidden md:block" />
           <input
@@ -782,9 +924,25 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
               className="flex-1 text-base min-h-0 overflow-hidden"
               placeholder="Write your triage notes here... (Drag & drop or paste images)"
             />
-            {/* Markdown preview with image tooltips */}
-            <div className="mt-2 p-2 bg-[#23272e] rounded text-orange-100 text-sm whitespace-pre-wrap break-words overflow-x-auto">
-              {renderMarkdownWithImageTooltips(editorValue)}
+            {/* Markdown preview with image tooltips and checklist rendering */}
+            <div className="mt-2 p-2 bg-[#23272e] rounded text-orange-100 text-sm whitespace-pre-wrap break-words overflow-x-auto max-h-96 overflow-y-auto">
+              {renderMarkdownWithImageTooltipsAndChecklist(editorValue, (idx) => {
+                // Toggle checklist item in editorValue
+                const lines = editorValue.split('\n');
+                let checklistIdx = 0;
+                for (let i = 0; i < lines.length; i++) {
+                  if (/^- \[.\] /.test(lines[i])) {
+                    if (checklistIdx === idx) {
+                      lines[i] = lines[i].startsWith('- [x] ')
+                        ? lines[i].replace('- [x] ', '- [ ] ')
+                        : lines[i].replace('- [ ] ', '- [x] ');
+                      break;
+                    }
+                    checklistIdx++;
+                  }
+                }
+                setEditorValue(lines.join('\n'));
+              })}
             </div>
           </div>
           <div className="flex flex-col md:flex-row gap-2 p-2 md:p-4 border-t border-orange-900/30">
@@ -813,7 +971,7 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
               </div>
             </div>
           )}
-          {activeNote && activeNote.images.length > 0 && (
+          {activeNote && activeNote.images?.length > 0 && (
             <div className="mt-2 p-2 bg-[#23272e] rounded text-orange-100 text-sm flex flex-wrap gap-4">
               {activeNote.images.map((img) => (
                 <div key={img.id} className="flex flex-col items-center">
@@ -833,7 +991,7 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
         </div>
         {/* Toast notification */}
         {toastMsg && (
-          <div style={{ position: 'fixed', bottom: 16, right: 16, left: 16, background: '#ff9800', color: 'white', padding: '12px 24px', borderRadius: 8, fontWeight: 'bold', zIndex: 9999, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', maxWidth: 400, margin: 'auto' }}>{toastMsg}</div>
+          <div style={{ position: 'fixed', bottom: 16, right: 16, left: 16, background: '#ff9800', color: 'white', padding: '12px 24px', borderRadius: 8, fontWeight: 'bold', zIndex: 9999, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', maxWidth: 400, margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>{toastMsg}</div>
         )}
       </div>
       {/* Command Palette - full screen on mobile */}
@@ -873,4 +1031,33 @@ export function DetectiveMode({ addNoteToCase }: DetectiveModeProps) {
       )}
     </div>
   );
+}
+
+// Helper: Render markdown with image tooltips and checklist
+function renderMarkdownWithImageTooltipsAndChecklist(text: string, onToggleChecklist: (idx: number) => void) {
+  // Regex for checklist items
+  const checklistRegex = /^- \[( |x)\] (.*)$/gm;
+  let lastIndex = 0;
+  let match;
+  let idx = 0;
+  const parts: React.ReactNode[] = [];
+  const lines = text.split('\n');
+  lines.forEach((line, i) => {
+    const checklistMatch = line.match(/^- \[( |x)\] (.*)$/);
+    if (checklistMatch) {
+      const checked = checklistMatch[1] === 'x';
+      const label = checklistMatch[2];
+      parts.push(
+        <div key={i} className="flex items-center gap-2 mb-1">
+          <input type="checkbox" checked={checked} onChange={() => onToggleChecklist(idx)} className="accent-[#ff7d2d] w-4 h-4" />
+          <span className={checked ? 'line-through text-orange-400' : ''}>{label}</span>
+        </div>
+      );
+      idx++;
+    } else {
+      // Fallback to image tooltip rendering for other lines
+      parts.push(<div key={i}>{renderMarkdownWithImageTooltips(line)}</div>);
+    }
+  });
+  return parts;
 } 

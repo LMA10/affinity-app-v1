@@ -17,7 +17,7 @@ import { useUmbrellaState } from "@/lib/state/umbrellaState";
 import { crossReferenceIPs } from "@/lib/services/umbrellaService";
 import { storeQuery } from '@/lib/utils/query-storage';
 import { useRouter } from 'next/navigation';
-import { DetectiveMode } from "@/components/incident-response/DetectiveMode"
+import { TriageMode } from "@/components/incident-response/TriageMode"
 
 // Add Case interface and utility functions
 interface Case {
@@ -708,8 +708,8 @@ function IncidentResponsePageInner() {
     const [uploading, setUploading] = useState(false);
     const router = useRouter();
 
-    // Add detectiveMode state
-    const [detectiveMode, setDetectiveMode] = useState(false);
+    // Add TriageMode state
+    const [triageMode, setTriageMode] = useState(false);
 
     // Add case management to the incident response page
     const [activeCaseId, setActiveCaseId] = useState<string | null>(null);
@@ -769,22 +769,22 @@ function IncidentResponsePageInner() {
 
     return (
         <div className="min-h-screen flex flex-col items-center bg-[#181c20] p-0">
-            <div className="w-full max-w-5xl mt-10">
+            <div className="w-full max-w-5xl mt-10 px-2 sm:px-4 md:px-0">
                 {/* IOC Add Button and Triage Mode Toggle Button aligned */}
-                <div className="flex justify-end mb-2 gap-2">
+                <div className="flex flex-col sm:flex-row justify-end mb-2 gap-2">
                     {/*  <Button onClick={() => setShowIocModal(true)} className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded flex items-center gap-2">
                         <FileText className="w-4 h-4" /> Add IOC
                     </Button>*/}
                     <Button 
-                        onClick={() => setDetectiveMode((v) => !v)}
-                        className={detectiveMode ? "bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold px-4 py-2 rounded flex items-center gap-2" : "bg-[#3b82f6] hover:bg-[#60a5fa] text-white font-semibold px-4 py-2 rounded flex items-center gap-2"}
+                        onClick={() => setTriageMode((v) => !v)}
+                        className={(triageMode ? "bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold px-4 py-2 rounded flex items-center gap-2" : "bg-[#3b82f6] hover:bg-[#60a5fa] text-white font-semibold px-4 py-2 rounded flex items-center gap-2") + " mt-8 sm:mt-0"}
                     >
-                        <FileText className="w-4 h-4" /> {detectiveMode ? "Exit Triage Mode" : "Triage Mode"}
+                        <FileText className="w-4 h-4" /> {triageMode ? "Exit Triage Mode" : "Triage Mode"}
                     </Button>
                 </div>
-                {/* Render DetectiveMode or Classic UI */}
-                {detectiveMode ? (
-                    <DetectiveMode addNoteToCase={addNoteToCase} />
+                {/* Render TriageMode or Classic UI */}
+                {triageMode ? (
+                    <TriageMode addNoteToCase={addNoteToCase} />
                 ) : (
                     <>
                         {/* IOC Modal */}
@@ -829,7 +829,7 @@ function IncidentResponsePageInner() {
                             </form>
                         </Modal>
                         {/* Hero Header */}
-                        <div className="flex items-center gap-3 mb-8">
+                        <div className="flex items-center gap-3 mb-8 flex-col sm:flex-row text-center sm:text-left">
                             <ShieldCheck className="w-10 h-10 text-[#ff7d2d] animate-pulse" />
                             <div>
                                 <h1 className="text-3xl font-extrabold text-[#ff7d2d] tracking-tight">INCIDENT RESPONSE</h1>
@@ -837,8 +837,8 @@ function IncidentResponsePageInner() {
                             </div>
                         </div>
                         {/* Tabbed Input */}
-                        <div className="bg-[#20262b] border border-orange-900/40 rounded-lg p-6 mb-8 shadow-sm">
-                            <div className="flex gap-4 mb-6">
+                        <div className="bg-[#20262b] border border-orange-900/40 rounded-lg p-3 sm:p-6 mb-8 shadow-sm">
+                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-6 w-full">
                                 <button onClick={() => setInputTab('text')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'text' ? 'bg-[#ff7d2d] text-white' : 'bg-[#23282e] text-[#ff7d2d] hover:bg-[#ffb37d]/20'}`}><ClipboardList className="w-5 h-5" />Text</button>
                                 <button onClick={() => setInputTab('upload')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'upload' ? 'bg-[#ff7d2d] text-white' : 'bg-[#23282e] text-[#ff7d2d] hover:bg-[#ffb37d]/20'}`}><UploadCloud className="w-5 h-5" />Upload</button>
                                 <button onClick={() => setInputTab('history')} className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold ${inputTab === 'history' ? 'bg-[#ff7d2d] text-white' : 'bg-[#23282e] text-[#ff7d2d] hover:bg-[#ffb37d]/20'}`}><History className="w-5 h-5" />History</button>
@@ -854,7 +854,7 @@ function IncidentResponsePageInner() {
                                         onChange={e => setRawText(e.target.value)}
                                         placeholder="Paste or type your log data here..."
                                     />
-                                    <Button onClick={() => { openIocSelectModal(); }} className="w-full max-w-xs mx-auto block bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold text-base py-2 rounded-md">
+                                    <Button onClick={() => { openIocSelectModal(); }} className="w-full sm:max-w-xs mx-auto block bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold text-base py-2 rounded-md">
                                         Start
                                     </Button>
                                 </>
@@ -895,7 +895,7 @@ function IncidentResponsePageInner() {
                         </div>
                         {/* Results Card */}
                         {step === 2 && !analyzing && !whitelisting && (
-                            <div className="bg-[#181f22] border border-orange-900/40 rounded-lg p-6 shadow-sm">
+                            <div className="bg-[#181f22] border border-orange-900/40 rounded-lg p-2 sm:p-6 shadow-sm">
                                 {/* Animated Summary Bar & Heatmap */}
                                 <div className="flex flex-wrap items-center gap-2 mb-4">
                                     {iocSummary.map(({ type, count }) => {
@@ -908,14 +908,14 @@ function IncidentResponsePageInner() {
                                     <span className="ml-2 text-sm font-semibold text-orange-300">Total: <AnimatedCount end={totalIocs} /></span>
                                     <IOCHeatmap iocResults={iocResults} />
                                     <Input
-                                        className="ml-auto max-w-xs h-8 text-sm"
+                                        className="ml-0 sm:ml-2 w-full sm:max-w-xs h-8 text-sm mt-2 sm:mt-0"
                                         placeholder="Global search..."
                                         value={globalSearch}
                                         onChange={e => setGlobalSearch(e.target.value)}
                                     />
                                 </div>
                                 {/* Actions */}
-                                <div className="flex gap-2 mb-4">
+                                <div className="flex flex-col sm:flex-row gap-2 mb-4 w-full">
                                     <Button onClick={() => copyAllIocs(iocResults)} className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-110" title="Copy all IOCs to clipboard">Copy All</Button>
                                     <Button onClick={() => { handleReset(); setStep(1); }} className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold text-base px-6 py-2 rounded-full shadow-md transition-transform hover:scale-105">Reset</Button>
                                     <Button onClick={() => exportIOCs('csv')} className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white font-semibold text-base px-6 py-2 rounded-full flex gap-2 items-center shadow-md transition-transform hover:scale-105"><Download className="w-5 h-5" />Export CSV</Button>
@@ -955,7 +955,7 @@ function IncidentResponsePageInner() {
                                             else if (domainWhitelistFilter === 'unmatched') displayValues = unmatched;
                                         }
                                         return (
-                                            <div key={iocType}>
+                                            <div key={iocType} className="overflow-x-auto rounded-md">
                                                 {iocType === 'ipv4' && (
                                                     <div className="mb-2">
                                                         <div className="flex gap-2 mb-2 items-center">
@@ -1020,8 +1020,8 @@ function IncidentResponsePageInner() {
             </div>
             {/* Spinner overlay when analyzing */}
             {(analyzing || whitelisting) && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                    <div className="flex flex-col items-center gap-2 p-8 bg-[#23282e] rounded-lg shadow-lg border border-orange-700/40">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-2">
+                    <div className="flex flex-col items-center gap-2 p-4 sm:p-8 bg-[#23282e] rounded-lg shadow-lg border border-orange-700/40 w-full max-w-xs sm:max-w-md">
                         <Loader2 className="animate-spin w-8 h-8 text-[#ff7d2d]" />
                         {analyzing && <span className="text-[#ff7d2d] font-semibold mt-2">Analyzing...</span>}
                         {whitelisting && <span className="text-[#ff7d2d] font-semibold mt-2">Whitelisting...</span>}
@@ -1031,7 +1031,7 @@ function IncidentResponsePageInner() {
             {/* Session History Sidebar/Modal */}
             {showHistory && (
                 <div className="fixed inset-0 z-50 bg-black/40 flex justify-end animate-fade-in">
-                    <div className="w-80 h-full bg-[#23282e] border-l border-orange-900/40 shadow-2xl flex flex-col">
+                    <div className="w-full max-w-xs sm:max-w-sm md:max-w-md h-full bg-[#23282e] border-l border-orange-900/40 shadow-2xl flex flex-col">
                         <div className="flex items-center justify-between p-4 border-b border-orange-900/30">
                             <span className="font-bold text-[#ff7d2d] text-lg">Session History</span>
                             <button onClick={() => setShowHistory(false)} className="p-2 rounded hover:bg-orange-700/20"><X className="w-5 h-5 text-[#ff7d2d]" /></button>
@@ -1055,7 +1055,7 @@ function IncidentResponsePageInner() {
                 </div>
             )}
             <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-                <DrawerContent className="max-w-4xl w-full right-0 fixed top-0 h-full z-50 bg-[#10181d] border-l border-orange-700/30 shadow-2xl">
+                <DrawerContent className="w-full max-w-xs sm:max-w-2xl md:max-w-4xl right-0 fixed top-0 h-full z-50 bg-[#10181d] border-l border-orange-700/30 shadow-2xl">
                     <DrawerHeader>
                         <DrawerTitle>Security Logs</DrawerTitle>
                         <DrawerClose asChild>
@@ -1069,7 +1069,7 @@ function IncidentResponsePageInner() {
             </Drawer>
             {/* IOC Selection Modal */}
             <Modal isOpen={showIocSelectModal} onClose={() => setShowIocSelectModal(false)} title="Select IOC Types to Analyze">
-                <div className="space-y-4">
+                <div className="space-y-4 px-2 sm:px-4">
                     <div className="flex flex-col gap-2">
                         {iocConfig.map(ioc => (
                             <label key={ioc.key} className="flex items-center gap-2 cursor-pointer">
@@ -1083,11 +1083,11 @@ function IncidentResponsePageInner() {
                             </label>
                         ))}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                         <Button type="button" variant="outline" onClick={selectAllIocTypes}>Select All</Button>
                         <Button type="button" variant="outline" onClick={deselectAllIocTypes}>Deselect All</Button>
                     </div>
-                    <div className="flex justify-end gap-2 pt-2">
+                    <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
                         <Button type="button" variant="outline" onClick={() => setShowIocSelectModal(false)}>Cancel</Button>
                         <Button type="button" className="bg-[#ff7d2d] hover:bg-[#ffb37d] text-white" onClick={handleAnalyzeSelected} disabled={selectedIocTypes.length === 0}>Analyze Selected</Button>
                     </div>

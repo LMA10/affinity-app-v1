@@ -117,7 +117,17 @@ export function LogDetailsView({ log, headers, onClose, onValueClick }: LogDetai
         <div className="flex items-center gap-2">
           <h3 className="text-orange-500 font-medium text-lg md:text-xl">Log Details</h3>
           <Badge variant="outline" className={log.albstatuscode ? getStatusBadgeColor(String(log.albstatuscode)) : ""}>
-            {log.albstatuscode || "Unknown"} {log.requestverb || ""} {log.requesturl ? new URL(log.requesturl).pathname : ""}
+            {log.albstatuscode || "Unknown"} {log.requestverb || ""} {(() => {
+              try {
+                if (!log.requesturl) return "";
+                const url = typeof window !== "undefined"
+                  ? new URL(log.requesturl, window.location.origin)
+                  : new URL(log.requesturl);
+                return url.pathname;
+              } catch {
+                return log.requesturl || "";
+              }
+            })()}
           </Badge>
         </div>
         <div className="flex items-center gap-2 mt-2 md:mt-0">

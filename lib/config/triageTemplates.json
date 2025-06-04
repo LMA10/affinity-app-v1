@@ -1,0 +1,23 @@
+{
+  "templates": [
+    {
+      "name": "Empty",
+      "content": ""
+    },
+    {
+      "name": "Standard Triage",
+      "content": "## Triage Checklist\n\n- [ ] What is the incident type?\n  - (write here...)\n- [ ] When was it detected?\n  - (write here...)\n- [ ] Who reported it?\n  - (write here...)\n- [ ] What systems are affected?\n  - (write here...)\n- [ ] What is the current impact?\n  - (write here...)\n- [ ] What actions have been taken so far?\n  - (write here...)\n- [ ] Is there evidence collected?\n  - (write here...)\n- [ ] Next steps?\n  - (write here...)\n- [ ] Who is the incident handler?\n  - (write here...)\n- [ ] Has the incident been communicated to stakeholders?\n  - (write here...)\n- [ ] Are there any regulatory or legal requirements?\n  - (write here...)\n- [ ] Is there a timeline for resolution?\n  - (write here...)\n"
+    },
+    {
+      "name": "Technology Survey",
+      "content": "## Technology Survey Checklist\n\n- [ ] Countries where the company operates.\n- [ ] Location of company headquarters.\n- [ ] Number and locations of company offices.\n- [ ] Total number of employees.\n- [ ] Number of owned data centers.\n- [ ] Location and type (owned or outsourced).\n- [ ] Who operates the data centers?\n- [ ] Cloud services? GCP? AWS? Azure? Number of tenants/accounts\n- [ ] Cloud-to-on-premise site connectivity.\n- [ ] Ranges of public IP addresses.\n- [ ] Firewall used – brand and model.\n- [ ] Remote access:\n- [ ] VPN – technology used.\n- [ ] Two-factor authentication?\n- [ ] Citrix access? MFA?\n- [ ] Access via RDP or RDS?\n- [ ] Administrative access using tools like TeamViewer or similar?\n- [ ] Third-party access (vendors)\n- [ ] VPN?\n- [ ] Site-to-Site VPN?\n- [ ] External public infrastructure:\n- [ ] Main applications\n- [ ] Applications? Web servers?\n- [ ] Web services?\n- [ ] Use of WAF?\n- [ ] Email solution? On-premise or cloud?\n- [ ] Internet browsing – On-premise proxy?\n- [ ] Do servers have proxy configured?\n- [ ] Workstations?\n- [ ] Remote workstations? Cloud proxy?\n- [ ] Antivirus used?\n- [ ] EDR?\n- [ ] SIEM? Brand – Model.\n- [ ] Internal / External? Who manages it?\n- [ ] How do logs reach the SIEM? Do they go through Elastic?\n- [ ] Internal segmentation? VLAN?\n- [ ] WiFi in the organization? Authentication?\n- [ ] Virtualization? VMware? Hyper-V?\n- [ ] Number of hypervisors?\n- [ ] Backup\n- [ ] Backup solution\n- [ ] Servers? OS and versions\n- [ ] Active Directory architecture?\n- [ ] Main databases\n- [ ] Do the networking, datacenter, IT admins use a single machine? Do they use a Jump server?\n- [ ] Main applications.\n- [ ] What is the mail infrastructure like?\n- [ ] How is it distributed? Cloud, local, hybrid mail? Macro-level structure\n- [ ] Data leakage prevention solutions? DLP?\n- [ ] Mobile devices. Do they have corporate devices? How are they managed? Is MDM implemented?\n"
+    }
+  ],
+  "ui": {
+    "templateLabel": "Template:",
+    "selectTemplate": "Select a template...",
+    "clearTemplate": "Clear Template",
+    "replaceTemplateConfirm": "Replace current note content with the selected template?",
+    "clearTemplateConfirm": "Remove template content from this note?"
+  }
+} 
